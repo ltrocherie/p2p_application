@@ -3,19 +3,12 @@ import java.net.*;
 /**
  * */
 
-public class ApplicationPeer {
+public class announcePeer {
     static int port = 8080;
     static final String folderName = "seed/";
     static int pieceSize = 1024;
-    public static int main() {
-        ApplicationPeer peer = new ApplicationPeer();
-        try{
-            peer.announce_tracker("ce site la marche pas");
-        }
-        return 0;
-    }
 
-    void announce_tracker(String connect) throws Exception{
+    public void announce_tracker(String connect) throws Exception{
         File[] fileL = this.fileList(folderName); // This fonctionne pas normalement en ce moment.
         String message = this.parseFileList(fileL);
         Socket socket = new Socket(connect,port);

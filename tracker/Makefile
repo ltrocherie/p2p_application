@@ -2,7 +2,7 @@ SRC=src/
 BLD=build/
 TST=tst/
 
-FLAGS= -Wall -std=c99
+FLAGS= -Wall
 
 .PHONY: all build tests clean
 
@@ -17,7 +17,7 @@ clean:
 	rm -rf $(BLD)*
 
 tracker: $(BLD)utils.o $(BLD)thpool.o 
-	cc $(FLAGS) -o $@ $(SRC)$@.c $^ 
+	cc $(FLAGS) -o $@ $(SRC)$@.c $^ -pthread
 
 $(BLD)utils.o:
 		cc $(FLAGS) -o $@ -c $(SRC)utils.c 
