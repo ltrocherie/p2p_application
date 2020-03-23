@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/queue.h>
+#include <pthread.h>
 
 #include "utils.h"
 #include "thpool.h"
@@ -75,7 +76,7 @@ int main(int argc, char *argv[])
     int n;
 
     /* Pool of threads which will retrieve work to do in the queue of work */
-    threadpool thpool = thpool_init(1);
+    threadpool thpool = thpool_init(5);
 
     /* Choose intervals where the tracker listen to ports */
     if (argc < 2)
