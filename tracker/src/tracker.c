@@ -14,6 +14,7 @@
 
 #include "utils.h"
 #include "thpool.h"
+#include "tracker.h"
 
 #define SIZE 1024
 
@@ -32,14 +33,20 @@ void error(char *msg)
     exit(1);
 }
 
-void treat_socket(void *newsockfd)
+void treat_socket(void *arg)
 {
     char args[1024];
     char buffer[SIZE];
     char command[SIZE];
 
+    /* Cast into struct socket_ip */
+    socket_ip socket_with_ip = *((socket_ip *)arg);
+
     /* Retrieve the socket */
-    int socket = *((int *)newsockfd);
+    int socket = socket_with_ip.socketfd;
+    char *ip = socket_with_ip.ip;
+
+    printf("IP Received %s\n", ip);
 
     /* Read all the message received*/
     int rr;
@@ -191,11 +198,12 @@ int main(int argc, char *argv[])
     {
         /* socket qui permet d'accepter la connexion */
         newsockfd = accept(sockfd, (struct sockaddr *)&cli_addr, &clilen);
-
+        
         if (newsockfd < 0)
             error("ERROR on accept");
 
-        thpool_add_work(thpool, (void *)treat_socket, &newsockfd);
+        socket_ip arg = {newsockfd,inet_ntoa(cli_addr.sin_addr)};
+        thpool_add_work(thpool, (void *)treat_socket, &arg);
     }
 
     thpool_destroy(thpool);
