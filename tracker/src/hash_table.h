@@ -2,39 +2,59 @@
 #define HASH_TABLE
 #include "queue.h"
 
-//Taille de la hash_table
+/**
+* \def HASH_TABLE_LENGTH hash_table.h
+*/
 #define HASH_TABLE_LENGTH 10000
 
-//Structure de propritaire de fichier
+/**
+* \struct owner hash_table.h
+*/
 struct owner {
-    char* IP;
-    int port;
-    SLIST_ENTRY(owner) next_owner;
+    char* IP; /** IP adress of the owner of the file */
+    int port; /** port of the owner of the file */
+    SLIST_ENTRY(owner) next_owner; /** next_owner for queue bsd lib*/
 };
 
-//Structure de fichier
+/**
+ * \struct file hash_table.h
+ */
 struct file {
-        char *key;
-        SLIST_HEAD(,owner) owners;
-        int nb_owners;
-        char *name;
-        int length;
-        SLIST_ENTRY(file) next_file;
+        char *key; /** pseudo-unique key of the file */
+        char *name; /** filename */
+        int length; /** total length of the file */
+        int piecesize; /** size of the piece */
+
+        int nb_owners; /** total number of owners */
+        SLIST_HEAD(,owner) owners; /** list of owners of the file */
+
+        SLIST_ENTRY(file) next_file; /** next_file for queue bsd lib */
 };
 
-//Table de hachage
+/**
+* \var hash_table hash_table.h
+*/
 SLIST_HEAD(,file) hash_table[HASH_TABLE_LENGTH];
 
-//Initialiser la hash_table
+/**
+* \fn hash__table_init() hash_table.h
+*/
 void hash__table_init();
 
-//Ajoute ou met à jour un fichier de clé fey
-int hash__add(char* key,char* IP, int port,char* name, int length);
+/**
+* \fn hash__add() hash_table.h
+*/
+int hash__add(char* key,char* IP, int port,char* name, int length, int piecesize);
 
-//Recherche un fichier à partir de sa clé key et renvoie le fichier f
+
+/**
+* \fn hash__search() hash_table.h
+*/
 int hash__search(char* key,struct file *f);
 
-//A utiliser pour libérer la hash_table
+/**
+* \fn hash__table_end() hash_table.h
+*/
 void hash__table_end();
 
 #endif

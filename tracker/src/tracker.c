@@ -15,6 +15,7 @@
 #include "utils.h"
 #include "thpool.h"
 #include "tracker.h"
+#include "hash_table.h"
 
 #define SIZE 1024
 
@@ -31,6 +32,238 @@ void error(char *msg)
 {
     perror(msg);
     exit(1);
+}
+
+void announce(char *buffer, char *IP)
+{
+    char *p, space = ' ';
+
+    /* Returns the pointer of the first occurence of the separator */
+    p = strchr(buffer, space);
+
+    /* If there is no space in the command */
+    if (p == NULL)
+    {
+        fprintf(stderr, "No %c found.\n", space);
+        return;
+    }
+
+    /* Pointer of next word */
+    buffer = p + 1;
+    int i = 0, tmp = 0;
+
+    /* Count number of files */
+    int n = 1;
+
+    /* LISTEN PORT TREATMENT */
+    char port_arg[8];
+
+    while (buffer[i] != ' ' && buffer[i] != 0 && buffer[i] != '\n') {
+        port_arg[tmp] = buffer[i];
+        i++;
+        tmp++;
+    }
+    port_arg[tmp] = '\0';
+    tmp = 0;
+    i++;
+
+    /* If the word wasn't "listen" : print the commands */
+    if (strcmp(port_arg, "listen") != 0) {
+        usage_commands();
+        return;
+    }
+
+    /* Get local port */
+    while (buffer[i] != ' ' && buffer[i] != 0 && buffer[i] != '\n') {
+        port_arg[tmp] = buffer[i];
+        i++;
+        tmp++;
+    }
+    port_arg[tmp] = '\0';
+    tmp = 0;
+    i++;
+
+    if (!isNumeric(port_arg)) {
+        usage_commands();
+        return;
+    }
+
+    printf("Port:%s\n",port_arg);
+    int port = atoi(port_arg);
+
+    /* SEEDS LEECHS TREATMENT */
+
+    int end = 0;
+    int seed = 0, leech = 0;
+    int seed_arg = 0;
+
+    (void)seed;
+    (void)leech;
+
+    /* Array of arguments for all file arguments : key, IP, port, filename, length, piecesize */
+    char seeds[4][1024];
+
+    /* Key leech asked */
+    char key_leech[1024];
+
+    buffer = buffer + i;
+    i = 0;
+
+    /* Read all characters */
+    while (buffer[i] != 0 && buffer[i] != '\n' && buffer[i] != '\r' && end == 0)
+    {
+        switch (buffer[i])
+        {
+        case ' ':
+            if (tmp == 0) {
+                i++;
+                break;
+            }
+
+            /* SEED CASE : every 4 words we add the file */
+            if (seed && !leech)
+            {
+                /* Finish the word */
+                seeds[seed_arg][tmp] = '\0';
+                tmp = 0;
+
+                /* If we have done a file */
+                if (seed_arg == 3) {
+                    /* Verify integrity of fields */
+                    if (!isNumeric(seeds[1]) || !isNumeric(seeds[2])) {
+                        fprintf(stderr,"Size of piecesize must be integers\n");
+                        usage_commands();
+                        return;
+                    }
+                    printf("---------------------------\n"
+                            "File:%d\n",n);
+                    printf("key:%s\n", seeds[3]);
+                    printf("IP:%s\n", IP);
+                    printf("port:%s\n", port_arg);
+                    printf("filename:%s\n", seeds[0]);
+                    printf("length:%s\n", seeds[1]);
+                    printf("piecesize:%s\n", seeds[2]);
+                    printf("---------------------------\n");
+
+                    /* Add the file to the hash_table */
+                    //add(seeds[3],IP,port,seeds[0],atoi(seeds[1]),atoi(seeds[2]));
+                    seed_arg = 0;
+                    n++;
+                }
+                /* If we didn't give enough args for a file */
+                else
+                    seed_arg++;
+            }
+
+            /* LEECH CASE : at the end of every word we show the key */
+            else if (!seed && leech)
+            {
+                if (!isNumeric(key_leech)) {
+                    fprintf(stderr,"Key must be an integer\n");
+                    usage_commands();
+                    return;
+                }
+                
+                /* Finish the word */
+                key_leech[tmp] = '\0';
+                printf("key:%s\n", key_leech);
+                tmp = 0;
+                break;
+            }
+
+            i++;
+            break;
+
+        case '[':
+
+            /* if we start by giving the seeds */
+            if (!seed && !leech) {
+                seed = 1;
+                seed_arg = 0;
+            }
+            /* else if it is for leechs */
+            else if (seed && !leech) {
+                leech = 1;
+                seed = 0;
+            }
+
+            tmp = 0;
+            i++;
+            break;
+
+        case ']':
+
+            /* SEED CASE : every 4 words we add the file */
+            if (seed && !leech)
+            {
+                /* Finish the word */
+                seeds[seed_arg][tmp] = '\0';
+                tmp = 0;
+
+                if (seed_arg == 3) {
+                    /* Verify integrity of fields */
+                    if (!isNumeric(seeds[1]) || !isNumeric(seeds[2])) {
+                        fprintf(stderr,"Size of piecesize must be integers\n");
+                        usage_commands();
+                        return;
+                    }
+
+                    printf("---------------------------\n"
+                            "File:%d\n",n);
+                    printf("key:%s\n", seeds[3]);
+                    printf("IP:%s\n", IP);
+                    printf("port:%s\n", port_arg);
+                    printf("filename:%s\n", seeds[0]);
+                    printf("length:%s\n", seeds[1]);
+                    printf("piecesize:%s\n", seeds[2]);
+                    printf("---------------------------\n");
+                    /* Add the file to the hash_table */
+                    //add(seeds[3],IP,port,seeds[0],atoi(seeds[1]),seeds[2]);
+                    seed_arg = 0;
+                }
+                else
+                {
+                    fprintf(stderr, "Not enough parameters for a file\n");
+                    usage_commands();
+                    return;
+                } 
+            }
+            /* LEECH CASE : at the end of every word we show the key */
+            else if (!seed && leech)
+            {
+                /* Finish the word */
+                key_leech[tmp] = '\0';
+                printf("key:%s\n", key_leech);
+                tmp = 0;
+
+                /* If both seeds and leechs args were given, it's finished */
+                end = 1;
+            }
+            i++;
+            break;
+
+        /* Case when we encounter a character */
+        default:
+            /* We fill the word in the args */
+            if (seed && !leech)
+                seeds[seed_arg][tmp] = buffer[i];
+            else if (!seed && leech)
+                key_leech[tmp] = buffer[i];
+            tmp++;
+            i++;
+            break;
+        }
+    }
+}
+
+void look(char *buffer)
+{
+    printf("%s\n", buffer);
+}
+
+void update(char *buffer)
+{
+    printf("%s\n", buffer);
 }
 
 void treat_socket(void *arg)
@@ -59,95 +292,19 @@ void treat_socket(void *arg)
 
     printf("Here is the message: %s\n", buffer);
 
-    get_command(buffer,command);
+    get_command(buffer, command);
     printf("%s\n", command);
 
-    printf("1 : %s\n",command);
-    printf("2 : %s\n",ANNOUNCE);
-
     if (strcmp(command, ANNOUNCE) == 0)
-        printf("ANNOUNCE\n");
+        announce(buffer, ip);
     else if (strcmp(command, LOOK) == 0)
-        printf("LOOK\n");
+        look(buffer);
     else if (strcmp(command, UPDATE) == 0)
-        printf("UPDATE\n");
-  
+        update(buffer);
+    else
+        usage_commands();
 
-    int tmp = 0;
-    int end = 0;
-    int i = 0;
-    int seed = 0, leech = 0;
-
-    (void)seed;
-    (void)leech;
-
-    while(buffer[i] != 0 || end == 0) {
-        switch(buffer[i]) {
-            case ' ':
-                if (tmp > 0) {
-                    args[tmp] = '\0';
-                    printf("%s\n",args);
-                    tmp = 0;
-                }
-                i++;
-                break;
-            case '[':
-                if (!seed && !leech)
-                    seed = 1;
-                else if (seed && !leech)
-                    leech = 1;
-                
-                i++;
-                break;
-            case ']':
-                args[tmp] = '\0';
-                printf("%s\n",args);
-                tmp = 0;
-                i++;
-
-                /* If both seed and leechs args weere given, it's finished*/
-                if(seed && leech)
-                    end = 1;
-                break;
-            default:
-                args[tmp] = buffer[i];
-                tmp++;
-                i++;
-                break;
-        }
-    }
-
-    printf("fin traitement\n");
-
-    /*
-    //parsing du message recu
-    // recup les fichiers demandés
-
-    // SI ON ANNOUNCE
-    for (fichier)
-    {
-        //creer un seeder
-        struct FICHIER = add(hash, nom, clé, seeder);
-
-        
-    }
-
-    // SI ON LOOK
-    for (fichier)
-    {
-        //
-        struct FICHIER = search(hash, nom, taille, comparateur, clé);
-        n = write(newsockfd, "peers ", 6);
-
-        for (int i = 0; i < FICHIER->nb_seeders; i++)
-        {
-            n = write(newsockfd, "%d %d", FICHIER->seeders[i].ip, FICHIER->seeders[i].port, 18);
-        }
-    }
-
-    // SI ON UPDATE
-    
-    */
+    return;
 }
 
 int main(int argc, char *argv[])
@@ -198,11 +355,11 @@ int main(int argc, char *argv[])
     {
         /* socket qui permet d'accepter la connexion */
         newsockfd = accept(sockfd, (struct sockaddr *)&cli_addr, &clilen);
-        
+
         if (newsockfd < 0)
             error("ERROR on accept");
 
-        socket_ip arg = {newsockfd,inet_ntoa(cli_addr.sin_addr)};
+        socket_ip arg = {newsockfd, inet_ntoa(cli_addr.sin_addr)};
         thpool_add_work(thpool, (void *)treat_socket, &arg);
     }
 

@@ -13,13 +13,31 @@
 
 #include "utils.h"
 
+/**
+ * Print how to run the tracker
+ */
 void usage()
 {
     printf("./tracker [port]\n");
     return;
 }
 
-//This function returns host name for local computer
+/**
+ * Print all different commands that a peer can send to the tracker
+ */
+void usage_commands()
+{
+    printf("List of possible commands :\n"
+            "- announce listen <local port> seed [file1 length1 piecesize1 key1 ...] leech [key2 key3 ...] : announce the peer is listen on his local port and seeding given files and leeching given keys\n"
+            "- look [criterion1 criterion2] : returns a list of files with all criterions (=, >, < with size in Mo)\n"
+            "- getfile key : returns a list of peers who have the file\n"
+            "- update seed [key1 key2 ...] leech [key10 key11 ...] : warns the trackers of the new files the peer has\n");
+    return;
+}
+
+/**
+ * Return host name for local computer
+ */
 void check_host_name(int hostname)
 {
     if (hostname == -1)
@@ -29,7 +47,9 @@ void check_host_name(int hostname)
     }
 }
 
-//find host info from host name
+/**
+ * Find host info from host name 
+ */
 void check_host_entry(struct hostent *hostentry)
 {
     if (hostentry == NULL)
@@ -39,7 +59,9 @@ void check_host_entry(struct hostent *hostentry)
     }
 }
 
-//convert IP string to dotted decimal format
+/**
+ * Convert IP string to dotted decimal format
+ */
 void IP_formatter(char *IPbuffer)
 {
     if (NULL == IPbuffer)
@@ -49,16 +71,7 @@ void IP_formatter(char *IPbuffer)
     }
 }
 
-void print_ip(unsigned int ip)
-{
-    unsigned char bytes[4];
-    bytes[0] = ip & 0xFF;
-    bytes[1] = (ip >> 8) & 0xFF;
-    bytes[2] = (ip >> 16) & 0xFF;
-    bytes[3] = (ip >> 24) & 0xFF;
-    printf("%d.%d.%d.%d\n", bytes[3], bytes[2], bytes[1], bytes[0]);
-}
-
+//TODO : faire en sorte que cela ne soit pas l'ip locale d'affichée
 void show_local_ip(int portno)
 {
     /* 
@@ -92,6 +105,12 @@ void show_local_ip(int portno)
     printf("Socket Data : -%s\n", id->ifa_addr->sa_data);
 }
 
+/**
+ * Retrieve the command and fill the command buffer given in parameter
+ * @param buffer : buffer filled with all the 1024 bytes buffer g=iven by the peer
+ * @param command : empty buffer which will be filled
+ * @return command buffer filled with the command if a command is recognized, not filled otherwise
+ */
 void get_command(char *buffer, char *command)
 {
     char *p, space = ' ';
@@ -103,10 +122,11 @@ void get_command(char *buffer, char *command)
     /* If there is no space in the command */
     if (p == NULL)
     {
-        printf("No %c found.\n", space);
+        fprintf(stderr,"No %c found.\n", space);
         return;
     }
 
+    /* Position of the first itération */
     i = p - buffer;
 
     int seed = 0, leech = 0;
@@ -122,4 +142,13 @@ void get_command(char *buffer, char *command)
     }
     
     return;
+}
+
+int isNumeric (const char * s)
+{
+    if (s == NULL || *s == '\0' || isspace(*s))
+      return 0;
+    char * p;
+    strtod (s, &p);
+    return *p == '\0';
 }
