@@ -26,15 +26,15 @@ struct file {
 SLIST_HEAD(,file) hash_table[HASH_TABLE_LENGTH];
 
 //Initialiser la hash_table
-void hash_table_init();
+void hash__table_init();
 
 //Ajoute ou met à jour un fichier de clé fey
-void add(char* key,char* IP, int port,char* name, int length);
+int hash__add(char* key,char* IP, int port,char* name, int length);
 
 //Recherche un fichier à partir de sa clé key et renvoie le fichier f
-void search(char* key,struct file *f);
+int hash__search(char* key,struct file *f);
 
 //A utiliser pour libérer la hash_table
-void hash_table_end();
+void hash__table_end();
 
 #endif
