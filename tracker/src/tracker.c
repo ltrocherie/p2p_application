@@ -12,6 +12,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include "queue.h"
 #include "utils.h"
 #include "thpool.h"
 #include "tracker.h"
@@ -22,11 +23,14 @@
 #define ANNOUNCE "announce"
 #define LOOK "look"
 #define UPDATE "update"
+#define GET "getfiles"
 
 #define LISTEN "listen"
 
 #define SEED "seed"
 #define LEECH "leech"
+
+//extern SLIST_HEAD(,file) hash_table[HASH_TABLE_LENGTH];
 
 void error(char *msg)
 {
@@ -34,7 +38,18 @@ void error(char *msg)
     exit(1);
 }
 
-void announce(char *buffer, char *IP)
+/**
+ * Parse the buffer given by the peer in order to figoure out what the port is but also
+ * which files will be added to the hash_table and finally all leechs incoming.
+ * 
+ * @param socket socket of the current connection
+ * @param buffer message given by the peer
+ * @param IP IP of the peer
+ * 
+ * @return will display "> ok" if everything happened right with all files added in hash_table,
+ * will display the usage otherwise on stderr
+ * */
+void announce(int socket, char *buffer, char *IP)
 {
     char *p, space = ' ';
 
@@ -44,7 +59,7 @@ void announce(char *buffer, char *IP)
     /* If there is no space in the command */
     if (p == NULL)
     {
-        fprintf(stderr, "No %c found.\n", space);
+        fprintf(stderr, "No \"%c\" found.\n", space);
         return;
     }
 
@@ -58,7 +73,8 @@ void announce(char *buffer, char *IP)
     /* LISTEN PORT TREATMENT */
     char port_arg[8];
 
-    while (buffer[i] != ' ' && buffer[i] != 0 && buffer[i] != '\n') {
+    while (buffer[i] != ' ' && buffer[i] != 0 && buffer[i] != '\n')
+    {
         port_arg[tmp] = buffer[i];
         i++;
         tmp++;
@@ -68,13 +84,15 @@ void announce(char *buffer, char *IP)
     i++;
 
     /* If the word wasn't "listen" : print the commands */
-    if (strcmp(port_arg, "listen") != 0) {
+    if (strcmp(port_arg, "listen") != 0)
+    {
         usage_commands();
         return;
     }
 
     /* Get local port */
-    while (buffer[i] != ' ' && buffer[i] != 0 && buffer[i] != '\n') {
+    while (buffer[i] != ' ' && buffer[i] != 0 && buffer[i] != '\n')
+    {
         port_arg[tmp] = buffer[i];
         i++;
         tmp++;
@@ -83,12 +101,12 @@ void announce(char *buffer, char *IP)
     tmp = 0;
     i++;
 
-    if (!isNumeric(port_arg)) {
+    if (!isNumeric(port_arg))
+    {
         usage_commands();
         return;
     }
 
-    printf("Port:%s\n",port_arg);
     int port = atoi(port_arg);
 
     /* SEEDS LEECHS TREATMENT */
@@ -115,7 +133,8 @@ void announce(char *buffer, char *IP)
         switch (buffer[i])
         {
         case ' ':
-            if (tmp == 0) {
+            if (tmp == 0)
+            {
                 i++;
                 break;
             }
@@ -128,25 +147,28 @@ void announce(char *buffer, char *IP)
                 tmp = 0;
 
                 /* If we have done a file */
-                if (seed_arg == 3) {
+                if (seed_arg == 3)
+                {
                     /* Verify integrity of fields */
-                    if (!isNumeric(seeds[1]) || !isNumeric(seeds[2])) {
-                        fprintf(stderr,"Size of piecesize must be integers\n");
+                    if (!isNumeric(seeds[1]) || !isNumeric(seeds[2]))
+                    {
+                        fprintf(stderr, "Size of piecesize must be integers\n");
                         usage_commands();
                         return;
                     }
-                    printf("---------------------------\n"
-                            "File:%d\n",n);
-                    printf("key:%s\n", seeds[3]);
-                    printf("IP:%s\n", IP);
-                    printf("port:%s\n", port_arg);
-                    printf("filename:%s\n", seeds[0]);
-                    printf("length:%s\n", seeds[1]);
-                    printf("piecesize:%s\n", seeds[2]);
-                    printf("---------------------------\n");
 
-                    /* Add the file to the hash_table */
-                    //add(seeds[3],IP,port,seeds[0],atoi(seeds[1]),atoi(seeds[2]));
+                    int add = hash__add(seeds[3]
+                                        ,IP
+                                        ,port
+                                        ,seeds[0]
+                                        ,atoi(seeds[1])
+                                        ,atoi(seeds[2]));
+
+                    if (!add)
+                    {
+                        fprintf(stderr, "Problem adding in has_table");
+                        return;
+                    }
                     seed_arg = 0;
                     n++;
                 }
@@ -158,15 +180,16 @@ void announce(char *buffer, char *IP)
             /* LEECH CASE : at the end of every word we show the key */
             else if (!seed && leech)
             {
-                if (!isNumeric(key_leech)) {
-                    fprintf(stderr,"Key must be an integer\n");
+                if (!isNumeric(key_leech))
+                {
+                    fprintf(stderr, "Key must be an integer\n");
                     usage_commands();
                     return;
                 }
-                
+
                 /* Finish the word */
                 key_leech[tmp] = '\0';
-                printf("key:%s\n", key_leech);
+                //printf("key:%s\n", key_leech);
                 tmp = 0;
                 break;
             }
@@ -177,12 +200,14 @@ void announce(char *buffer, char *IP)
         case '[':
 
             /* if we start by giving the seeds */
-            if (!seed && !leech) {
+            if (!seed && !leech)
+            {
                 seed = 1;
                 seed_arg = 0;
             }
             /* else if it is for leechs */
-            else if (seed && !leech) {
+            else if (seed && !leech)
+            {
                 leech = 1;
                 seed = 0;
             }
@@ -200,25 +225,27 @@ void announce(char *buffer, char *IP)
                 seeds[seed_arg][tmp] = '\0';
                 tmp = 0;
 
-                if (seed_arg == 3) {
+                if (seed_arg == 3)
+                {
                     /* Verify integrity of fields */
-                    if (!isNumeric(seeds[1]) || !isNumeric(seeds[2])) {
-                        fprintf(stderr,"Size of piecesize must be integers\n");
+                    if (!isNumeric(seeds[1]) || !isNumeric(seeds[2]))
+                    {
+                        fprintf(stderr, "Size of piecesize must be integers\n");
                         usage_commands();
                         return;
                     }
+                    int add = hash__add(seeds[3]
+                                        ,IP
+                                        ,port
+                                        ,seeds[0]
+                                        ,atoi(seeds[1])
+                                        ,atoi(seeds[2]));
 
-                    printf("---------------------------\n"
-                            "File:%d\n",n);
-                    printf("key:%s\n", seeds[3]);
-                    printf("IP:%s\n", IP);
-                    printf("port:%s\n", port_arg);
-                    printf("filename:%s\n", seeds[0]);
-                    printf("length:%s\n", seeds[1]);
-                    printf("piecesize:%s\n", seeds[2]);
-                    printf("---------------------------\n");
-                    /* Add the file to the hash_table */
-                    //add(seeds[3],IP,port,seeds[0],atoi(seeds[1]),seeds[2]);
+                    if (!add)
+                    {
+                        fprintf(stderr, "Problem adding in hash_table");
+                        return;
+                    }
                     seed_arg = 0;
                 }
                 else
@@ -226,7 +253,7 @@ void announce(char *buffer, char *IP)
                     fprintf(stderr, "Not enough parameters for a file\n");
                     usage_commands();
                     return;
-                } 
+                }
             }
             /* LEECH CASE : at the end of every word we show the key */
             else if (!seed && leech)
@@ -254,16 +281,184 @@ void announce(char *buffer, char *IP)
             break;
         }
     }
+
+    /* Everything happened good */
+    n = write(socket, "> ok", 148);
+    if (n < 0)
+        error("ERROR writing to socket");
 }
 
-void look(char *buffer)
+void look(int socket, char *buffer, char *IP)
+{
+    char *p, space = ' ';
+
+    /* Returns the pointer of the first occurence of the separator */
+    p = strchr(buffer, space);
+
+    /* If there is no space in the command */
+    if (p == NULL)
+    {
+        fprintf(stderr, "No \"%c\" found.\n", space);
+        return;
+    }
+
+    /* Pointer of next word */
+    buffer = p + 1;
+    int i = 0, tmp = 0;
+
+    char arg[1024], name[1024], size[64];
+    char comparator = '=';
+    int given = 0;
+
+    /* Read all characters */
+    while (buffer[i] != 0 && buffer[i] != '\n' && buffer[i] != ']')
+    {
+        switch (buffer[i])
+        {
+        case ' ':
+            if (tmp <= 0) {
+                i++;
+                break;
+            }
+
+            if (given)
+                size[tmp] = '\0';
+            else
+                name[tmp] = '\0';
+
+            tmp = 0;
+            i++;
+
+            break;
+        case '=':
+            if (strcmp(arg,"filename") == 0)
+                given = 0;       
+            else if (strcmp(arg,"filesize") == 0)
+                given = 1;
+            else {
+                usage_commands();
+                return;
+            }
+            arg[tmp] = '\0';
+            tmp = 0;
+            i++;
+            break;
+
+        case '>':
+            /* If the comparator is > with other than filesize, this is not valid */
+            if (strcmp(arg,"filesize") != 0) {
+                usage_commands();
+                return;
+            }
+
+            given = 1;
+            arg[tmp] = '\0';
+            comparator = buffer[i];
+
+            tmp = 0;
+            i++;
+            break;
+        case '<':
+            /* If the comparator is < with other than filesize, this is not valid */
+            if (strcmp(arg,"filesize") != 0) {
+                usage_commands();
+                return;
+            }
+            given = 1;
+            arg[tmp] = '\0';
+            comparator = buffer[i];
+
+            tmp = 0;     
+            i++;
+            break;
+        case '[':
+            i++;
+            break;
+        case '"':
+            /* If the size was given then we finish */
+            if (given)
+                size[tmp] = '\0';
+            tmp = 0;
+
+            i++;
+            break;
+        default:
+            /* If we submitted a comparator then we assign the size */
+            if (given)
+                size[tmp] = buffer[i];
+            else
+                name[tmp] = buffer[i];
+
+            arg[tmp] = buffer[i];
+
+            tmp++;
+            i++;
+            break;
+        }
+    }
+
+    printf("filename:%s\n",name);
+    printf("size:%s\n",size);
+    printf("comparator:%c\n",comparator);
+
+    struct file *f = NULL;
+
+    /* Search for the file with all criterions */
+    //int search = hash__search()
+    return;
+}
+
+void update(int socket, char *buffer, char *IP)
 {
     printf("%s\n", buffer);
 }
 
-void update(char *buffer)
+void getfiles(int socket, char *buffer, char *IP)
 {
-    printf("%s\n", buffer);
+    char *p, space = ' ';
+
+    /* Returns the pointer of the first occurence of the separator */
+    p = strchr(buffer, space);
+
+    /* If there is no space in the command */
+    if (p == NULL)
+    {
+        fprintf(stderr, "No \"%c\" found.\n", space);
+        return;
+    }
+
+    /* Pointer of next word */
+    buffer = p + 1;
+    int i = 0, tmp = 0;
+
+    char key[1024];
+
+    /* Read all characters */
+    while (buffer[i] != 0 && buffer[i] != '\n' && buffer[i] != ' ') {
+        key[tmp] = buffer[i];
+        i++;
+    }
+
+    struct file* f = NULL;
+
+    int search = hash__search(key, f);
+
+    if (!search) {
+        fprintf(stderr, "File with key %s not found in the hash table\n", key);
+        return;
+    }
+
+    /* Everything happened good */
+
+    int n = write(socket, "> peers [", 9);
+    if (n < 0)
+        error("ERROR writing to socket");
+        
+    //itererer sur les owners et les afficher
+
+    n = write(socket, "]", 1);
+
+    return;
 }
 
 void treat_socket(void *arg)
@@ -295,12 +490,14 @@ void treat_socket(void *arg)
     get_command(buffer, command);
     printf("%s\n", command);
 
-    if (strcmp(command, ANNOUNCE) == 0)
-        announce(buffer, ip);
-    else if (strcmp(command, LOOK) == 0)
-        look(buffer);
-    else if (strcmp(command, UPDATE) == 0)
-        update(buffer);
+    if (!strcmp(command, ANNOUNCE))
+        announce(socket, buffer, ip);
+    else if (!strcmp(command, LOOK))
+        look(socket, buffer, ip);
+    else if (!strcmp(command, UPDATE))
+        update(socket, buffer, ip);
+    else if (!strcmp(command, GET))
+        getfiles(socket, buffer, ip);
     else
         usage_commands();
 
