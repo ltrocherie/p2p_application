@@ -1,3 +1,7 @@
+/** 
+ * @file hash_table.h
+ * Hash table structures and methods in order to store FILES owned by peers
+ */
 #ifndef HASH_TABLE
 #define HASH_TABLE
 #include "queue.h"
@@ -8,7 +12,7 @@
 #define HASH_TABLE_LENGTH 10000
 
 /**
-* \struct owner hash_table.h
+* @struct owner hash_table.h
 */
 struct owner {
     char* IP; /** IP adress of the owner of the file */
@@ -17,7 +21,7 @@ struct owner {
 };
 
 /**
- * \struct file hash_table.h
+ * @struct file hash_table.h
  */
 struct file {
         char *key; /** pseudo-unique key of the file */
@@ -37,24 +41,39 @@ struct file {
 SLIST_HEAD(,file) hash_table[HASH_TABLE_LENGTH];
 
 /**
-* \fn hash__table_init() hash_table.h
-*/
+ * Initialize hash_table
+ * @return hash_table variable initialized
+ * */
 void hash__table_init();
 
 /**
-* \fn hash__add() hash_table.h
-*/
+ * Add a file in the hash_table with its key, its criterions and its owner
+ * @param key unique key linked to the file
+ * @param IP IP of the owner
+ * @param port port where the owner listen to other peers
+ * @param name filename
+ * @param length total length of the file
+ * @param piecesize size of each segment which will be downloaded between peers
+ * 
+ * @return 1 if the file has been added correctly, 0 otherwise
+ * */
 int hash__add(char* key,char* IP, int port,char* name, int length, int piecesize);
 
 
 /**
-* \fn hash__search() hash_table.h
-*/
+ * Search a file in the hash_table depending of the key but also on different possible
+ * criterions such as the total size with (with different comparators)
+ * @param key key in order to search for the file
+ * @param f file which will be returned depeping on the search
+ * 
+ * @return 1 and the file in f if the file has been found, 0 and f NULL otherwise 
+ * */
 int hash__search(char* key,struct file *f);
 
 /**
-* \fn hash__table_end() hash_table.h
-*/
+ * Free all table memory by freeing each elements inside
+ * @return hash_table freeed
+ * */
 void hash__table_end();
 
 #endif

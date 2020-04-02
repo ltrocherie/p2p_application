@@ -140,7 +140,7 @@ void get_command(char *buffer, char *command)
         command[j] = tolower(command[j]);
         j++;
     }
-    
+
     return;
 }
 
