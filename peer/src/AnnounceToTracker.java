@@ -3,12 +3,20 @@ import java.net.*;
 /**
  * */
 
-public class announcePeer {
-    static int port = 8080;
+public class AnnounceToTracker {
+    static int port = 8080; // pas une super idée le port http pour nos connexions
+
+    static int inPort = 10000; // A voir, un pour les communications, l'autre pour les transferts de fichier
+    static int outPort = 10000;
+
     static final String folderName = "seed/";
     static int pieceSize = 1024;
 
-    public void announce_tracker(String connect) throws Exception{
+    public void announceTracker(String connect) throws Exception{ // on devrait pas passer le dossier en paramètre ?
+      /*
+          TODO : Rules announce, look, getfile
+      */
+
         File[] fileL = this.fileList(folderName); // This fonctionne pas normalement en ce moment.
         String message = this.parseFileList(fileL);
         Socket socket = new Socket(connect,port);
@@ -22,6 +30,8 @@ public class announcePeer {
         br.close();
         socket.close();
     }
+
+    /*** PRIVATE METHODS ***/
 
     private File[] fileList(String folder){
         File fold = new File(folder);
