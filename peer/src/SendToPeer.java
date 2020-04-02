@@ -15,12 +15,13 @@ public class SendToPeer extends PeerConfig implements Runnable{
 
   public String announcePeer() throws Exception{
 
-    Socket socket = new Socket(connect,outPort);
+    ServerSocket welcomeSocket = new ServerSocket(inPort);
+    Socket socket = welcomeSocket.accept();
+
     BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
     PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),true);
 
     // Tells another peer what is given in cmd
-    System.out.println(cmd + "\n");
     pw.println(cmd);
     String answer = br.readLine();
     System.out.println(answer + "\n");

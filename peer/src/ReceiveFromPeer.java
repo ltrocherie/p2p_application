@@ -13,7 +13,8 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
 
   public String receivePeer() throws Exception{
 
-    Socket connectionSocket = new Socket(connect,inPort);
+
+    Socket connectionSocket = new Socket("localhost", inPort);
 
     BufferedReader br = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
     PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(connectionSocket.getOutputStream())),true);
@@ -26,11 +27,9 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
       case "< have*":
         answer = "> Ok";
         pw.println(answer);
-        System.out.println(answer);
       default:
         answer = "> Input not understood, please try again";
         pw.println(answer);
-        System.out.println(answer);
 
     }
     return answer;

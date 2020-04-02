@@ -7,7 +7,8 @@ public class Peer {
 
   public static void main(String[] args) {
 
-    (new Thread(new SendToPeer("localhost", "> cmd"))).start();
+
+    (new Thread(new SendToPeer("localhost", "< cmd"))).start();
     (new Thread(new ReceiveFromPeer("localhost"))).start();
 
   }
