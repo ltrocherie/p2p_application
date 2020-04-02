@@ -1,3 +1,6 @@
+/**
+ * @file hash_table.c
+ * */
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,8 +8,11 @@
 #include "hash_table.h"
 
 /**
-* Fonction de hachage
-*/
+ * Hash function in order to find index where to store elements
+ * @param key unique key of the file
+ * 
+ * @return hashed index value : where to store the file 
+ * */
 int hash_value(char* key){
     int hash = 0;
     for (int i = 0; i < strlen(key); i++)
@@ -15,8 +21,17 @@ int hash_value(char* key){
 }
 
 /**
-* Fonction qui update la structure
-*/
+ * Compare 1 file with differents criterions : if a file is the same as all criterions
+ * then we add a new owner in it
+ * @param f given f in the hash table which will be compared to all criterions
+ * @param IP IP of the owner
+ * @param port port where the owner listen to other peers
+ * @param name filename
+ * @param length total length of the file
+ * @param piecesize size of each segment which will be downloaded between peers
+ * 
+ * @return hashed index value : where to store the file 
+ * */
 int compare(struct file* f,char* IP, int port,char* name, int length, int piecesize){
     if(strcmp(name,"-1") && !strcmp(name,f->name))
         f->name = name;
@@ -38,9 +53,6 @@ int compare(struct file* f,char* IP, int port,char* name, int length, int pieces
     return 1;
 }
 
-/**
-* Fonction qui ajoute un fichier ou met à jour un fichier
-*/
 int hash__add(char* key,char* IP, int port,char* name, int length, int piecesize){
     int bool = 0;
     int index = hash_value(key);
@@ -64,12 +76,10 @@ int hash__add(char* key,char* IP, int port,char* name, int length, int piecesize
     f->piecesize = piecesize;
     SLIST_INSERT_HEAD(&hash_table[index],f,next_file);
     bool = 1;
+
     return bool;
 }
 
-/**
-* Recherche le fichier key et le renvoie dans f
-*/
 int hash__search(char* key,struct file *f){
     int index = hash_value(key);
     struct file *p;
@@ -83,17 +93,11 @@ int hash__search(char* key,struct file *f){
     return 0;
 }
 
-/**
-* Initialise la hash_table
-*/
 void hash__table_init(){
     for(int i = 0; i<HASH_TABLE_LENGTH;i++)
         SLIST_INIT(&hash_table[i]);
 }
 
-/**
-* Libère la mémoire
-*/
 void hash__table_end(){
     for(int i = 0; i<HASH_TABLE_LENGTH; i++){
         struct file *p;
