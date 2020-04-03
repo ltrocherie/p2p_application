@@ -23,7 +23,7 @@
 #define ANNOUNCE "announce"
 #define LOOK "look"
 #define UPDATE "update"
-#define GET "getfiles"
+#define GET "getfile"
 
 #define LISTEN "listen"
 
@@ -156,7 +156,7 @@ void announce(int socket, char *buffer, char *IP)
                         usage_commands();
                         return;
                     }
-
+                    printf("add:%s|key:%s\n",seeds[0],seeds[3]);
                     int add = hash__add(seeds[3]
                                         ,IP
                                         ,port
@@ -189,7 +189,8 @@ void announce(int socket, char *buffer, char *IP)
 
                 /* Finish the word */
                 key_leech[tmp] = '\0';
-                //printf("key:%s\n", key_leech);
+                //TODO : renvoyer une liste de peers avec les clés ???
+                printf("key:%s\n", key_leech);
                 tmp = 0;
                 break;
             }
@@ -234,6 +235,7 @@ void announce(int socket, char *buffer, char *IP)
                         usage_commands();
                         return;
                     }
+                    printf("add:%s|key:%s\n",seeds[0],seeds[3]);
                     int add = hash__add(seeds[3]
                                         ,IP
                                         ,port
@@ -260,6 +262,7 @@ void announce(int socket, char *buffer, char *IP)
             {
                 /* Finish the word */
                 key_leech[tmp] = '\0';
+                //TODO : renvoyer une liste de peers avec les clés ???
                 printf("key:%s\n", key_leech);
                 tmp = 0;
 
@@ -403,6 +406,7 @@ void look(int socket, char *buffer, char *IP)
 
     struct file *f = NULL;
 
+    //TODO
     /* Search for the file with all criterions */
     //int search = hash__search()
     return;
@@ -413,7 +417,7 @@ void update(int socket, char *buffer, char *IP)
     printf("%s\n", buffer);
 }
 
-void getfiles(int socket, char *buffer, char *IP)
+void getfile(int socket, char *buffer, char *IP)
 {
     char *p, space = ' ';
 
@@ -450,11 +454,13 @@ void getfiles(int socket, char *buffer, char *IP)
 
     /* Everything happened good */
 
-    int n = write(socket, "> peers [", 9);
+    int n = write(socket, "> peers ",8);
     if (n < 0)
         error("ERROR writing to socket");
-        
-    //itererer sur les owners et les afficher
+
+    n = write(socket, key, sizeof(key));
+ 
+    //TODO itererer sur les owners et les afficher
 
     n = write(socket, "]", 1);
 
@@ -485,10 +491,10 @@ void treat_socket(void *arg)
     if (rr < 0)
         error("ERROR reading from socket");
 
-    printf("Here is the message: %s\n", buffer);
+    printf("Here is the message: %s", buffer);
 
     get_command(buffer, command);
-    printf("%s\n", command);
+    printf("command:%s\n", command);
 
     if (!strcmp(command, ANNOUNCE))
         announce(socket, buffer, ip);
@@ -497,7 +503,7 @@ void treat_socket(void *arg)
     else if (!strcmp(command, UPDATE))
         update(socket, buffer, ip);
     else if (!strcmp(command, GET))
-        getfiles(socket, buffer, ip);
+        getfile(socket, buffer, ip);
     else
         usage_commands();
 
