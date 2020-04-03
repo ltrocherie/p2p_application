@@ -29,7 +29,7 @@ void usage_commands()
 {
     printf("List of possible commands :\n"
             "- announce listen <local port> seed [file1 length1 piecesize1 key1 ...] leech [key2 key3 ...] : announce the peer is listen on his local port and seeding given files and leeching given keys\n"
-            "- look [criterion1 criterion2] : returns a list of files with all criterions (=, >, < with size in Mo)\n"
+            "- look [criterion1<comparator>\"criterion\" criterion2<comparator>\"criterion\"] : returns a list of files with all criterions (=, >, < with size in o) (criterions are : filename and filesize)\n"
             "- getfile key : returns a list of peers who have the file\n"
             "- update seed [key1 key2 ...] leech [key10 key11 ...] : warns the trackers of the new files the peer has\n");
     return;

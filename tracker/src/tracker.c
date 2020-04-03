@@ -461,6 +461,7 @@ void getfile(int socket, char *buffer, char *IP)
     n = write(socket, key, sizeof(key));
  
     //TODO itererer sur les owners et les afficher
+    //affiche owners in file
 
     n = write(socket, "]", 1);
 
