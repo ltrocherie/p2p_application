@@ -468,6 +468,20 @@ void treat_socket(void *arg)
     char buffer[SIZE];
     char command[SIZE];
 
+    /* Read config.ini file */
+    char ch, file_name = "config.ini";
+    FILE *config;
+
+    printf("Enter name of a file you wish to see\n");
+    config = fopen(file_name, "r"); // read mode
+
+    if (config == NULL)
+        fprintf(stderr, "Can't open config.ini file : defaults settings");
+    /* Read all configuration settings */
+    else {
+
+    }
+
     /* Cast into struct socket_ip */
     socket_ip socket_with_ip = *((socket_ip *)arg);
 
