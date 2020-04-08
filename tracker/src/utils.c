@@ -129,7 +129,6 @@ void get_command(char *buffer, char *command)
     /* Position of the first itération */
     i = p - buffer;
 
-    int seed = 0, leech = 0;
     /* Get the command */
     strncpy(command, &buffer[0], i);
     command[i] = '\0';
