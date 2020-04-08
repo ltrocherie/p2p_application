@@ -10,8 +10,8 @@
 /**
  * Hash function in order to find index where to store elements
  * @param key unique key of the file
- * 
- * @return hashed index value : where to store the file 
+ *
+ * @return hashed index value : where to store the file
  * */
 int hash_value(char* key){
     int hash = 0;
@@ -29,8 +29,8 @@ int hash_value(char* key){
  * @param name filename
  * @param length total length of the file
  * @param piecesize size of each segment which will be downloaded between peers
- * 
- * @return hashed index value : where to store the file 
+ *
+ * @return hashed index value : where to store the file
  * */
 int compare(struct file* f,char* IP, int port,char* name, int length, int piecesize){
     if(strcmp(name,"-1") && !strcmp(name,f->name))
@@ -76,26 +76,91 @@ int hash__add(char* key,char* IP, int port,char* name, int length, int piecesize
     f->piecesize = piecesize;
     SLIST_INSERT_HEAD(&hash_table[index],f,next_file);
     bool = 1;
-
     return bool;
 }
 
-int hash__search(char* key,struct file *f){
+struct file* hash__search(char* key){
     int index = hash_value(key);
     struct file *p;
     SLIST_FOREACH(p,&hash_table[index],next_file){
         if(!strcmp(p->key,key)){
-            *f = *p;
-            return 1;
+            return p;
         }
     }
-    f = NULL;
-    return 0;
+    return NULL;
 }
 
 void hash__table_init(){
     for(int i = 0; i<HASH_TABLE_LENGTH;i++)
         SLIST_INIT(&hash_table[i]);
+}
+
+/**
+ * Compare 1 file with differents criterions : if a file has the good name or the good size
+ * @param compn is the comparator
+ * @param size is the size wanted
+ * @param size2 is the size of the file
+ *
+ * @return the true if all criterions is respected, false otherwise
+ * */
+int has_size(char compn, int size, int size2){
+    if(size == -1)
+        return 1;
+    if('<' == compn && size2 < size)
+        return 1;
+    if('>' == compn && size2 > size)
+        return 1;
+    if('=' == compn && size2 == size)
+        return 1;
+
+    return 0;
+}
+
+/**
+ * Convert integer into string
+ * @param val is the integer that need transformation
+ * @param base is the base of the value
+ *
+ * @return the string corresponding the integer val
+ * */
+char* itoa(int val, int base){
+	static char buf[32] = {0};
+	int i = 30;
+	for(; val && i ; --i, val /= base)
+		buf[i] = "0123456789abcdef"[val % base];
+	return &buf[i+1];
+}
+
+int hash__getfiles(char compn,char* name, int size,char* files_found){
+    int nb = 0;
+    if(size == -1 && !strcmp(name,"-1"))
+        return nb;
+    for(int i = 0;i<HASH_TABLE_LENGTH;i++){
+        struct file *f;
+        SLIST_FOREACH(f,&hash_table[i],next_file){
+            if(has_size(compn,size,f->length) && (!strcmp(f->name,name) || !strcmp(name,"-1"))){
+                    strcat(files_found,f->name);
+                    strcat(files_found," ");
+                    strcat(files_found,itoa(f->length,10));
+                    strcat(files_found," ");
+                    strcat(files_found,itoa(f->piecesize,10))   ;
+                    strcat(files_found," ");
+                    strcat(files_found,f->key);
+                    strcat(files_found," ");
+                    nb++;
+            }
+        }
+    }
+    return nb;
+}
+
+void hash__print(){
+    for(int i = 0; i<HASH_TABLE_LENGTH;i++){
+        struct file *f;
+        SLIST_FOREACH(f,&hash_table[i],next_file){
+                printf("A l'indice %d,il y a %s %s\n",i,f->name,f->key);
+        }
+    }
 }
 
 void hash__table_end(){

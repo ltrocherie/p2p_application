@@ -1,4 +1,4 @@
-/** 
+/**
  * @file hash_table.h
  * Hash table structures and methods in order to store FILES owned by peers
  */
@@ -54,7 +54,7 @@ void hash__table_init();
  * @param name filename
  * @param length total length of the file
  * @param piecesize size of each segment which will be downloaded between peers
- * 
+ *
  * @return 1 if the file has been added correctly, 0 otherwise
  * */
 int hash__add(char* key,char* IP, int port,char* name, int length, int piecesize);
@@ -65,10 +65,27 @@ int hash__add(char* key,char* IP, int port,char* name, int length, int piecesize
  * criterions such as the total size with (with different comparators)
  * @param key key in order to search for the file
  * @param f file which will be returned depeping on the search
- * 
- * @return 1 and the file in f if the file has been found, 0 and f NULL otherwise 
+ *
+ * @return 1 and the file in f if the file has been found, 0 and f NULL otherwise
  * */
-int hash__search(char* key,struct file *f);
+struct file* hash__search(char* key);
+
+/**
+ * Search some files in the hash_table with the name name and size
+ * criterions such as the total size with (with different comparators)
+ * @param comp compare the size with the size of the file (comp is <,= or >)
+ * @param name it's the name wanted
+ * @param size it's the size we want more or less
+ * @param files_found it's the data wanted
+ *
+ * @return an integer that correspoond of the number of file
+ * */
+int hash__getfiles(char compn,char* name, int size, char* files_found);
+
+/**
+ * Print all the files in hash_table (used in debug)
+ * */
+void hash__print();
 
 /**
  * Free all table memory by freeing each elements inside
