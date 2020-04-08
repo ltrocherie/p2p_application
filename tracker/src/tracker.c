@@ -157,13 +157,8 @@ void announce(int socket, char *buffer, char *IP)
                         usage_commands();
                         return;
                     }
-                    printf("add:%s|key:%s\n",seeds[0],seeds[3]);
-                    int add = hash__add(seeds[3]
-                                        ,IP
-                                        ,port
-                                        ,seeds[0]
-                                        ,atoi(seeds[1])
-                                        ,atoi(seeds[2]));
+                    printf("add:%s|key:%s\n", seeds[0], seeds[3]);
+                    int add = hash__add(seeds[3], IP, port, seeds[0], atoi(seeds[1]), atoi(seeds[2]));
 
                     if (!add)
                     {
@@ -181,13 +176,6 @@ void announce(int socket, char *buffer, char *IP)
             /* LEECH CASE : at the end of every word we show the key */
             else if (!seed && leech)
             {
-                if (!isNumeric(key_leech))
-                {
-                    fprintf(stderr, "Key must be an integer\n");
-                    usage_commands();
-                    return;
-                }
-
                 /* Finish the word */
                 key_leech[tmp] = '\0';
                 //TODO : renvoyer une liste de peers avec les clés ???
@@ -236,13 +224,8 @@ void announce(int socket, char *buffer, char *IP)
                         usage_commands();
                         return;
                     }
-                    printf("add:%s|key:%s\n",seeds[0],seeds[3]);
-                    int add = hash__add(seeds[3]
-                                        ,IP
-                                        ,port
-                                        ,seeds[0]
-                                        ,atoi(seeds[1])
-                                        ,atoi(seeds[2]));
+                    printf("add:%s|key:%s\n", seeds[0], seeds[3]);
+                    int add = hash__add(seeds[3], IP, port, seeds[0], atoi(seeds[1]), atoi(seeds[2]));
 
                     if (!add)
                     {
@@ -272,7 +255,6 @@ void announce(int socket, char *buffer, char *IP)
             }
             i++;
             break;
-
         /* Case when we encounter a character */
         default:
             /* We fill the word in the args */
@@ -322,7 +304,8 @@ void look(int socket, char *buffer, char *IP)
         switch (buffer[i])
         {
         case ' ':
-            if (tmp <= 0) {
+            if (tmp <= 0)
+            {
                 i++;
                 break;
             }
@@ -335,11 +318,12 @@ void look(int socket, char *buffer, char *IP)
 
             break;
         case '=':
-            if (strcmp(arg,"filename") == 0)
+            if (strcmp(arg, "filename") == 0)
                 given_name = 1;
-            else if (strcmp(arg,"filesize") == 0)
+            else if (strcmp(arg, "filesize") == 0)
                 given_size = 1;
-            else {
+            else
+            {
                 usage_commands();
                 return;
             }
@@ -350,7 +334,8 @@ void look(int socket, char *buffer, char *IP)
             break;
         case '>':
             /* If the comparator is > with other than filesize, this is not valid */
-            if (strcmp(arg,"filesize") != 0) {
+            if (strcmp(arg, "filesize") != 0)
+            {
                 usage_commands();
                 return;
             }
@@ -363,13 +348,13 @@ void look(int socket, char *buffer, char *IP)
             break;
         case '<':
             /* If the comparator is < with other than filesize, this is not valid */
-            if (strcmp(arg,"filesize") != 0) {
+            if (strcmp(arg, "filesize") != 0)
+            {
                 usage_commands();
                 return;
             }
             given_size = 1;
             comparator = buffer[i];
-
 
             arg[tmp] = '\0';
             tmp = 0;
@@ -396,23 +381,24 @@ void look(int socket, char *buffer, char *IP)
             break;
         }
     }
-    if(!isNumeric(size)){
+    if (!isNumeric(size))
+    {
         return;
     }
-    printf("filename:%s\n",name);
-    printf("size:%s\n",size);
-    printf("comparator:%c\n",comparator);
+    printf("filename:%s\n", name);
+    printf("size:%s\n", size);
+    printf("comparator:%c\n", comparator);
 
-    char* find = malloc(1024*sizeof(char));
-    printf("%s\n",find);
+    char *find = malloc(1024 * sizeof(char));
+    printf("%s\n", find);
     int s = atoi(size);
-    printf("%d\n",s);
-    hash__getfiles(comparator,name,s,find);
-    int n = write(socket,"> list [",sizeof("> list ["));
-    n = write(socket,find,sizeof(find));
+    printf("%d\n", s);
+    hash__getfiles(comparator, name, s, find);
+    int n = write(socket, "> list [", sizeof("> list ["));
+    n = write(socket, find, sizeof(find));
     if (n < 0)
         error("ERROR writing to socket");
-    n = write(socket,"]",1);
+    n = write(socket, "]", 1);
     free(find);
     hash__print();
     return;
@@ -420,7 +406,128 @@ void look(int socket, char *buffer, char *IP)
 
 void update(int socket, char *buffer, char *IP)
 {
-    printf("%s\n", buffer);
+    char *p, space = ' ';
+
+    /* Returns the pointer of the first occurence of the separator */
+    p = strchr(buffer, space);
+
+    /* If there is no space in the command */
+    if (p == NULL)
+    {
+        fprintf(stderr, "No \"%c\" found.\n", space);
+        return;
+    }
+
+    /* Pointer of next word */
+    buffer = p + 1;
+    int i = 0, tmp = 0;
+
+    /* SEEDS LEECHS TREATMENT */
+    int end = 0;
+    int seed = 0, leech = 0;
+    (void)seed;
+    (void)leech;
+
+    char key[1024];
+
+    /* Read all characters */
+    while (buffer[i] != 0 && buffer[i] != '\n' && buffer[i] != '\r' && end == 0)
+    {
+        switch (buffer[i])
+        {
+        case ' ':
+            i++;
+
+            /* If it is only spaces */
+            if (tmp == 0)
+                break;
+
+            key[tmp] = '\0';
+            tmp = 0;
+
+            /* If we found the seed or leech keyword */
+            if (!strcmp(key, SEED)) {
+                seed = 1;
+                break;
+            } else if (!strcmp(key, LEECH)) {
+                leech = 1;
+                break;
+            }
+
+            /* Seed case */
+            if (seed)
+            {
+                /* We add a new file OR a new owner in the existing file */
+                printf("add seed:%s\n",key);
+                /*int add = hash__add(seeds[3]
+                                    ,IP
+                                    ,port
+                                    ,seeds[0]
+                                    ,atoi(seeds[1])
+                                    ,atoi(seeds[2]));*/
+            }
+            /* Leeching case */
+            else if (leech)
+            {
+                /* Add leeching ??? */
+                printf("add leech:%s\n",key);
+
+            }
+            break;
+        case '[':
+            i++;
+            break;
+        case ']':
+            key[tmp] = '\0';
+            tmp = 0;
+            i++;
+
+            /* If we didnt have neither seed or leech in [], we don't care */
+            if (!strcmp(key, "\0"))
+            {
+                printf("no key\n");
+                break;
+            }
+
+            /* Seed case */
+            if (seed)
+            {
+                seed = 0;
+
+                /* We add a new file OR a new owner in the existing file */
+                printf("add seed:%s\n",key);
+                /*int add = hash__add(seeds[3]
+                                    ,IP
+                                    ,port
+                                    ,seeds[0]
+                                    ,atoi(seeds[1])
+                                    ,atoi(seeds[2]));*/
+            }
+            /* Leeching case */
+            else if (leech)
+            {
+                leech = 0;
+                end = 1;
+
+                /* Add leeching ??? */
+                printf("add leech:%s\n",key);
+
+            }
+            break;
+        /* Case when we encounter a character */
+        default:
+            /* We fill the word in the args */
+            key[tmp] = buffer[i];
+            tmp++;
+            i++;
+            break;
+        }
+    }
+
+    /* Everything happened good */
+    int n = write(socket, "> ok", 148);
+    if (n < 0)
+        error("ERROR writing to socket");
 }
 
 void getfile(int socket, char *buffer, char *IP)
@@ -444,35 +551,38 @@ void getfile(int socket, char *buffer, char *IP)
     char key[1024];
 
     /* Read all characters */
-    while (buffer[i] != 0 && buffer[i] != '\n' && buffer[i] != ' ') {
+    while (buffer[i] != 0 && buffer[i] != '\n' && buffer[i] != ' ')
+    {
         key[tmp] = buffer[i];
         i++;
     }
 
-    struct file* f = NULL;
+    struct file *f = NULL;
 
     f = hash__search(key);
 
-    if (f == NULL) {
+    if (f == NULL)
+    {
         fprintf(stderr, "File with key %s not found in the hash table\n", key);
         return;
     }
 
     /* Everything happened good */
 
-    int n = write(socket, "> peers ",8);
+    int n = write(socket, "> peers ", 8);
     if (n < 0)
         error("ERROR writing to socket");
     int nb_owner = 0;
     n = write(socket, key, sizeof(key));
-    n = write(socket, " [",2);
+    n = write(socket, " [", 2);
     struct owner *own;
-    SLIST_FOREACH(own,&f->owners,next_owner){
-        n = write(socket,own->IP,sizeof(own->IP));
-        n = write(socket,":",1);
-        n = write(socket,&own->port,sizeof(own->port));
-        if(nb_owner == f->nb_owners-1)
-            n = write(socket," ",1);
+    SLIST_FOREACH(own, &f->owners, next_owner)
+    {
+        n = write(socket, own->IP, sizeof(own->IP));
+        n = write(socket, ":", 1);
+        n = write(socket, &own->port, sizeof(own->port));
+        if (nb_owner == f->nb_owners - 1)
+            n = write(socket, " ", 1);
         nb_owner++;
     }
 
@@ -483,23 +593,22 @@ void getfile(int socket, char *buffer, char *IP)
 
 void treat_socket(void *arg)
 {
-    char args[1024];
     char buffer[SIZE];
     char command[SIZE];
 
     /* Read config.ini file */
+    /*
     char ch, file_name = "config.ini";
     FILE *config;
-
-    printf("Enter name of a file you wish to see\n");
     config = fopen(file_name, "r"); // read mode
 
     if (config == NULL)
         fprintf(stderr, "Can't open config.ini file : defaults settings");
-    /* Read all configuration settings */
-    else {
-
+    / Read all configuration settings /
+    else
+    {
     }
+    */
 
     /* Cast into struct socket_ip */
     socket_ip socket_with_ip = *((socket_ip *)arg);
@@ -554,6 +663,7 @@ int main(int argc, char *argv[])
         usage();
         exit(1);
     }
+    
     hash__table_init();
 
     portno = atoi(argv[1]);
