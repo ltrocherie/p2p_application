@@ -41,11 +41,11 @@ void error(char *msg)
 /**
  * Parse the buffer given by the peer in order to figoure out what the port is but also
  * which files will be added to the hash_table and finally all leechs incoming.
- * 
+ *
  * @param socket socket of the current connection
  * @param buffer message given by the peer
  * @param IP IP of the peer
- * 
+ *
  * @return will display "> ok" if everything happened right with all files added in hash_table,
  * will display the usage otherwise on stderr. Be careful, if the command has not the right number of arguments for seed (for example) corrects files before the error will be still
  * added to the hash table
@@ -310,7 +310,9 @@ void look(int socket, char *buffer, char *IP)
     buffer = p + 1;
     int i = 0, tmp = 0;
 
-    char arg[1024], name[1024], size[64];
+    char arg[1024];
+    char name[1024] = "\0";
+    char size[64] = "-1";
     char comparator = '=';
     int given_size = 0, given_name = 0;
 
@@ -334,7 +336,7 @@ void look(int socket, char *buffer, char *IP)
             break;
         case '=':
             if (strcmp(arg,"filename") == 0)
-                given_name = 1;       
+                given_name = 1;
             else if (strcmp(arg,"filesize") == 0)
                 given_size = 1;
             else {
@@ -368,8 +370,9 @@ void look(int socket, char *buffer, char *IP)
             given_size = 1;
             comparator = buffer[i];
 
+
             arg[tmp] = '\0';
-            tmp = 0;     
+            tmp = 0;
             i++;
             break;
         case '[':
@@ -393,16 +396,25 @@ void look(int socket, char *buffer, char *IP)
             break;
         }
     }
-
+    if(!isNumeric(size)){
+        return;
+    }
     printf("filename:%s\n",name);
     printf("size:%s\n",size);
     printf("comparator:%c\n",comparator);
 
-    struct file *f = NULL;
-
-    //TODO
-    /* Search for the file with all criterions */
-    //int search = hash__search()
+    char* find = malloc(1024*sizeof(char));
+    printf("%s\n",find);
+    int s = atoi(size);
+    printf("%d\n",s);
+    hash__getfiles(comparator,name,s,find);
+    int n = write(socket,"> list [",sizeof("> list ["));
+    n = write(socket,find,sizeof(find));
+    if (n < 0)
+        error("ERROR writing to socket");
+    n = write(socket,"]",1);
+    free(find);
+    hash__print();
     return;
 }
 
@@ -439,9 +451,9 @@ void getfile(int socket, char *buffer, char *IP)
 
     struct file* f = NULL;
 
-    int search = hash__search(key, f);
+    f = hash__search(key);
 
-    if (!search) {
+    if (f == NULL) {
         fprintf(stderr, "File with key %s not found in the hash table\n", key);
         return;
     }
@@ -451,11 +463,18 @@ void getfile(int socket, char *buffer, char *IP)
     int n = write(socket, "> peers ",8);
     if (n < 0)
         error("ERROR writing to socket");
-
+    int nb_owner = 0;
     n = write(socket, key, sizeof(key));
- 
-    //TODO itererer sur les owners et les afficher
-    //affiche owners in file
+    n = write(socket, " [",2);
+    struct owner *own;
+    SLIST_FOREACH(own,&f->owners,next_owner){
+        n = write(socket,own->IP,sizeof(own->IP));
+        n = write(socket,":",1);
+        n = write(socket,&own->port,sizeof(own->port));
+        if(nb_owner == f->nb_owners-1)
+            n = write(socket," ",1);
+        nb_owner++;
+    }
 
     n = write(socket, "]", 1);
 
@@ -535,6 +554,7 @@ int main(int argc, char *argv[])
         usage();
         exit(1);
     }
+    hash__table_init();
 
     portno = atoi(argv[1]);
     sockfd = socket(AF_INET, SOCK_STREAM, 0);

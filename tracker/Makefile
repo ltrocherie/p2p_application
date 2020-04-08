@@ -1,6 +1,6 @@
 SRC=src/
 BLD=build/
-TST=tst/
+TST=tests/
 
 FLAGS= -Wall
 
@@ -10,7 +10,8 @@ all: build
 
 build: tracker
 
-tests:
+tests: $(BLD)utils.o $(BLD)thpool.o $(BLD)hash_table.o
+	cc $(FLAGS) -o $(BLD)$@ $(TST)test_hash_table.c $^ -pthread
 
 clean:
 	rm -rf $(SRC)*.o *~ \#*#
@@ -20,7 +21,7 @@ tracker: $(BLD)utils.o $(BLD)thpool.o $(BLD)hash_table.o
 	cc $(FLAGS) -o $(BLD)$@ $(SRC)$@.c $^ -pthread
 
 $(BLD)utils.o:
-		cc $(FLAGS) -o $@ -c $(SRC)utils.c 
+		cc $(FLAGS) -o $@ -c $(SRC)utils.c
 
 $(BLD)thpool.o:
 		cc $(FLAGS) -o $@ -c $(SRC)thpool.c -D THPOOL_DEBUG -pthread
