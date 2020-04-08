@@ -11,6 +11,7 @@
 #include <ifaddrs.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <fcntl.h>
 
 #include "queue.h"
 #include "utils.h"
@@ -30,7 +31,9 @@
 #define SEED "seed"
 #define LEECH "leech"
 
-//extern SLIST_HEAD(,file) hash_table[HASH_TABLE_LENGTH];
+#define CONFIG "config.ini"
+#define LOG "log"
+int config_fd, log_fd;
 
 void error(char *msg)
 {
@@ -157,7 +160,12 @@ void announce(int socket, char *buffer, char *IP)
                         usage_commands();
                         return;
                     }
-                    printf("add:%s|key:%s\n", seeds[0], seeds[3]);
+                    fprintf(stdout,"add:%s|key:%s\n", seeds[0], seeds[3]);
+                    n = write(log_fd, "key ", 4);
+                    n = write(log_fd, seeds[3], sizeof(seeds[3]));
+                    n = write(log_fd, "add ", 4);
+                    n = write(log_fd, seeds[0], sizeof(seeds[0]));
+                    
                     int add = hash__add(seeds[3], IP, port, seeds[0], atoi(seeds[1]), atoi(seeds[2]));
 
                     if (!add)
@@ -179,7 +187,10 @@ void announce(int socket, char *buffer, char *IP)
                 /* Finish the word */
                 key_leech[tmp] = '\0';
                 //TODO : renvoyer une liste de peers avec les clés ???
-                printf("key:%s\n", key_leech);
+                fprintf(stdout,"key:%s\n", key_leech);
+                n = write(log_fd, "key ", 4);
+                n = write(log_fd, key_leech, sizeof(key_leech));
+
                 tmp = 0;
                 break;
             }
@@ -224,7 +235,13 @@ void announce(int socket, char *buffer, char *IP)
                         usage_commands();
                         return;
                     }
-                    printf("add:%s|key:%s\n", seeds[0], seeds[3]);
+                    
+                    fprintf(stdout,"add:%s|key:%s\n", seeds[0], seeds[3]);
+                    n = write(log_fd, "key ", 4);
+                    n = write(log_fd, seeds[3], sizeof(seeds[3]));
+                    n = write(log_fd, "add ", 4);
+                    n = write(log_fd, seeds[0], sizeof(seeds[0]));
+
                     int add = hash__add(seeds[3], IP, port, seeds[0], atoi(seeds[1]), atoi(seeds[2]));
 
                     if (!add)
@@ -247,7 +264,10 @@ void announce(int socket, char *buffer, char *IP)
                 /* Finish the word */
                 key_leech[tmp] = '\0';
                 //TODO : renvoyer une liste de peers avec les clés ???
-                printf("key:%s\n", key_leech);
+                fprintf(stdout,"key:%s\n", key_leech);
+                n = write(log_fd, "key ", 4);
+                n = write(log_fd, key_leech, sizeof(key_leech));
+
                 tmp = 0;
 
                 /* If both seeds and leechs args were given, it's finished */
@@ -596,20 +616,6 @@ void treat_socket(void *arg)
     char buffer[SIZE];
     char command[SIZE];
 
-    /* Read config.ini file */
-    /*
-    char ch, file_name = "config.ini";
-    FILE *config;
-    config = fopen(file_name, "r"); // read mode
-
-    if (config == NULL)
-        fprintf(stderr, "Can't open config.ini file : defaults settings");
-    / Read all configuration settings /
-    else
-    {
-    }
-    */
-
     /* Cast into struct socket_ip */
     socket_ip socket_with_ip = *((socket_ip *)arg);
 
@@ -655,6 +661,21 @@ int main(int argc, char *argv[])
 
     /* Pool of threads which will retrieve work to do in the queue of work */
     threadpool thpool = thpool_init(5);
+
+    /* Open and write in config.ini */
+    config_fd = open(CONFIG, O_RDONLY);
+    log_fd = open(LOG, O_CREAT | O_WRONLY | O_APPEND);
+
+    /* Exiting program */
+    if (config_fd < 0) {
+        fprintf(stderr,"Error opening config.ini");
+        return -1;
+    }
+
+    if (log_fd < 0) {
+        fprintf(stderr,"Error opening log");
+        return -1;
+    }
 
     /* Choose ports */
     if (argc < 2 || argc > 2)
@@ -705,6 +726,9 @@ int main(int argc, char *argv[])
         thpool_add_work(thpool, (void *)treat_socket, &arg);
     }
 
+    hash__table_end();
     thpool_destroy(thpool);
+    close(log_fd);
+    close(config_fd);
     return 0;
 }
