@@ -47,7 +47,8 @@ void error(char *msg)
  * @param IP IP of the peer
  *
  * @return will display "> ok" if everything happened right with all files added in hash_table,
- * will display the usage otherwise on stderr
+ * will display the usage otherwise on stderr. Be careful, if the command has not the right number of arguments for seed (for example) corrects files before the error will be still
+ * added to the hash table
  * */
 void announce(int socket, char *buffer, char *IP)
 {
@@ -309,10 +310,11 @@ void look(int socket, char *buffer, char *IP)
     buffer = p + 1;
     int i = 0, tmp = 0;
 
-    char arg[1024], name[1024];
+    char arg[1024];
+    char name[1024] = "\0";
     char size[64] = "-1";
     char comparator = '=';
-    int given = 0;
+    int given_size = 0, given_name = 0;
 
     /* Read all characters */
     while (buffer[i] != 0 && buffer[i] != '\n' && buffer[i] != ']')
@@ -325,10 +327,8 @@ void look(int socket, char *buffer, char *IP)
                 break;
             }
 
-            if (given)
-                size[tmp] = '\0';
-            else
-                name[tmp] = '\0';
+            given_size = 0;
+            given_name = 0;
 
             tmp = 0;
             i++;
@@ -336,29 +336,28 @@ void look(int socket, char *buffer, char *IP)
             break;
         case '=':
             if (strcmp(arg,"filename") == 0)
-                given = 0;
+                given_name = 1;
             else if (strcmp(arg,"filesize") == 0)
-                given = 1;
+                given_size = 1;
             else {
                 usage_commands();
                 return;
             }
+
             arg[tmp] = '\0';
             tmp = 0;
             i++;
             break;
-
         case '>':
             /* If the comparator is > with other than filesize, this is not valid */
             if (strcmp(arg,"filesize") != 0) {
                 usage_commands();
                 return;
             }
-
-            given = 1;
-            arg[tmp] = '\0';
+            given_size = 1;
             comparator = buffer[i];
 
+            arg[tmp] = '\0';
             tmp = 0;
             i++;
             break;
@@ -368,10 +367,11 @@ void look(int socket, char *buffer, char *IP)
                 usage_commands();
                 return;
             }
-            given = 1;
-            arg[tmp] = '\0';
+            given_size = 1;
             comparator = buffer[i];
 
+
+            arg[tmp] = '\0';
             tmp = 0;
             i++;
             break;
@@ -379,34 +379,34 @@ void look(int socket, char *buffer, char *IP)
             i++;
             break;
         case '"':
-            /* If the size was given then we finish */
-            if (given)
-                size[tmp] = '\0';
-            tmp = 0;
+            arg[tmp] = '\0';
 
+            if (given_size)
+                strcpy(size, arg);
+            else if (given_name)
+                strcpy(name, arg);
+
+            tmp = 0;
             i++;
             break;
         default:
-            /* If we submitted a comparator then we assign the size */
-            if (given)
-                size[tmp] = buffer[i];
-            else
-                name[tmp] = buffer[i];
-
             arg[tmp] = buffer[i];
-
             tmp++;
             i++;
             break;
         }
     }
-
+    if(!isNumeric(size)){
+        return;
+    }
     printf("filename:%s\n",name);
     printf("size:%s\n",size);
     printf("comparator:%c\n",comparator);
 
     char* find = malloc(1024*sizeof(char));
+    printf("%s\n",find);
     int s = atoi(size);
+    printf("%d\n",s);
     hash__getfiles(comparator,name,s,find);
     int n = write(socket,"> list [",sizeof("> list ["));
     n = write(socket,find,sizeof(find));
@@ -414,6 +414,7 @@ void look(int socket, char *buffer, char *IP)
         error("ERROR writing to socket");
     n = write(socket,"]",1);
     free(find);
+    hash__print();
     return;
 }
 
@@ -539,6 +540,7 @@ int main(int argc, char *argv[])
         usage();
         exit(1);
     }
+    hash__table_init();
 
     portno = atoi(argv[1]);
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
