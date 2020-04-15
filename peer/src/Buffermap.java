@@ -49,7 +49,8 @@ public class Buffermap extends PeerConfig implements Runnable{
 	   return sb.toString();
 	}
 
-	void buffermapUpdate() throws Exception{
+	void buffermapInit() throws Exception{
+		// gets all the files in the seed/ folder and adds them in the file manager
 		File[] filelist = fileList(folderName); 
 	    for (File f : filelist) {
 	    	String hash = getFileChecksumMD5(f);
@@ -61,14 +62,23 @@ public class Buffermap extends PeerConfig implements Runnable{
 	    	Map.Entry<String, boolean[]> tuple = new AbstractMap.SimpleEntry<>(hash, buffermap);
 	    	fileManager.add(tuple);
     	}
-    	for (int i = 0; i < fileManager.size(); i++) {
-    		System.out.println(fileManager.get(i).getKey() + " BMlength: " + fileManager.get(i).getValue().length);
-    	}
+    	return;
+	}
+
+	void buffermapUpdate(String hash, boolean[] buffermap){
+		for(Map.Entry<String, boolean[]> tuple: fileManager){
+			if(tuple.getKey().equals(hash)){
+				tuple.setValue(buffermap);
+				return;
+			}
+		}
+		// else : may need to add a new entry
+		return;
 	}
 
 	public void run(){
 		try{
-			buffermapUpdate();
+			buffermapInit();
 		}catch(Exception e){
 			e.printStackTrace();
 		}
