@@ -1,18 +1,17 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.Arrays; 
 import java.security.MessageDigest;
 /**
  * */
 
 public class Buffermap extends PeerConfig implements Runnable{
 
-	byte[] buffermapArray;
-	List<String> hashArray;
+	List<Map.Entry<String, boolean[]>> fileManager;
 
 	public Buffermap(){
-		buffermapArray = new byte[pieceSize/8];
-		hashArray = new ArrayList<String>();
+		fileManager = new ArrayList<>();
 	}
 
 	private static String getFileChecksumMD5(File file) throws Exception
@@ -53,11 +52,17 @@ public class Buffermap extends PeerConfig implements Runnable{
 	void buffermapUpdate() throws Exception{
 		File[] filelist = fileList(folderName); 
 	    for (File f : filelist) {
-	    	hashArray.add(getFileChecksumMD5(f));
-	    	//buffermapArray.append();
+	    	String hash = getFileChecksumMD5(f);
+	    	long bmlength = f.length()/pieceSize + 1;
+	    	boolean[] buffermap = new boolean[(int) bmlength];
+	    	for(boolean b: buffermap){
+	    		b = true;
+	    	}
+	    	Map.Entry<String, boolean[]> tuple = new AbstractMap.SimpleEntry<>(hash, buffermap);
+	    	fileManager.add(tuple);
     	}
-    	for (int i = 0; i < hashArray.size(); i++) {
-    		System.out.println(hashArray.get(i));
+    	for (int i = 0; i < fileManager.size(); i++) {
+    		System.out.println(fileManager.get(i).getKey() + " BMlength: " + fileManager.get(i).getValue().length);
     	}
 	}
 

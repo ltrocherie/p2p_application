@@ -24,7 +24,7 @@ public class PeerConfig{
 	    String message = "announce listen " + port + "seed [";
 	    for (final File fileEntry : fileL) {
 	        message = message + fileEntry.getName();
-	        message = message + " " + fileEntry.getTotalSpace();
+	        message = message + " " + fileEntry.length();
 	        message = message + " " + pieceSize;
 	        message = message + " " + fileEntry.hashCode() + " ";
 	    }
