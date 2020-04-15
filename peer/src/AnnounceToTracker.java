@@ -3,22 +3,16 @@ import java.net.*;
 /**
  * */
 
-public class AnnounceToTracker {
-    static int port = 8080; // pas une super idée le port http pour nos connexions
+public class AnnounceToTracker extends PeerConfig{
 
-    static int inPort = 10000; // A voir, un pour les communications, l'autre pour les transferts de fichier
-    static int outPort = 10000;
-
-    static final String folderName = "seed/";
-    static int pieceSize = 1024;
 
     public void announceTracker(String connect) throws Exception{ // on devrait pas passer le dossier en paramètre ?
       /*
           TODO : Rules announce, look, getfile
       */
 
-        File[] fileL = this.fileList(folderName); // This fonctionne pas normalement en ce moment.
-        String message = this.parseFileList(fileL);
+        File[] fileL = super.fileList(folderName); // This fonctionne pas normalement en ce moment.
+        String message = super.parseFileList(fileL);
         Socket socket = new Socket(connect,port);
         BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),true);
@@ -31,23 +25,5 @@ public class AnnounceToTracker {
         socket.close();
     }
 
-    /*** PRIVATE METHODS ***/
 
-    private File[] fileList(String folder){
-        File fold = new File(folder);
-        File[] list = fold.listFiles();
-        return list;
-    }
-
-    private String parseFileList(File[] fileL) {
-        String message = "announce listen " + port + "seed [";
-        for (final File fileEntry : fileL) {
-            message = message + fileEntry.getName();
-            message = message + " " + fileEntry.getTotalSpace();
-            message = message + " " + pieceSize;
-            message = message + " " + fileEntry.hashCode() + " ";
-        }
-        message = message + "]";
-        return message;
-    }
 }
