@@ -102,7 +102,7 @@ void show_local_ip(int portno)
 
     printf("Network Interface Name :- %s\n", id->ifa_name);
     //printf("Network Address of %s :- %d\n", id->ifa_name, id->ifa_addr);
-    printf("Socket Data : -%s\n", id->ifa_addr->sa_data);
+    //printf("Socket Data : -%s\n", id->ifa_addr->sa_data);
 }
 
 /**

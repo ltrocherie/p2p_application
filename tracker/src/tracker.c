@@ -575,7 +575,12 @@ void getfile(int socket, char *buffer, char *IP)
     {
         key[tmp] = buffer[i];
         i++;
+        tmp++;
     }
+
+    key[tmp] = '\0';
+
+    printf("key:%s\n",key);
 
     struct file *f = NULL;
 
