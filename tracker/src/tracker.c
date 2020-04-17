@@ -12,6 +12,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <string.h>
 
 #include "queue.h"
 #include "utils.h"
@@ -165,7 +166,7 @@ void announce(int socket, char *buffer, char *IP)
                     n = write(log_fd, seeds[3], sizeof(seeds[3]));
                     n = write(log_fd, "add ", 4);
                     n = write(log_fd, seeds[0], sizeof(seeds[0]));
-                    
+
                     int add = hash__add(seeds[3], IP, port, seeds[0], atoi(seeds[1]), atoi(seeds[2]));
 
                     if (!add)
@@ -235,7 +236,7 @@ void announce(int socket, char *buffer, char *IP)
                         usage_commands();
                         return;
                     }
-                    
+
                     fprintf(stdout,"add:%s|key:%s\n", seeds[0], seeds[3]);
                     n = write(log_fd, "key ", 4);
                     n = write(log_fd, seeds[3], sizeof(seeds[3]));
@@ -577,11 +578,7 @@ void getfile(int socket, char *buffer, char *IP)
         i++;
         tmp++;
     }
-
     key[tmp] = '\0';
-
-    printf("key:%s\n",key);
-
     struct file *f = NULL;
 
     f = hash__search(key);
@@ -598,15 +595,16 @@ void getfile(int socket, char *buffer, char *IP)
     if (n < 0)
         error("ERROR writing to socket");
     int nb_owner = 0;
-    n = write(socket, key, sizeof(key));
+    n = write(socket, key, tmp*sizeof(char));
     n = write(socket, " [", 2);
     struct owner *own;
     SLIST_FOREACH(own, &f->owners, next_owner)
     {
-        n = write(socket, own->IP, sizeof(own->IP));
+        n = write(socket, own->IP, strlen(own->IP)*sizeof(char));
         n = write(socket, ":", 1);
-        n = write(socket, &own->port, sizeof(own->port));
-        if (nb_owner == f->nb_owners - 1)
+        char* port = itoa(own->port,10);
+        n = write(socket,port , strlen(port)*sizeof(char));
+        if (nb_owner != f->nb_owners - 1)
             n = write(socket, " ", 1);
         nb_owner++;
     }
@@ -669,7 +667,7 @@ int main(int argc, char *argv[])
 
     /* Open and write in config.ini */
     config_fd = open(CONFIG, O_RDONLY);
-    log_fd = open(LOG, O_CREAT | O_WRONLY | O_APPEND);
+    log_fd = open(LOG, O_CREAT | O_WRONLY | O_APPEND,0755);
 
     /* Exiting program */
     if (config_fd < 0) {
@@ -689,7 +687,7 @@ int main(int argc, char *argv[])
         usage();
         exit(1);
     }
-    
+
     hash__table_init();
 
     portno = atoi(argv[1]);
