@@ -57,6 +57,7 @@ int hash__add(char* key,char* IP, int port,char* name, int length, int piecesize
     int bool = 0;
     int index = hash_value(key);
     struct file *p;
+    pthread_mutex_lock(&mutex_table[index]);
     SLIST_FOREACH(p,&hash_table[index],next_file){
         if(!strcmp(p->key,key)){
             bool = compare(p,IP,port,name,length,piecesize);
@@ -75,6 +76,7 @@ int hash__add(char* key,char* IP, int port,char* name, int length, int piecesize
     f->length = length;
     f->piecesize = piecesize;
     SLIST_INSERT_HEAD(&hash_table[index],f,next_file);
+    pthread_mutex_unlock(&mutex_table[index]);
     bool = 1;
     return bool;
 }
@@ -82,17 +84,29 @@ int hash__add(char* key,char* IP, int port,char* name, int length, int piecesize
 struct file* hash__search(char* key){
     int index = hash_value(key);
     struct file *p;
+    pthread_mutex_lock(&mutex_table[index]);
     SLIST_FOREACH(p,&hash_table[index],next_file){
         if(!strcmp(p->key,key)){
             return p;
         }
     }
+    pthread_mutex_unlock(&mutex_table[index]);
     return NULL;
 }
 
 void hash__table_init(){
-    for(int i = 0; i<HASH_TABLE_LENGTH;i++)
+    for(int i = 0; i<HASH_TABLE_LENGTH;i++){
         SLIST_INIT(&hash_table[i]);
+        pthread_mutex_init(&mutex_table[i],NULL);
+    }
+}
+
+char* itoa(int val, int base){
+	static char buf[32] = {0};
+	int i = 30;
+	for(; val && i ; --i, val /= base)
+		buf[i] = "0123456789abcdef"[val % base];
+	return &buf[i+1];
 }
 
 /**
@@ -112,23 +126,7 @@ int has_size(char compn, int size, int size2){
         return 1;
     if('=' == compn && size2 == size)
         return 1;
-
     return 0;
-}
-
-/**
- * Convert integer into string
- * @param val is the integer that need transformation
- * @param base is the base of the value
- *
- * @return the string corresponding the integer val
- * */
-char* itoa(int val, int base){
-	static char buf[32] = {0};
-	int i = 30;
-	for(; val && i ; --i, val /= base)
-		buf[i] = "0123456789abcdef"[val % base];
-	return &buf[i+1];
 }
 
 int hash__getfiles(char compn,char* name, int size,char* files_found){
@@ -137,6 +135,7 @@ int hash__getfiles(char compn,char* name, int size,char* files_found){
         return nb;
     for(int i = 0;i<HASH_TABLE_LENGTH;i++){
         struct file *f;
+        pthread_mutex_lock(&mutex_table[i]);
         SLIST_FOREACH(f,&hash_table[i],next_file){
             if(has_size(compn,size,f->length) && (!strcmp(f->name,name) || !strcmp(name,"-1"))){
                     strcat(files_found,f->name);
@@ -150,16 +149,19 @@ int hash__getfiles(char compn,char* name, int size,char* files_found){
                     nb++;
             }
         }
+        pthread_mutex_unlock(&mutex_table[i]);
     }
     return nb;
 }
 
 void hash__print(){
     for(int i = 0; i<HASH_TABLE_LENGTH;i++){
+        pthread_mutex_lock(&mutex_table[i]);
         struct file *f;
         SLIST_FOREACH(f,&hash_table[i],next_file){
                 printf("A l'indice %d,il y a %s %s\n",i,f->name,f->key);
         }
+        pthread_mutex_unlock(&mutex_table[i]);
     }
 }
 

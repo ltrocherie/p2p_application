@@ -4,6 +4,7 @@
  */
 #ifndef HASH_TABLE
 #define HASH_TABLE
+#include <pthread.h>
 #include "queue.h"
 
 /**
@@ -39,6 +40,20 @@ struct file {
 * \var hash_table hash_table.h
 */
 SLIST_HEAD(,file) hash_table[HASH_TABLE_LENGTH];
+
+/**
+* \var mutex_table hash_table.h
+*/
+pthread_mutex_t mutex_table[HASH_TABLE_LENGTH];
+
+/**
+ * Convert integer into string
+ * @param val is the integer that need transformation
+ * @param base is the base of the value
+ *
+ * @return the string corresponding the integer val
+ * */
+char* itoa(int val, int base);
 
 /**
  * Initialize hash_table
