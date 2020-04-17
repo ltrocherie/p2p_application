@@ -157,7 +157,8 @@ void announce(int socket, char *buffer, char *IP)
                     if (!isNumeric(seeds[1]) || !isNumeric(seeds[2]))
                     {
                         fprintf(stderr, "Size of piecesize must be integers\n");
-                        usage_commands(socket);
+                        //usage_commands(socket);
+                        write(socket,"> nok",5);
                         return;
                     }
                     fprintf(stdout,"add:%s|key:%s\n", seeds[0], seeds[3]);
@@ -171,6 +172,8 @@ void announce(int socket, char *buffer, char *IP)
                     if (!add)
                     {
                         fprintf(stderr, "Problem adding in has_table");
+                        //usage_commands(socket);
+                        write(socket,"> nok",5);
                         return;
                     }
                     seed_arg = 0;
@@ -232,7 +235,8 @@ void announce(int socket, char *buffer, char *IP)
                     if (!isNumeric(seeds[1]) || !isNumeric(seeds[2]))
                     {
                         fprintf(stderr, "Size of piecesize must be integers\n");
-                        usage_commands(socket);
+                        //usage_commands(socket);
+                        write(socket,"> nok",5);
                         return;
                     }
                     
@@ -254,7 +258,9 @@ void announce(int socket, char *buffer, char *IP)
                 else
                 {
                     fprintf(stderr, "Not enough parameters for a file\n");
-                    usage_commands(socket);
+                    //usage_commands(socket);
+                    write(socket,"> nok",5);
+
                     return;
                 }
             }
@@ -346,7 +352,8 @@ void look(int socket, char *buffer, char *IP)
                 given_size = 1;
             else
             {
-                usage_commands(socket);
+                //usage_commands(socket);
+                write(socket,"> nok",5);
                 return;
             }
             i++;
@@ -357,7 +364,8 @@ void look(int socket, char *buffer, char *IP)
             /* If the comparator is > with other than filesize, this is not valid */
             if (strcmp(arg, "filesize") != 0)
             {
-                usage_commands(socket);
+                //usage_commands(socket);
+                write(socket,"> nok",5);
                 return;
             }
             given_size = 1;
@@ -372,7 +380,8 @@ void look(int socket, char *buffer, char *IP)
             /* If the comparator is < with other than filesize, this is not valid */
             if (strcmp(arg, "filesize") != 0)
             {
-                usage_commands(socket);
+                //usage_commands(socket);
+                write(socket,"> nok",5);
                 return;
             }
             given_size = 1;
@@ -405,7 +414,7 @@ void look(int socket, char *buffer, char *IP)
     {
         return;
     }
-    
+
     printf("filename:%s\n", name);
     printf("size:%s\n", size);
     printf("comparator:%c\n", comparator);
@@ -654,7 +663,7 @@ void treat_socket(void *arg)
     else if (!strcmp(command, GET))
         getfile(socket, buffer, ip);
     else
-        usage_commands(socket);
+        write(socket,"> nok",5);
 
     return;
 }
