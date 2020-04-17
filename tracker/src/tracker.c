@@ -338,7 +338,7 @@ void look(int socket, char *buffer, char *IP)
             i++;
 
             break;
-        case '=':        
+        case '=':
             arg[tmp] = '\0';
             tmp = 0;
             if (strcmp(arg, "filename") == 0)
@@ -406,18 +406,18 @@ void look(int socket, char *buffer, char *IP)
     {
         return;
     }
-    
+
     printf("filename:%s\n", name);
     printf("size:%s\n", size);
     printf("comparator:%c\n", comparator);
 
     char *find = malloc(1024 * sizeof(char));
-    printf("%s\n", find);
     int s = atoi(size);
-    printf("%d\n", s);
     hash__getfiles(comparator, name, s, find);
-    int n = write(socket, "> list [", sizeof("> list ["));
-    n = write(socket, find, sizeof(find));
+    printf("%s\n", find);
+    printf("%d\n", s);
+    int n = write(socket, "> list [", 8);
+    n = write(socket, find, strlen(find)*sizeof(char));
     if (n < 0)
         error("ERROR writing to socket");
     n = write(socket, "]", 1);
