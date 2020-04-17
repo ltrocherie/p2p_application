@@ -289,10 +289,13 @@ void announce(int socket, char *buffer, char *IP)
         }
     }
 
+    hash__print();
+
     /* Everything happened good */
-    n = write(socket, "> ok", 148);
+    n = send(socket, "> ok", 4, 0);
     if (n < 0)
         error("ERROR writing to socket");
+    sleep(100);
 }
 
 void look(int socket, char *buffer, char *IP)
@@ -579,7 +582,9 @@ void getfile(int socket, char *buffer, char *IP)
         i++;
         tmp++;
     }
+
     key[tmp] = '\0';
+
     struct file *f = NULL;
 
     f = hash__search(key);
@@ -587,30 +592,39 @@ void getfile(int socket, char *buffer, char *IP)
     if (f == NULL)
     {
         fprintf(stderr, "File with key %s not found in the hash table\n", key);
+        write(socket,"> nok", 5);
         return;
     }
 
+    hash__print();
+
     /* Everything happened good */
 
-    int n = write(socket, "> peers ", 8);
+    int n = send(socket, "> peers ", 8, 0);
     if (n < 0)
         error("ERROR writing to socket");
+
+    /* Writing the key */
+    n = send(socket, key, tmp*sizeof(char), 0);
+    if (n < 0)
+        error("ERROR writing to socket");
+
+    /* Writing peers */
+    n = send(socket, " [", 2, 0);
     int nb_owner = 0;
-    n = write(socket, key, tmp*sizeof(char));
-    n = write(socket, " [", 2);
     struct owner *own;
     SLIST_FOREACH(own, &f->owners, next_owner)
     {
-        n = write(socket, own->IP, strlen(own->IP)*sizeof(char));
-        n = write(socket, ":", 1);
+        n = send(socket, own->IP, strlen(own->IP)*sizeof(char), 0);
+        n = send(socket, ":", 1, 0);
         char* port = itoa(own->port,10);
-        n = write(socket,port , strlen(port)*sizeof(char));
+        n = send(socket,port , strlen(port)*sizeof(char), 0);
         if (nb_owner != f->nb_owners - 1)
-            n = write(socket, " ", 1);
+            n = send(socket, " ", 1, 0);
         nb_owner++;
     }
 
-    n = write(socket, "]", 1);
+    n = send(socket, "]", 1, 0);
 
     return;
 }
@@ -659,7 +673,7 @@ void treat_socket(void *arg)
 
 int main(int argc, char *argv[])
 {
-    int sockfd, newsockfd, portno;
+    int sockfd, newsockfd, portno, *sock_thread;
     socklen_t clilen;
     struct sockaddr_in serv_addr, cli_addr;
 
@@ -720,16 +734,24 @@ int main(int argc, char *argv[])
     /* Listen to every connection */
     for (;;)
     {
-        /* socket qui permet d'accepter la connexion */
+        /* accept incoming connection */
         newsockfd = accept(sockfd, (struct sockaddr *)&cli_addr, &clilen);
 
         if (newsockfd < 0)
             error("ERROR on accept");
 
-        socket_ip arg = {newsockfd, inet_ntoa(cli_addr.sin_addr)};
+        sock_thread = malloc(sizeof(int));
+        if (!sock_thread) {
+            perror("\n Error : Malloc Failed\n");
+            close(*sock_thread);
+            continue;
+        }
+        *sock_thread = newsockfd;
+
+        socket_ip arg = {*sock_thread, inet_ntoa(cli_addr.sin_addr)};
         thpool_add_work(thpool, (void *)treat_socket, &arg);
     }
-
+    close(sockfd);
     hash__table_end();
     thpool_destroy(thpool);
     close(log_fd);

@@ -61,6 +61,7 @@ int hash__add(char* key,char* IP, int port,char* name, int length, int piecesize
     SLIST_FOREACH(p,&hash_table[index],next_file){
         if(!strcmp(p->key,key)){
             bool = compare(p,IP,port,name,length,piecesize);
+            pthread_mutex_unlock(&mutex_table[index]);
             return bool;
         }
     }
@@ -87,6 +88,7 @@ struct file* hash__search(char* key){
     pthread_mutex_lock(&mutex_table[index]);
     SLIST_FOREACH(p,&hash_table[index],next_file){
         if(!strcmp(p->key,key)){
+            pthread_mutex_unlock(&mutex_table[index]);
             return p;
         }
     }
