@@ -90,7 +90,7 @@ void announce(int socket, char *buffer, char *IP)
     /* If the word wasn't "listen" : print the commands */
     if (strcmp(port_arg, "listen") != 0)
     {
-        usage_commands();
+        usage_commands(socket);
         return;
     }
 
@@ -107,7 +107,7 @@ void announce(int socket, char *buffer, char *IP)
 
     if (!isNumeric(port_arg))
     {
-        usage_commands();
+        usage_commands(socket);
         return;
     }
 
@@ -157,7 +157,7 @@ void announce(int socket, char *buffer, char *IP)
                     if (!isNumeric(seeds[1]) || !isNumeric(seeds[2]))
                     {
                         fprintf(stderr, "Size of piecesize must be integers\n");
-                        usage_commands();
+                        usage_commands(socket);
                         return;
                     }
                     fprintf(stdout,"add:%s|key:%s\n", seeds[0], seeds[3]);
@@ -232,7 +232,7 @@ void announce(int socket, char *buffer, char *IP)
                     if (!isNumeric(seeds[1]) || !isNumeric(seeds[2]))
                     {
                         fprintf(stderr, "Size of piecesize must be integers\n");
-                        usage_commands();
+                        usage_commands(socket);
                         return;
                     }
                     
@@ -254,7 +254,7 @@ void announce(int socket, char *buffer, char *IP)
                 else
                 {
                     fprintf(stderr, "Not enough parameters for a file\n");
-                    usage_commands();
+                    usage_commands(socket);
                     return;
                 }
             }
@@ -337,47 +337,47 @@ void look(int socket, char *buffer, char *IP)
             i++;
 
             break;
-        case '=':
+        case '=':        
+            arg[tmp] = '\0';
+            tmp = 0;
             if (strcmp(arg, "filename") == 0)
                 given_name = 1;
             else if (strcmp(arg, "filesize") == 0)
                 given_size = 1;
             else
             {
-                usage_commands();
+                usage_commands(socket);
                 return;
             }
-
-            arg[tmp] = '\0';
-            tmp = 0;
             i++;
             break;
         case '>':
+            arg[tmp] = '\0';
+            tmp = 0;
             /* If the comparator is > with other than filesize, this is not valid */
             if (strcmp(arg, "filesize") != 0)
             {
-                usage_commands();
+                usage_commands(socket);
                 return;
             }
             given_size = 1;
             comparator = buffer[i];
 
-            arg[tmp] = '\0';
-            tmp = 0;
             i++;
             break;
         case '<':
+            arg[tmp] = '\0';
+            tmp = 0;
+
             /* If the comparator is < with other than filesize, this is not valid */
             if (strcmp(arg, "filesize") != 0)
             {
-                usage_commands();
+                usage_commands(socket);
                 return;
             }
             given_size = 1;
             comparator = buffer[i];
 
-            arg[tmp] = '\0';
-            tmp = 0;
             i++;
             break;
         case '[':
@@ -405,6 +405,7 @@ void look(int socket, char *buffer, char *IP)
     {
         return;
     }
+    
     printf("filename:%s\n", name);
     printf("size:%s\n", size);
     printf("comparator:%c\n", comparator);
@@ -653,7 +654,7 @@ void treat_socket(void *arg)
     else if (!strcmp(command, GET))
         getfile(socket, buffer, ip);
     else
-        usage_commands();
+        usage_commands(socket);
 
     return;
 }
