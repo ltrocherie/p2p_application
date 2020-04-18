@@ -13,6 +13,7 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <string.h>
+#include <pthread.h>
 
 #include "queue.h"
 #include "utils.h"
@@ -36,6 +37,7 @@
 #define LOG "log"
 
 int log_fd;
+pthread_mutex_t log_lock;
 
 void error(char *msg)
 {
@@ -139,34 +141,32 @@ void announce(int socket, char *buffer, char *IP)
         switch (buffer[i])
         {
         case ' ':
-            if (tmp == 0)
-            {
+            if (tmp == 0) {
                 i++;
                 break;
             }
 
             /* SEED CASE : every 4 words we add the file */
-            if (seed && !leech)
-            {
+            if (seed && !leech) {
                 /* Finish the word */
                 seeds[seed_arg][tmp] = '\0';
                 tmp = 0;
 
                 /* If we have done a file */
-                if (seed_arg == 3)
-                {
+                if (seed_arg == 3) {
                     /* Verify integrity of fields */
-                    if (!isNumeric(seeds[1]) || !isNumeric(seeds[2]))
-                    {
+                    if (!isNumeric(seeds[1]) || !isNumeric(seeds[2])) {
                         fprintf(stderr, "Size of piecesize must be integers\n");
-                        usage_commands(socket);
+                        exit_if ( write(log_fd, "\nSize of piecesize must be integers", 35) == -1, "ERROR write log" );
+                        exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
                         return;
                     }
+
                     fprintf(stdout,"add:%s|key:%s\n", seeds[0], seeds[3]);
-                    n = write(log_fd, "key ", 4);
-                    n = write(log_fd, seeds[3], sizeof(seeds[3]));
-                    n = write(log_fd, "add ", 4);
-                    n = write(log_fd, seeds[0], sizeof(seeds[0]));
+                    exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write socket" );
+                    exit_if ( write(log_fd, seeds[3], strlen(seeds[3])*sizeof(char)) == -1, "ERROR write socket" );
+                    exit_if ( write(log_fd, "\nadd ", 5) == -1, "ERROR write socket" );
+                    exit_if ( write(log_fd, seeds[0], strlen(seeds[0])*sizeof(char)) == -1, "ERROR write socket" );
 
                     int add = hash__add(seeds[3], IP, port, seeds[0], atoi(seeds[1]), atoi(seeds[2]));
 
@@ -184,22 +184,18 @@ void announce(int socket, char *buffer, char *IP)
             }
 
             /* LEECH CASE : at the end of every word we show the key */
-            else if (!seed && leech)
-            {
+            else if (!seed && leech) {
                 /* Finish the word */
                 key_leech[tmp] = '\0';
                 //TODO : renvoyer une liste de peers avec les clés ???
                 fprintf(stdout,"key:%s\n", key_leech);
-                n = write(log_fd, "key ", 4);
-                n = write(log_fd, key_leech, sizeof(key_leech));
-
+                exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write log" );
+                exit_if ( write(log_fd, key_leech, strlen(key_leech)*sizeof(char)) == -1, "ERROR write log" );
                 tmp = 0;
                 break;
             }
-
             i++;
             break;
-
         case '[':
 
             /* if we start by giving the seeds */
@@ -231,47 +227,43 @@ void announce(int socket, char *buffer, char *IP)
                 if (seed_arg == 3)
                 {
                     /* Verify integrity of fields */
-                    if (!isNumeric(seeds[1]) || !isNumeric(seeds[2]))
-                    {
+                    if (!isNumeric(seeds[1]) || !isNumeric(seeds[2])) {
                         fprintf(stderr, "Size of piecesize must be integers\n");
-                        usage_commands(socket);
+                        exit_if ( write(log_fd, "\nSize of piecesize must be integers", 35) == -1, "ERROR write log" );
+                        exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
                         return;
                     }
 
                     fprintf(stdout,"add:%s|key:%s\n", seeds[0], seeds[3]);
-                    n = write(log_fd, "key ", 4);
-                    n = write(log_fd, seeds[3], sizeof(seeds[3]));
-                    n = write(log_fd, "add ", 4);
-                    n = write(log_fd, seeds[0], sizeof(seeds[0]));
+                    exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write log" );
+                    exit_if ( write(log_fd, seeds[3], strlen(seeds[3])*sizeof(char)) == -1, "ERROR write log" );
+                    exit_if ( write(log_fd, "\nadd ", 5) == -1, "ERROR write log" );
+                    exit_if ( write(log_fd, seeds[0], strlen(seeds[0])*sizeof(char)) == -1, "ERROR write log" );
 
                     int add = hash__add(seeds[3], IP, port, seeds[0], atoi(seeds[1]), atoi(seeds[2]));
 
-                    if (!add)
-                    {
+                    if (!add) {
                         fprintf(stderr, "Problem adding in hash_table");
                         return;
                     }
                     seed_arg = 0;
-                }
-                else
-                {
+                } else {
                     fprintf(stderr, "Not enough parameters for a file\n");
-                    usage_commands(socket);
+                    exit_if ( write(log_fd, "\nNot enough parameters for a file", 33) == -1, "ERROR write log" );
+                    exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
                     return;
                 }
             }
             /* LEECH CASE : at the end of every word we show the key */
-            else if (!seed && leech)
-            {
+            else if (!seed && leech) {
                 /* Finish the word */
                 key_leech[tmp] = '\0';
                 //TODO : renvoyer une liste de peers avec les clés ???
                 fprintf(stdout,"key:%s\n", key_leech);
-                n = write(log_fd, "key ", 4);
-                n = write(log_fd, key_leech, sizeof(key_leech));
+                exit_if ( write(log_fd, "key ", 4) == -1, "ERROR writing log" );
+                exit_if ( write(log_fd, key_leech, strlen(key_leech)*sizeof(key_leech)) == -1, "ERROR writing log" );
 
                 tmp = 0;
-
                 /* If both seeds and leechs args were given, it's finished */
                 end = 1;
             }
@@ -293,9 +285,7 @@ void announce(int socket, char *buffer, char *IP)
     hash__print();
 
     /* Everything happened good */
-    n = send(socket, "> ok", 4, 0);
-    if (n < 0)
-        error("ERROR writing to socket");
+    exit_if ( send(socket, "> ok", 4, 0) == -1, "ERROR sending to socket" );
 }
 
 void look(int socket, char *buffer, char *IP)
@@ -350,7 +340,7 @@ void look(int socket, char *buffer, char *IP)
                 given_size = 1;
             else
             {
-                usage_commands(socket);
+                send(socket, "> nok", 5, 0);
                 return;
             }
             i++;
@@ -361,7 +351,7 @@ void look(int socket, char *buffer, char *IP)
             /* If the comparator is > with other than filesize, this is not valid */
             if (strcmp(arg, "filesize") != 0)
             {
-                usage_commands(socket);
+                send(socket, "> nok", 5, 0);
                 return;
             }
             given_size = 1;
@@ -376,7 +366,7 @@ void look(int socket, char *buffer, char *IP)
             /* If the comparator is < with other than filesize, this is t valid */
             if (strcmp(arg, "filesize") != 0)
             {
-                usage_commands(socket);
+                send(socket, "> nok", 5, 0);
                 return;
             }
             given_size = 1;
@@ -414,16 +404,23 @@ void look(int socket, char *buffer, char *IP)
     printf("size:%s\n", size);
     printf("comparator:%c\n", comparator);
 
+    exit_if( write(log_fd,"\nfilename:",10) == -1, "ERROR writing to log" );
+    exit_if( write(log_fd,name,strlen(name)*sizeof(char)) == -1, "ERROR writing to log" );
+    exit_if( write(log_fd,"\nsize:",6) == -1, "ERROR writing to log" );
+    exit_if( write(log_fd,size,strlen(size)*sizeof(char)) == -1, "ERROR writing to log" );
+    exit_if( write(log_fd,"\ncomparator:",12) == -1, "ERROR writing to log" );
+    exit_if( write(log_fd,&comparator,sizeof(char)) == -1, "ERROR writing to log" );
+
     char *find = malloc(1024 * sizeof(char));
-    int s = atoi(size);
-    hash__getfiles(comparator, name, s, find);
+    hash__getfiles(comparator, name, atoi(size), find);
+
     printf("%s\n", find);
-    printf("%d\n", s);
-    int n = write(socket, "> list [", 8);
-    n = write(socket, find, strlen(find)*sizeof(char));
-    if (n < 0)
-        error("ERROR writing to socket");
-    n = write(socket, "]", 1);
+    printf("%d\n", atoi(size));
+
+    exit_if( send(socket, "> list [", 8, 0) == -1, "ERROR writing to socket");
+    exit_if( send(socket, find, strlen(find)*sizeof(char), 0) == -1, "ERROR writing to socket");
+    exit_if( send(socket, "]", 1, 0) == -1, "ERROR writing to socket");
+
     free(find);
     hash__print();
     return;
@@ -437,8 +434,7 @@ void update(int socket, char *buffer, char *IP)
     p = strchr(buffer, space);
 
     /* If there is no space in the command */
-    if (p == NULL)
-    {
+    if (p == NULL) {
         fprintf(stderr, "No \"%c\" found.\n", space);
         return;
     }
@@ -483,7 +479,11 @@ void update(int socket, char *buffer, char *IP)
             if (seed)
             {
                 /* We add a new file OR a new owner in the existing file */
-                printf("add seed:%s\n",key);
+                printf("update seed:%s\n",key);
+                exit_if ( write(log_fd, "\nupdate ", 8) == -1, "ERROR write log" );
+                exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write log" );
+                exit_if ( write(log_fd, key, strlen(key)*sizeof(char)) == -1, "ERROR write log" );
+
                 /*int add = hash__add(seeds[3]
                                     ,IP
                                     ,port
@@ -496,6 +496,8 @@ void update(int socket, char *buffer, char *IP)
             {
                 /* Add leeching ??? */
                 printf("add leech:%s\n",key);
+                exit_if ( write(log_fd, "key ", 4) == -1, "ERROR writing log" );
+                exit_if ( write(log_fd, key, strlen(key)*sizeof(key)) == -1, "ERROR writing log" );
 
             }
             break;
@@ -508,8 +510,7 @@ void update(int socket, char *buffer, char *IP)
             i++;
 
             /* If we didnt have neither seed or leech in [], we don't care */
-            if (!strcmp(key, "\0"))
-            {
+            if (!strcmp(key, "\0")) {
                 printf("no key\n");
                 break;
             }
@@ -520,7 +521,11 @@ void update(int socket, char *buffer, char *IP)
                 seed = 0;
 
                 /* We add a new file OR a new owner in the existing file */
-                printf("add seed:%s\n",key);
+                printf("update seed:%s\n",key);
+                exit_if ( write(log_fd, "\nupdate ", 8) == -1, "ERROR write log" );
+                exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write log" );
+                exit_if ( write(log_fd, key, strlen(key)*sizeof(char)) == -1, "ERROR write log" );
+
                 /*int add = hash__add(seeds[3]
                                     ,IP
                                     ,port
@@ -536,7 +541,8 @@ void update(int socket, char *buffer, char *IP)
 
                 /* Add leeching ??? */
                 printf("add leech:%s\n",key);
-
+                exit_if ( write(log_fd, "key ", 4) == -1, "ERROR writing log" );
+                exit_if ( write(log_fd, key, strlen(key)*sizeof(key)) == -1, "ERROR writing log" );
             }
             break;
         /* Case when we encounter a character */
@@ -550,9 +556,7 @@ void update(int socket, char *buffer, char *IP)
     }
 
     /* Everything happened good */
-    int n = write(socket, "> ok", 148);
-    if (n < 0)
-        error("ERROR writing to socket");
+    exit_if ( send(socket, "> ok", 148,0) == -1, "ERROR sending to socket");
 }
 
 void getfile(int socket, char *buffer, char *IP)
@@ -592,7 +596,10 @@ void getfile(int socket, char *buffer, char *IP)
     if (f == NULL)
     {
         fprintf(stderr, "File with key %s not found in the hash table\n", key);
-        write(socket,"> nok", 5);
+        exit_if( write(log_fd,"\nFile with key ",15) == -1, "ERROR writing log" );
+        exit_if( write(log_fd,key,strlen(key)*sizeof(char)) == -1, "ERROR writing log" );
+        exit_if( write(log_fd," not found in the hash table",28) == -1, "ERROR writing log" );
+        exit_if (send(socket,"> nok", 5,0) == -1, "ERROR sending to socket");
         return;
     }
 
@@ -600,31 +607,26 @@ void getfile(int socket, char *buffer, char *IP)
 
     /* Everything happened good */
 
-    int n = send(socket, "> peers ", 8, 0);
-    if (n < 0)
-        error("ERROR writing to socket");
-
-    /* Writing the key */
-    n = send(socket, key, tmp*sizeof(char), 0);
-    if (n < 0)
-        error("ERROR writing to socket");
+    exit_if( send(socket,"> peers ", 8,0) == -1, "ERROR sending to socket");
+    exit_if( send(socket,key, strlen(key)*sizeof(char),0) == -1, "ERROR sending to socket");
+    exit_if( send(socket," [", 2,0) == -1, "ERROR sending to socket");
 
     /* Writing peers */
-    n = send(socket, " [", 2, 0);
     int nb_owner = 0;
     struct owner *own;
     SLIST_FOREACH(own, &f->owners, next_owner)
     {
-        n = send(socket, own->IP, strlen(own->IP)*sizeof(char), 0);
-        n = send(socket, ":", 1, 0);
+        exit_if( send(socket, own->IP, strlen(own->IP)*sizeof(char), 0) == -1, "ERROR sending to socket");
+        exit_if( send(socket, ":", 1, 0) == -1, "ERROR sending to socket");
         char* port = itoa(own->port,10);
-        n = send(socket,port , strlen(port)*sizeof(char), 0);
+        exit_if( send(socket,port , strlen(port)*sizeof(char), 0) == -1, "ERROR sending to socket");
+
         if (nb_owner != f->nb_owners - 1)
-            n = send(socket, " ", 1, 0);
+            exit_if( send(socket, " ", 1, 0) == -1, "ERROR sending to socket");
+
         nb_owner++;
     }
-
-    n = send(socket, "]", 1, 0);
+    exit_if( send(socket, "]", 1, 0) == -1, "ERROR sending to socket");
 
     return;
 }
@@ -686,6 +688,8 @@ int main(int argc, char *argv[])
         fprintf(stderr,"Error opening log");
         return -1;
     }
+    
+    exit_if ( pthread_mutex_init(&log_lock, NULL) != 0, "ERROR init mutex" );
 
     hash__table_init();
          
@@ -715,8 +719,7 @@ int main(int argc, char *argv[])
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
-    if (sockfd < 0)
-        error("ERROR opening socket");
+    exit_if ( sockfd < 0, "ERROR opening socket");
 
     bzero((char *)&serv_addr, sizeof(serv_addr));
 
@@ -728,8 +731,7 @@ int main(int argc, char *argv[])
     serv_addr.sin_port = htons(portno);
 
     /* link socket to the address */
-    if (bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
-        error("ERROR on binding");
+    exit_if ( bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0, "ERROR on binding");
 
     show_local_ip(portno);
 
@@ -743,16 +745,10 @@ int main(int argc, char *argv[])
     {
         /* accept incoming connection */
         newsockfd = accept(sockfd, (struct sockaddr *)&cli_addr, &clilen);
-
-        if (newsockfd < 0)
-            error("ERROR on accept");
+        exit_if ( newsockfd < 0, "ERROR on accept" );
 
         sock_thread = malloc(sizeof(int));
-        if (!sock_thread) {
-            perror("\n Error : Malloc Failed\n");
-            close(*sock_thread);
-            continue;
-        }
+        exit_if ( !sock_thread, "Error : Malloc Failed" );
         
         *sock_thread = newsockfd;
 
@@ -765,6 +761,6 @@ int main(int argc, char *argv[])
     hash__table_end();
     
     thpool_destroy(thpool);
-    
+
     return 0;
 }
