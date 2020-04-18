@@ -18,7 +18,7 @@ clean:
 	rm -rf $(BLD)*
 
 tracker: $(BLD)utils.o $(BLD)thpool.o $(BLD)hash_table.o
-	cc $(FLAGS) -o $(BLD)$@ $(SRC)$@.c $^ -pthread
+	cc $(FLAGS) -g3 -o $(BLD)$@ $(SRC)$@.c $^ -pthread
 
 $(BLD)utils.o:
 		cc $(FLAGS) -o $@ -c $(SRC)utils.c
