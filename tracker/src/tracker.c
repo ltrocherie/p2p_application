@@ -334,6 +334,7 @@ void look(int socket, char *buffer, char *IP)
         case '=':
             arg[tmp] = '\0';
             tmp = 0;
+            
             if (strcmp(arg, "filename") == 0)
                 given_name = 1;
             else if (strcmp(arg, "filesize") == 0)
@@ -395,8 +396,17 @@ void look(int socket, char *buffer, char *IP)
             break;
         }
     }
+
     if (!isNumeric(size))
     {
+        send(socket, "> nok", 5, 0);
+        exit_if( write(log_fd,"\nNaN size",9) == -1, "ERROR NaN size" );
+        return;
+    }
+
+    if (given_size && atoi(size) < 0) {
+        send(socket, "> nok", 5, 0);
+        exit_if( write(log_fd,"\nNegative size",9) == -1, "ERROR negative size" );
         return;
     }
 
