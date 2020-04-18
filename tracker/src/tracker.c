@@ -34,7 +34,8 @@
 
 #define CONFIG "config.ini"
 #define LOG "log"
-int config_fd, log_fd;
+
+int log_fd;
 
 void error(char *msg)
 {
@@ -295,7 +296,6 @@ void announce(int socket, char *buffer, char *IP)
     n = send(socket, "> ok", 4, 0);
     if (n < 0)
         error("ERROR writing to socket");
-    sleep(100);
 }
 
 void look(int socket, char *buffer, char *IP)
@@ -673,39 +673,46 @@ void treat_socket(void *arg)
 
 int main(int argc, char *argv[])
 {
-    int sockfd, newsockfd, portno, *sock_thread;
+    int sockfd, newsockfd, *sock_thread, portno;
     socklen_t clilen;
     struct sockaddr_in serv_addr, cli_addr;
 
     /* Pool of threads which will retrieve work to do in the queue of work */
     threadpool thpool = thpool_init(5);
 
-    /* Open and write in config.ini */
-    config_fd = open(CONFIG, O_RDONLY);
+    /* Open and write in log */
     log_fd = open(LOG, O_CREAT | O_WRONLY | O_APPEND,0755);
-
-    /* Exiting program */
-    if (config_fd < 0) {
-        fprintf(stderr,"Error opening config.ini");
-        return -1;
-    }
-
     if (log_fd < 0) {
         fprintf(stderr,"Error opening log");
         return -1;
     }
 
-    /* Choose ports */
-    if (argc < 2 || argc > 2)
-    {
-        fprintf(stderr, "ERROR, you need to a port\n");
-        usage();
-        exit(1);
-    }
-
     hash__table_init();
+         
+    /* no port given : default port */
+    if (argc < 2) {  
+        FILE* config = NULL;
+        config = fopen(CONFIG, "r");
+        if (config == NULL) {
+            perror("Error opening config.ini");
+            return -1;
+        }
+        char *p;
 
-    portno = atoi(argv[1]);
+        char *line = malloc( sizeof(char)* 1024 );
+        while(!feof(config)) //loop to read the file
+        {
+            fgets( line, 1024, config );
+            p = strchr(line, ':')+1;
+            portno = atoi(p);
+        }
+        free( line );
+        fclose(config);
+    } else
+        portno = atoi(argv[1]);
+    
+    printf("Run on port:%d\n",portno);
+
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
     if (sockfd < 0)
@@ -746,15 +753,18 @@ int main(int argc, char *argv[])
             close(*sock_thread);
             continue;
         }
+        
         *sock_thread = newsockfd;
 
         socket_ip arg = {*sock_thread, inet_ntoa(cli_addr.sin_addr)};
         thpool_add_work(thpool, (void *)treat_socket, &arg);
     }
     close(sockfd);
-    hash__table_end();
-    thpool_destroy(thpool);
     close(log_fd);
-    close(config_fd);
+    
+    hash__table_end();
+    
+    thpool_destroy(thpool);
+    
     return 0;
 }
