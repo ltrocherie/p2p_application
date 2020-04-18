@@ -94,7 +94,7 @@ void announce(int socket, char *buffer, char *IP)
     /* If the word wasn't "listen" : print the commands */
     if (strcmp(port_arg, "listen") != 0)
     {
-        usage_commands(socket);
+        exit_if(send(socket, "> nok", 5,0) == -1, "ERROR sending to socket");
         return;
     }
 
@@ -111,12 +111,12 @@ void announce(int socket, char *buffer, char *IP)
 
     if (!isNumeric(port_arg))
     {
-        usage_commands(socket);
+        exit_if(send(socket, "> nok", 5,0) == -1, "ERROR sending to socket");
         return;
     }
 
     int port = atoi(port_arg);
-
+    // ajout du couple IP:port dans un tableau d'owners
     /* SEEDS LEECHS TREATMENT */
 
     int end = 0;
@@ -261,7 +261,7 @@ void announce(int socket, char *buffer, char *IP)
                 //TODO : renvoyer une liste de peers avec les clés ???
                 fprintf(stdout,"key:%s\n", key_leech);
                 exit_if ( write(log_fd, "key ", 4) == -1, "ERROR writing log" );
-                exit_if ( write(log_fd, key_leech, strlen(key_leech)*sizeof(key_leech)) == -1, "ERROR writing log" );
+                exit_if ( write(log_fd, key_leech, strlen(key_leech)*sizeof(char)) == -1, "ERROR writing log" );
 
                 tmp = 0;
                 /* If both seeds and leechs args were given, it's finished */
@@ -334,6 +334,7 @@ void look(int socket, char *buffer, char *IP)
         case '=':
             arg[tmp] = '\0';
             tmp = 0;
+            
             if (strcmp(arg, "filename") == 0)
                 given_name = 1;
             else if (strcmp(arg, "filesize") == 0)
@@ -395,8 +396,17 @@ void look(int socket, char *buffer, char *IP)
             break;
         }
     }
+
     if (!isNumeric(size))
     {
+        send(socket, "> nok", 5, 0);
+        exit_if( write(log_fd,"\nNaN size",9) == -1, "ERROR NaN size" );
+        return;
+    }
+
+    if (given_size && atoi(size) < 0) {
+        send(socket, "> nok", 5, 0);
+        exit_if( write(log_fd,"\nNegative size",9) == -1, "ERROR negative size" );
         return;
     }
 
@@ -556,7 +566,7 @@ void update(int socket, char *buffer, char *IP)
     }
 
     /* Everything happened good */
-    exit_if ( send(socket, "> ok", 148,0) == -1, "ERROR sending to socket");
+    exit_if ( send(socket, "> ok", 5,0) == -1, "ERROR sending to socket");
 }
 
 void getfile(int socket, char *buffer, char *IP)
@@ -668,7 +678,7 @@ void treat_socket(void *arg)
     else if (!strcmp(command, GET))
         getfile(socket, buffer, ip);
     else
-        usage_commands(socket);
+        exit_if(send(socket, "> nok", 5,0) == -1, "ERROR sending to socket");
 
     return;
 }
