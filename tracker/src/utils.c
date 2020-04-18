@@ -13,13 +13,17 @@
 
 #include "utils.h"
 
-/**
- * Print how to run the tracker
- */
-void usage()
+void exit_if(int condition, const char *prefix)
 {
-    printf("./tracker [port]\n");
-    return;
+    if (condition) {
+	if ( errno != 0 ) {
+	    perror(prefix);
+	}
+	else {
+	    fprintf( stderr, "%s\n", prefix );
+	}
+        exit(1);
+    }
 }
 
 /**
