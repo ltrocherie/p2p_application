@@ -46,7 +46,7 @@ void error(char *msg)
 }
 
 /**
- * Parse the buffer given by the peer in order to figoure out what the port is but also
+ * Parse the buffer given by the peer in order to figure out what the port is but also
  * which files will be added to the hash_table and finally all leechs incoming.
  *
  * @param socket socket of the current connection

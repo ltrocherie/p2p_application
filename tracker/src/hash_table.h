@@ -79,7 +79,7 @@ int hash__add(char* key,char* IP, int port,char* name, int length, int piecesize
  * Search a file in the hash_table depending of the key but also on different possible
  * criterions such as the total size with (with different comparators)
  * @param key key in order to search for the file
- * @param f file which will be returned depeping on the search
+ * @param f file which will be returned depending on the search
  *
  * @return 1 and the file in f if the file has been found, 0 and f NULL otherwise
  * */
