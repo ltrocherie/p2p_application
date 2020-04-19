@@ -658,6 +658,8 @@ void treat_socket(void *arg)
     int socket = socket_with_ip.socketfd;
     char *ip = socket_with_ip.ip;
 
+    printf("SOCKET:%d\n",socket);
+
     printf("IP Received %s\n", ip);
 
     /* Read all the message received*/
