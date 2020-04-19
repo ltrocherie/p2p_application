@@ -91,8 +91,6 @@ int hash__add(char* key,char* IP, int port,char* name, int length, int piecesize
     own->port = port;
     SLIST_INSERT_HEAD(&f->owners,own,next_owner);
 
-    printf("add-----key:%s,name:%s,taille:%d,piece:%d\n",f->key,f->name,f->length,f->piecesize);
-
     SLIST_INSERT_HEAD(&hash_table[index],f,next_file);
     pthread_mutex_unlock(&mutex_table[index]);
 
