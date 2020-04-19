@@ -14,7 +14,7 @@ public class Buffermap extends PeerConfig implements Runnable{
 		fileManager = new ArrayList<>();
 	}
 
-	private static String getFileChecksumMD5(File file) throws Exception
+	public static String getFileChecksumMD5(File file) throws Exception
 	{
 		//Use MD5 algorithm
 		MessageDigest md5Digest = MessageDigest.getInstance("MD5");
