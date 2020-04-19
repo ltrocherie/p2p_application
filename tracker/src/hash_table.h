@@ -25,8 +25,8 @@ struct owner {
  * @struct file hash_table.h
  */
 struct file {
-        char *key; /** pseudo-unique key of the file */
-        char *name; /** filename */
+        char* key; /** pseudo-unique key of the file */
+        char* name; /** filename */
         int length; /** total length of the file */
         int piecesize; /** size of the piece */
 

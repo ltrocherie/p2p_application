@@ -162,7 +162,7 @@ void announce(int socket, char *buffer, char *IP)
                         return;
                     }
 
-                    fprintf(stdout,"add:%s|key:%s\n", seeds[0], seeds[3]);
+                    fprintf(stdout,"add:%s|key:%s|taille:%d|piece:%d\n", seeds[0], seeds[3],atoi(seeds[1]), atoi(seeds[2]));
                     exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write socket" );
                     exit_if ( write(log_fd, seeds[3], strlen(seeds[3])*sizeof(char)) == -1, "ERROR write socket" );
                     exit_if ( write(log_fd, "\nadd ", 5) == -1, "ERROR write socket" );
@@ -172,7 +172,9 @@ void announce(int socket, char *buffer, char *IP)
 
                     if (!add)
                     {
-                        fprintf(stderr, "Problem adding in has_table");
+                        fprintf(stderr, "Problem adding in hash_table");
+                        exit_if ( write(log_fd, "\nProblem adding in hash_table", 33) == -1, "ERROR write log" );
+                        exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
                         return;
                     }
                     seed_arg = 0;
@@ -234,7 +236,7 @@ void announce(int socket, char *buffer, char *IP)
                         return;
                     }
 
-                    fprintf(stdout,"add:%s|key:%s\n", seeds[0], seeds[3]);
+                    fprintf(stdout,"add:%s|key:%s|taille:%d|piece:%d\n", seeds[0], seeds[3],atoi(seeds[1]), atoi(seeds[2]));
                     exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write log" );
                     exit_if ( write(log_fd, seeds[3], strlen(seeds[3])*sizeof(char)) == -1, "ERROR write log" );
                     exit_if ( write(log_fd, "\nadd ", 5) == -1, "ERROR write log" );
@@ -244,6 +246,8 @@ void announce(int socket, char *buffer, char *IP)
 
                     if (!add) {
                         fprintf(stderr, "Problem adding in hash_table");
+                        exit_if ( write(log_fd, "\nProblem adding in hash_table", 33) == -1, "ERROR write log" );
+                        exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
                         return;
                     }
                     seed_arg = 0;
@@ -283,7 +287,6 @@ void announce(int socket, char *buffer, char *IP)
     }
 
     hash__print();
-
     /* Everything happened good */
     exit_if ( send(socket, "> ok", 4, 0) == -1, "ERROR sending to socket" );
 }
@@ -307,7 +310,7 @@ void look(int socket, char *buffer, char *IP)
     int i = 0, tmp = 0;
 
     char arg[1024];
-    char name[1024] = "\0";
+    char name[1024] = "-1";
     char size[64] = "-1";
     char comparator = '=';
     int given_size = 0, given_name = 0;
@@ -334,7 +337,7 @@ void look(int socket, char *buffer, char *IP)
         case '=':
             arg[tmp] = '\0';
             tmp = 0;
-            
+
             if (strcmp(arg, "filename") == 0)
                 given_name = 1;
             else if (strcmp(arg, "filesize") == 0)
@@ -421,17 +424,19 @@ void look(int socket, char *buffer, char *IP)
     exit_if( write(log_fd,"\ncomparator:",12) == -1, "ERROR writing to log" );
     exit_if( write(log_fd,&comparator,sizeof(char)) == -1, "ERROR writing to log" );
 
-    char *find = malloc(1024 * sizeof(char));
+    char find[1024] = {'\0'};
+    strcat(find,"> list [");
     hash__getfiles(comparator, name, atoi(size), find);
 
     printf("%s\n", find);
     printf("%d\n", atoi(size));
 
-    exit_if( send(socket, "> list [", 8, 0) == -1, "ERROR writing to socket");
-    exit_if( send(socket, find, strlen(find)*sizeof(char), 0) == -1, "ERROR writing to socket");
-    exit_if( send(socket, "]", 1, 0) == -1, "ERROR writing to socket");
+    strcat(find,"]");
 
-    free(find);
+    send(socket,find,strlen(find)*sizeof(char),0);
+    // exit_if( send(socket, "> list [", 8, 0) == -1, "ERROR writing to socket");
+    // exit_if( send(socket, find, strlen(find)*sizeof(char), 0) == -1, "ERROR writing to socket");
+    // exit_if( send(socket, "]", 1, 0) == -1, "ERROR writing to socket");
     hash__print();
     return;
 }
@@ -580,6 +585,8 @@ void getfile(int socket, char *buffer, char *IP)
     if (p == NULL)
     {
         fprintf(stderr, "No \"%c\" found.\n", space);
+        exit_if( write(log_fd,"\nNo \"%c\" found",13) == -1, "ERROR writing log" );
+        exit_if (send(socket,"> nok", 5,0) == -1, "ERROR sending to socket");
         return;
     }
 
@@ -614,29 +621,34 @@ void getfile(int socket, char *buffer, char *IP)
     }
 
     hash__print();
-
-    /* Everything happened good */
-
-    exit_if( send(socket,"> peers ", 8,0) == -1, "ERROR sending to socket");
-    exit_if( send(socket,key, strlen(key)*sizeof(char),0) == -1, "ERROR sending to socket");
-    exit_if( send(socket," [", 2,0) == -1, "ERROR sending to socket");
+    char msg[1024] = {'\0'};
+    strcat(msg,"> peers ");
+    strcat(msg,key);
+    strcat(msg,"[");
 
     /* Writing peers */
     int nb_owner = 0;
     struct owner *own;
     SLIST_FOREACH(own, &f->owners, next_owner)
     {
-        exit_if( send(socket, own->IP, strlen(own->IP)*sizeof(char), 0) == -1, "ERROR sending to socket");
-        exit_if( send(socket, ":", 1, 0) == -1, "ERROR sending to socket");
+        strcat(msg,own->IP);
+        strcat(msg,":");
         char* port = itoa(own->port,10);
-        exit_if( send(socket,port , strlen(port)*sizeof(char), 0) == -1, "ERROR sending to socket");
+        strcat(msg,port);
+        // exit_if( send(socket, own->IP, strlen(own->IP)*sizeof(char), 0) == -1, "ERROR sending to socket");
+        // exit_if( send(socket, ":", 1, 0) == -1, "ERROR sending to socket");
+        //
+        // exit_if( send(socket,port , strlen(port)*sizeof(char), 0) == -1, "ERROR sending to socket");
 
         if (nb_owner != f->nb_owners - 1)
-            exit_if( send(socket, " ", 1, 0) == -1, "ERROR sending to socket");
+            strcat(msg," ");
+            //exit_if( send(socket, " ", 1, 0) == -1, "ERROR sending to socket");
 
         nb_owner++;
     }
-    exit_if( send(socket, "]", 1, 0) == -1, "ERROR sending to socket");
+    strcat(msg,"]");
+    send(socket,msg,strlen(msg)*sizeof(char),0);
+    //exit_if( send(socket, "]", 1, 0) == -1, "ERROR sending to socket");
 
     return;
 }
@@ -652,6 +664,8 @@ void treat_socket(void *arg)
     /* Retrieve the socket */
     int socket = socket_with_ip.socketfd;
     char *ip = socket_with_ip.ip;
+
+    printf("SOCKET:%d\n",socket);
 
     printf("IP Received %s\n", ip);
 
@@ -698,13 +712,13 @@ int main(int argc, char *argv[])
         fprintf(stderr,"Error opening log");
         return -1;
     }
-    
+
     exit_if ( pthread_mutex_init(&log_lock, NULL) != 0, "ERROR init mutex" );
 
     hash__table_init();
-         
+
     /* no port given : default port */
-    if (argc < 2) {  
+    if (argc < 2) {
         FILE* config = NULL;
         config = fopen(CONFIG, "r");
         if (config == NULL) {
@@ -724,7 +738,7 @@ int main(int argc, char *argv[])
         fclose(config);
     } else
         portno = atoi(argv[1]);
-    
+
     printf("Run on port:%d\n",portno);
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -759,7 +773,7 @@ int main(int argc, char *argv[])
 
         sock_thread = malloc(sizeof(int));
         exit_if ( !sock_thread, "Error : Malloc Failed" );
-        
+
         *sock_thread = newsockfd;
 
         socket_ip arg = {*sock_thread, inet_ntoa(cli_addr.sin_addr)};
@@ -767,9 +781,9 @@ int main(int argc, char *argv[])
     }
     close(sockfd);
     close(log_fd);
-    
+
     hash__table_end();
-    
+
     thpool_destroy(thpool);
 
     return 0;

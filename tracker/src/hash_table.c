@@ -21,9 +21,9 @@ int hash_value(char* key){
 }
 
 /**
- * Compare 1 file with differents criterions : if a file is the same as all criterions
+ * update 1 file with differents criterions : if a file is the same as all criterions
  * then we add a new owner in it
- * @param f given f in the hash table which will be compared to all criterions
+ * @param f given f in the hash table which will be updated to all criterions
  * @param IP IP of the owner
  * @param port port where the owner listen to other peers
  * @param name filename
@@ -32,52 +32,70 @@ int hash_value(char* key){
  *
  * @return hashed index value : where to store the file
  * */
-int compare(struct file* f,char* IP, int port,char* name, int length, int piecesize){
-    if(strcmp(name,"-1") && !strcmp(name,f->name))
-        f->name = name;
-    if(length != -1 && length != f->length)
-        f->length = length;
-    if(piecesize != -1 && piecesize != f->piecesize)
-        f->piecesize = piecesize;
-    if(strcmp(IP,"-1") && port != -1){
-        struct owner* own;
-        SLIST_FOREACH(own,&f->owners,next_owner)
-            if(!strcmp(IP,own->IP) && port == own->port)
-                return 1;
-        own = malloc(sizeof(struct owner));
-        own->IP = IP;
-        own->port = port;
-        SLIST_INSERT_HEAD(&f->owners,own,next_owner);
-        f->nb_owners += 1;
-    }
+int hash__update(struct file* f,char* IP, int port,char* name, int length, int piecesize){
+    /* Error cases */
+    if(!strcmp(name,"\0") || strcmp(name,f->name))
+        return 0;
+    if(length == -1 || length != f->length)
+        return 0;
+    if(piecesize == -1 || piecesize != f->piecesize)
+        return 0;
+
+    struct owner* own;
+    SLIST_FOREACH(own,&f->owners,next_owner)
+        if(!strcmp(IP,own->IP) && port == own->port)
+            return 1;
+
+    /* Add a new owner in the list */
+    own = malloc(sizeof(struct owner));
+    own->IP = malloc(sizeof(char) * 16);
+    strcpy(own->IP,IP);
+
+    own->port = port;
+    SLIST_INSERT_HEAD(&f->owners,own,next_owner);
+    f->nb_owners += 1;
     return 1;
 }
 
 int hash__add(char* key,char* IP, int port,char* name, int length, int piecesize){
+
     int bool = 0;
     int index = hash_value(key);
     struct file *p;
     pthread_mutex_lock(&mutex_table[index]);
     SLIST_FOREACH(p,&hash_table[index],next_file){
+        /* If we find the key : verify all criterions then add a new owner */
         if(!strcmp(p->key,key)){
-            bool = compare(p,IP,port,name,length,piecesize);
+            bool = hash__update(p,IP,port,name,length,piecesize);
             pthread_mutex_unlock(&mutex_table[index]);
             return bool;
         }
     }
+
+    /* Create a new file */
     struct file* f = malloc(sizeof(struct file));
-    f->key = key;
-    SLIST_INIT(&f->owners);
-    struct owner* own = malloc(sizeof(struct owner));
-    own->IP = IP;
-    own->port = port;
-    SLIST_INSERT_HEAD(&f->owners,own,next_owner);
+    f->key = malloc(sizeof(char) * 1024);
+    f->name = malloc(sizeof(char) * 1024);
+
+    strcpy(f->key,key);
     f->nb_owners = 1;
-    f->name = name;
+    strcpy(f->name,name);
     f->length = length;
     f->piecesize = piecesize;
+
+    SLIST_INIT(&f->owners);
+    struct owner* own = malloc(sizeof(struct owner));
+    own->IP = malloc(sizeof(char) * 16);
+    strcpy(own->IP,IP);
+
+    own->port = port;
+    SLIST_INSERT_HEAD(&f->owners,own,next_owner);
+
+    printf("add-----key:%s,name:%s,taille:%d,piece:%d\n",f->key,f->name,f->length,f->piecesize);
+
     SLIST_INSERT_HEAD(&hash_table[index],f,next_file);
     pthread_mutex_unlock(&mutex_table[index]);
+
     bool = 1;
     return bool;
 }
@@ -140,14 +158,15 @@ int hash__getfiles(char compn,char* name, int size,char* files_found){
         pthread_mutex_lock(&mutex_table[i]);
         SLIST_FOREACH(f,&hash_table[i],next_file){
             if(has_size(compn,size,f->length) && (!strcmp(f->name,name) || !strcmp(name,"-1"))){
+                    if(nb != 0)
+                        strcat(files_found," ");
                     strcat(files_found,f->name);
                     strcat(files_found," ");
                     strcat(files_found,itoa(f->length,10));
                     strcat(files_found," ");
-                    strcat(files_found,itoa(f->piecesize,10))   ;
+                    strcat(files_found,itoa(f->piecesize,10));
                     strcat(files_found," ");
                     strcat(files_found,f->key);
-                    strcat(files_found," ");
                     nb++;
             }
         }
@@ -161,7 +180,12 @@ void hash__print(){
         pthread_mutex_lock(&mutex_table[i]);
         struct file *f;
         SLIST_FOREACH(f,&hash_table[i],next_file){
-                printf("A l'indice %d,il y a %s %s\n",i,f->name,f->key);
+            printf("A l'indice %d,il y a %s %s [",i,f->name,f->key);
+            struct owner *own;
+            SLIST_FOREACH(own,&f->owners,next_owner){
+                    printf("%s:%d",own->IP,own->port);
+            }
+            printf("]\n");
         }
         pthread_mutex_unlock(&mutex_table[i]);
     }
@@ -172,9 +196,14 @@ void hash__table_end(){
         struct file *p;
         SLIST_FOREACH(p,&hash_table[i],next_file){
             struct owner* own;
-            SLIST_FOREACH(own,&p->owners,next_owner)
+            SLIST_FOREACH(own,&p->owners,next_owner) {
+                free(own->IP);
                 free(own);
+            }
+            free(p->key);
+            free(p->name);
             free(p);
         }
+        pthread_mutex_destroy(&mutex_table[i]);
     }
 }
