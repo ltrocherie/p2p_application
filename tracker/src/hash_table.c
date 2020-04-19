@@ -140,14 +140,15 @@ int hash__getfiles(char compn,char* name, int size,char* files_found){
         pthread_mutex_lock(&mutex_table[i]);
         SLIST_FOREACH(f,&hash_table[i],next_file){
             if(has_size(compn,size,f->length) && (!strcmp(f->name,name) || !strcmp(name,"-1"))){
+                    if(nb != 0)
+                        strcat(files_found," ");
                     strcat(files_found,f->name);
                     strcat(files_found," ");
                     strcat(files_found,itoa(f->length,10));
                     strcat(files_found," ");
-                    strcat(files_found,itoa(f->piecesize,10))   ;
+                    strcat(files_found,itoa(f->piecesize,10));
                     strcat(files_found," ");
                     strcat(files_found,f->key);
-                    strcat(files_found," ");
                     nb++;
             }
         }
