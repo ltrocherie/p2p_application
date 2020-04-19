@@ -10,7 +10,9 @@ void verif(struct file *f,char* key, char* IP, int port, char* name, int length,
     assert(strcmp(f->name,name) == 0);
     assert(f->length == length);
     assert(f->piecesize == piecesize);
-        int n = 0;
+    
+    int n = 0;
+
     struct owner* own;
     SLIST_FOREACH(own,&f->owners,next_owner){
         if(strcmp(own->IP,IP) == 0)
@@ -31,17 +33,18 @@ void test_hash__search(){
 }
 
 void test_hash__add(){
-    printf("Test de hash__add: ");
+    printf("Test de hash__add: \n");
     struct file* f;
     //On ajoute un élément
     hash__add("LROTPbestdlesGAY4EVER","255.255.255.255",255,"Le delegue",2054,3);
     f = hash__search("LROTPbestdlesGAY4EVER");
     verif(f,"LROTPbestdlesGAY4EVER","255.255.255.255",255,"Le delegue",2054,3);
     //On modifie cet élément en lui ajoutant un port avec même IP
-    hash__add("LROTPbestdlesGAY4EVER","255.255.255.255",380,"-1",-1,-1);
+    hash__add("LROTPbestdlesGAY4EVER","255.255.255.255",380,"Le delegue",2054,3);
     f = hash__search("LROTPbestdlesGAY4EVER");
     verif(f,"LROTPbestdlesGAY4EVER","255.255.255.255",255,"Le delegue",2054,3);
     verif(f,"LROTPbestdlesGAY4EVER","255.255.255.255",380,"Le delegue",2054,3);
+
     //On ajoute un autre élément avec une autre clef
     hash__add("3OGenstil","225.250.225.230",210,"Un delegue",1028,1);
     f = hash__search("3OGenstil");
@@ -62,19 +65,19 @@ void test_hash__getfiles(){
     char* err = malloc(150*sizeof(char));
     int nb = 0;
     nb = hash__getfiles('>',"-1",2000,err);
-    assert(!strcmp(err,"Le delegue 2054 3 LROTPbestdlesGAY4EVER Gobert 3000 2 JAzzBusquet ") && nb == 2);
+    assert(!strcmp(err,"Le delegue 2054 3 LROTPbestdlesGAY4EVER Gobert 3000 2 JAzzBusquet") && nb == 2);
     *err = '\0';
     nb = hash__getfiles('<',"-1",2000,err);
-    assert(!strcmp(err,"Un delegue 10 4 TT Un delegue 1028 1 3OGenstil ") && nb == 2);
+    assert(!strcmp(err,"Un delegue 10 4 TT Un delegue 1028 1 3OGenstil") && nb == 2);
     *err = '\0';
     nb = hash__getfiles('=',"-1",2054,err);
-    assert(!strcmp(err,"Le delegue 2054 3 LROTPbestdlesGAY4EVER ") && nb == 1);
+    assert(!strcmp(err,"Le delegue 2054 3 LROTPbestdlesGAY4EVER") && nb == 1);
     *err = '\0';
     nb = hash__getfiles('=',"Gobert",-1,err);
-    assert(!strcmp(err,"Gobert 3000 2 JAzzBusquet ") && nb == 1);
+    assert(!strcmp(err,"Gobert 3000 2 JAzzBusquet") && nb == 1);
     *err = '\0';
     nb = hash__getfiles('>',"Le delegue",2000,err);
-    assert(!strcmp(err,"Le delegue 2054 3 LROTPbestdlesGAY4EVER ") && nb == 1);
+    assert(!strcmp(err,"Le delegue 2054 3 LROTPbestdlesGAY4EVER") && nb == 1);
     *err = '\0';
     nb = hash__getfiles('=',"-1",-1,err);
     assert(!strcmp(err,"") && !nb);
