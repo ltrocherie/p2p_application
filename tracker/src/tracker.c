@@ -670,7 +670,7 @@ void getfile(int socket, char *buffer, char *IP)
     char msg[1024] = {'\0'};
     strcat(msg,"> peers ");
     strcat(msg,key);
-    strcat(msg,"[");
+    strcat(msg," [");
 
     /* Writing peers */
     int nb_owner = 0;
@@ -681,20 +681,13 @@ void getfile(int socket, char *buffer, char *IP)
         strcat(msg,":");
         char* port = itoa(own->port,10);
         strcat(msg,port);
-        // exit_if( send(socket, own->IP, strlen(own->IP)*sizeof(char), 0) == -1, "ERROR sending to socket");
-        // exit_if( send(socket, ":", 1, 0) == -1, "ERROR sending to socket");
-        //
-        // exit_if( send(socket,port , strlen(port)*sizeof(char), 0) == -1, "ERROR sending to socket");
-
         if (nb_owner != f->nb_owners - 1)
             strcat(msg," ");
-            //exit_if( send(socket, " ", 1, 0) == -1, "ERROR sending to socket");
 
         nb_owner++;
     }
     strcat(msg,"]");
     send(socket,msg,strlen(msg)*sizeof(char),0);
-    //exit_if( send(socket, "]", 1, 0) == -1, "ERROR sending to socket");
 
     return;
 }
@@ -711,9 +704,13 @@ void treat_socket(void *arg)
     int socket = socket_with_ip.socketfd;
     char *ip = socket_with_ip.ip;
 
-    printf("SOCKET:%d\n",socket);
-
     printf("IP Received %s\n", ip);
+    printf("Socket:%d\n",socket);
+
+    exit_if( write(log_fd,"\nIP Received:",13) == -1, "ERROR writing log" );
+    exit_if( write(log_fd,ip,strlen(ip)*sizeof(char)) == -1, "ERROR writing log" );
+    exit_if( write(log_fd,"\nSocket:",7) == -1, "ERROR writing log" );
+    exit_if( write(log_fd,itoa(socket,10),strlen(itoa(socket,10))*sizeof(char)) == -1, "ERROR writing log" );
 
     /* Read all the message received*/
     int rr;
