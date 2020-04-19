@@ -147,7 +147,7 @@ int has_size(char compn, int size, int size2){
     return 0;
 }
 
-int hash__getfiles(char compn,char* name, int size,char* files_found){
+int hash__getfiles(char* name, char compn, int size,char* files_found){
     int nb = 0;
     if(size == -1 && !strcmp(name,"-1"))
         return nb;

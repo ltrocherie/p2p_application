@@ -95,7 +95,7 @@ struct file* hash__search(char* key);
  *
  * @return an integer that correspoond of the number of file
  * */
-int hash__getfiles(char compn,char* name, int size, char* files_found);
+int hash__getfiles(char* name, char compn, int size, char* files_found);
 
 /**
  * Print all the files in hash_table (used in debug)

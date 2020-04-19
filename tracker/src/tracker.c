@@ -198,7 +198,7 @@ void announce(int socket, char *buffer, char *IP)
                 tmp = 0;
                 break;
             }
-            
+
             /* Not key words recognized yet */
             else {
                 arg[tmp] = '\0';
@@ -219,9 +219,9 @@ void announce(int socket, char *buffer, char *IP)
                     exit_if ( write(log_fd, "\nNo key word", 12) == -1, "ERROR write log" );
                     exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
                     return;
-                }  
+                }
             }
-            
+
             i++;
             break;
         case '[':
@@ -230,7 +230,7 @@ void announce(int socket, char *buffer, char *IP)
             if (!seed && !leech) {
                 fprintf(stderr, "Bracket without key word\n");
                 exit_if ( write(log_fd, "\nBracket without key word", 25) == -1, "ERROR write log" );
-                exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );   
+                exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
             }
 
             tmp = 0;
@@ -386,7 +386,7 @@ void look(int socket, char *buffer, char *IP)
                 send(socket, "> nok", 5, 0);
                 return;
             }
-    
+
             given_size = 1;
             given_name = 0;
 
@@ -450,7 +450,7 @@ void look(int socket, char *buffer, char *IP)
     printf("filename:%s\n", name);
     printf("size:%s\n", size);
     printf("comparator:%c\n", comparator);
-    
+
     if (!isNumeric(size))
     {
         send(socket, "> nok", 5, 0);
@@ -473,7 +473,7 @@ void look(int socket, char *buffer, char *IP)
 
     char find[1024] = {'\0'};
     strcat(find,"> list [");
-    hash__getfiles(comparator, name, atoi(size), find);
+    hash__getfiles(name, comparator, atoi(size), find);
 
     //todo : logfd
     printf("%s\n", find);
