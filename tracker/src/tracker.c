@@ -162,7 +162,7 @@ void announce(int socket, char *buffer, char *IP)
                         return;
                     }
 
-                    fprintf(stdout,"add:%s|key:%s\n", seeds[0], seeds[3]);
+                    fprintf(stdout,"add:%s|key:%s|taille:%d|piece:%d\n", seeds[0], seeds[3],atoi(seeds[1]), atoi(seeds[2]));
                     exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write socket" );
                     exit_if ( write(log_fd, seeds[3], strlen(seeds[3])*sizeof(char)) == -1, "ERROR write socket" );
                     exit_if ( write(log_fd, "\nadd ", 5) == -1, "ERROR write socket" );
@@ -172,7 +172,9 @@ void announce(int socket, char *buffer, char *IP)
 
                     if (!add)
                     {
-                        fprintf(stderr, "Problem adding in has_table");
+                        fprintf(stderr, "Problem adding in hash_table");
+                        exit_if ( write(log_fd, "\nProblem adding in hash_table", 33) == -1, "ERROR write log" );
+                        exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
                         return;
                     }
                     seed_arg = 0;
@@ -234,7 +236,7 @@ void announce(int socket, char *buffer, char *IP)
                         return;
                     }
 
-                    fprintf(stdout,"add:%s|key:%s\n", seeds[0], seeds[3]);
+                    fprintf(stdout,"add:%s|key:%s|taille:%d|piece:%d\n", seeds[0], seeds[3],atoi(seeds[1]), atoi(seeds[2]));
                     exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write log" );
                     exit_if ( write(log_fd, seeds[3], strlen(seeds[3])*sizeof(char)) == -1, "ERROR write log" );
                     exit_if ( write(log_fd, "\nadd ", 5) == -1, "ERROR write log" );
@@ -244,6 +246,8 @@ void announce(int socket, char *buffer, char *IP)
 
                     if (!add) {
                         fprintf(stderr, "Problem adding in hash_table");
+                        exit_if ( write(log_fd, "\nProblem adding in hash_table", 33) == -1, "ERROR write log" );
+                        exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
                         return;
                     }
                     seed_arg = 0;
@@ -283,7 +287,6 @@ void announce(int socket, char *buffer, char *IP)
     }
 
     hash__print();
-
     /* Everything happened good */
     exit_if ( send(socket, "> ok", 4, 0) == -1, "ERROR sending to socket" );
 }
@@ -580,6 +583,8 @@ void getfile(int socket, char *buffer, char *IP)
     if (p == NULL)
     {
         fprintf(stderr, "No \"%c\" found.\n", space);
+        exit_if( write(log_fd,"\nNo \"%c\" found",13) == -1, "ERROR writing log" );
+        exit_if (send(socket,"> nok", 5,0) == -1, "ERROR sending to socket");
         return;
     }
 
