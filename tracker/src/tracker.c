@@ -310,7 +310,7 @@ void look(int socket, char *buffer, char *IP)
     int i = 0, tmp = 0;
 
     char arg[1024];
-    char name[1024] = "\0";
+    char name[1024] = "-1";
     char size[64] = "-1";
     char comparator = '=';
     int given_size = 0, given_name = 0;
@@ -424,16 +424,19 @@ void look(int socket, char *buffer, char *IP)
     exit_if( write(log_fd,"\ncomparator:",12) == -1, "ERROR writing to log" );
     exit_if( write(log_fd,&comparator,sizeof(char)) == -1, "ERROR writing to log" );
 
-    char *find = calloc(1024,sizeof(char));
+    char find[1024] = {'\0'};
+    strcat(find,"> list [");
     hash__getfiles(comparator, name, atoi(size), find);
 
     printf("%s\n", find);
     printf("%d\n", atoi(size));
 
-    exit_if( send(socket, "> list [", 8, 0) == -1, "ERROR writing to socket");
-    exit_if( send(socket, find, strlen(find)*sizeof(char), 0) == -1, "ERROR writing to socket");
-    exit_if( send(socket, "]", 1, 0) == -1, "ERROR writing to socket");
-    free(find);
+    strcat(find,"]");
+
+    send(socket,find,strlen(find)*sizeof(char),0);
+    // exit_if( send(socket, "> list [", 8, 0) == -1, "ERROR writing to socket");
+    // exit_if( send(socket, find, strlen(find)*sizeof(char), 0) == -1, "ERROR writing to socket");
+    // exit_if( send(socket, "]", 1, 0) == -1, "ERROR writing to socket");
     hash__print();
     return;
 }
@@ -618,30 +621,34 @@ void getfile(int socket, char *buffer, char *IP)
     }
 
     hash__print();
-
-    /* Everything happened good */
-
-    exit_if( send(socket,"> peers ", 8,0) == -1, "ERROR sending to socket");
-
-    exit_if( send(socket,key, strlen(key)*sizeof(char),0) == -1, "ERROR sending to socket");
-    exit_if( send(socket," [", 2,0) == -1, "ERROR sending to socket");
+    char msg[1024] = {'\0'};
+    strcat(msg,"> peers ");
+    strcat(msg,key);
+    strcat(msg,"[");
 
     /* Writing peers */
     int nb_owner = 0;
     struct owner *own;
     SLIST_FOREACH(own, &f->owners, next_owner)
     {
-        exit_if( send(socket, own->IP, strlen(own->IP)*sizeof(char), 0) == -1, "ERROR sending to socket");
-        exit_if( send(socket, ":", 1, 0) == -1, "ERROR sending to socket");
+        strcat(msg,own->IP);
+        strcat(msg,":");
         char* port = itoa(own->port,10);
-        exit_if( send(socket,port , strlen(port)*sizeof(char), 0) == -1, "ERROR sending to socket");
+        strcat(msg,port);
+        // exit_if( send(socket, own->IP, strlen(own->IP)*sizeof(char), 0) == -1, "ERROR sending to socket");
+        // exit_if( send(socket, ":", 1, 0) == -1, "ERROR sending to socket");
+        //
+        // exit_if( send(socket,port , strlen(port)*sizeof(char), 0) == -1, "ERROR sending to socket");
 
         if (nb_owner != f->nb_owners - 1)
-            exit_if( send(socket, " ", 1, 0) == -1, "ERROR sending to socket");
+            strcat(msg," ");
+            //exit_if( send(socket, " ", 1, 0) == -1, "ERROR sending to socket");
 
         nb_owner++;
     }
-    exit_if( send(socket, "]", 1, 0) == -1, "ERROR sending to socket");
+    strcat(msg,"]");
+    send(socket,msg,strlen(msg)*sizeof(char),0);
+    //exit_if( send(socket, "]", 1, 0) == -1, "ERROR sending to socket");
 
     return;
 }
@@ -657,6 +664,8 @@ void treat_socket(void *arg)
     /* Retrieve the socket */
     int socket = socket_with_ip.socketfd;
     char *ip = socket_with_ip.ip;
+
+    printf("SOCKET:%d\n",socket);
 
     printf("IP Received %s\n", ip);
 
