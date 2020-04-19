@@ -825,7 +825,7 @@ int main(int argc, char *argv[])
         socket_ip arg = {*sock_thread, inet_ntoa(cli_addr.sin_addr)};
         thpool_add_work(thpool, (void *)treat_socket, &arg);
     }
-    close(sockfd);
+    close(sockfd); //useless now
     close(log_fd);
 
     hash__table_end();
