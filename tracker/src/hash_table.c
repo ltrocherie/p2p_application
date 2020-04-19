@@ -45,7 +45,7 @@ int hash__update(struct file* f,char* IP, int port,char* name, int length, int p
     SLIST_FOREACH(own,&f->owners,next_owner)
         if(!strcmp(IP,own->IP) && port == own->port)
             return 1;
-    
+
     /* Add a new owner in the list */
     own = malloc(sizeof(struct owner));
     own->IP = malloc(sizeof(char) * 16);
@@ -95,8 +95,7 @@ int hash__add(char* key,char* IP, int port,char* name, int length, int piecesize
 
     SLIST_INSERT_HEAD(&hash_table[index],f,next_file);
     pthread_mutex_unlock(&mutex_table[index]);
-    
-    hash__print();
+
     bool = 1;
     return bool;
 }
@@ -181,7 +180,12 @@ void hash__print(){
         pthread_mutex_lock(&mutex_table[i]);
         struct file *f;
         SLIST_FOREACH(f,&hash_table[i],next_file){
-                printf("A l'indice %d,il y a %s %s\n",i,f->name,f->key);
+            printf("A l'indice %d,il y a %s %s [",i,f->name,f->key);
+            struct owner *own;
+            SLIST_FOREACH(own,&f->owners,next_owner){
+                    printf("%s:%d",own->IP,own->port);
+            }
+            printf("]\n");
         }
         pthread_mutex_unlock(&mutex_table[i]);
     }
@@ -200,5 +204,6 @@ void hash__table_end(){
             free(p->name);
             free(p);
         }
+        pthread_mutex_destroy(&mutex_table[i]);
     }
 }
