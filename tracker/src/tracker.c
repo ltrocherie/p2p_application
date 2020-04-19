@@ -289,6 +289,7 @@ void announce(int socket, char *buffer, char *IP)
     hash__print();
     /* Everything happened good */
     exit_if ( send(socket, "> ok", 4, 0) == -1, "ERROR sending to socket" );
+    close(socket);
 }
 
 void look(int socket, char *buffer, char *IP)
@@ -569,6 +570,7 @@ void update(int socket, char *buffer, char *IP)
 
     /* Everything happened good */
     exit_if ( send(socket, "> ok", 5,0) == -1, "ERROR sending to socket");
+    close(socket);
 }
 
 void getfile(int socket, char *buffer, char *IP)
