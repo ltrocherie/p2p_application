@@ -337,7 +337,7 @@ void look(int socket, char *buffer, char *IP)
         case '=':
             arg[tmp] = '\0';
             tmp = 0;
-            
+
             if (strcmp(arg, "filename") == 0)
                 given_name = 1;
             else if (strcmp(arg, "filesize") == 0)
@@ -424,7 +424,7 @@ void look(int socket, char *buffer, char *IP)
     exit_if( write(log_fd,"\ncomparator:",12) == -1, "ERROR writing to log" );
     exit_if( write(log_fd,&comparator,sizeof(char)) == -1, "ERROR writing to log" );
 
-    char *find = malloc(1024 * sizeof(char));
+    char *find = calloc(1024,sizeof(char));
     hash__getfiles(comparator, name, atoi(size), find);
 
     printf("%s\n", find);
@@ -433,7 +433,6 @@ void look(int socket, char *buffer, char *IP)
     exit_if( send(socket, "> list [", 8, 0) == -1, "ERROR writing to socket");
     exit_if( send(socket, find, strlen(find)*sizeof(char), 0) == -1, "ERROR writing to socket");
     exit_if( send(socket, "]", 1, 0) == -1, "ERROR writing to socket");
-
     free(find);
     hash__print();
     return;
@@ -623,6 +622,7 @@ void getfile(int socket, char *buffer, char *IP)
     /* Everything happened good */
 
     exit_if( send(socket,"> peers ", 8,0) == -1, "ERROR sending to socket");
+
     exit_if( send(socket,key, strlen(key)*sizeof(char),0) == -1, "ERROR sending to socket");
     exit_if( send(socket," [", 2,0) == -1, "ERROR sending to socket");
 
@@ -703,13 +703,13 @@ int main(int argc, char *argv[])
         fprintf(stderr,"Error opening log");
         return -1;
     }
-    
+
     exit_if ( pthread_mutex_init(&log_lock, NULL) != 0, "ERROR init mutex" );
 
     hash__table_init();
-         
+
     /* no port given : default port */
-    if (argc < 2) {  
+    if (argc < 2) {
         FILE* config = NULL;
         config = fopen(CONFIG, "r");
         if (config == NULL) {
@@ -729,7 +729,7 @@ int main(int argc, char *argv[])
         fclose(config);
     } else
         portno = atoi(argv[1]);
-    
+
     printf("Run on port:%d\n",portno);
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -764,7 +764,7 @@ int main(int argc, char *argv[])
 
         sock_thread = malloc(sizeof(int));
         exit_if ( !sock_thread, "Error : Malloc Failed" );
-        
+
         *sock_thread = newsockfd;
 
         socket_ip arg = {*sock_thread, inet_ntoa(cli_addr.sin_addr)};
@@ -772,9 +772,9 @@ int main(int argc, char *argv[])
     }
     close(sockfd);
     close(log_fd);
-    
+
     hash__table_end();
-    
+
     thpool_destroy(thpool);
 
     return 0;
