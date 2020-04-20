@@ -33,7 +33,7 @@
 #define SEED "seed"
 #define LEECH "leech"
 
-#define CONFIG "config.ini"
+#define CONFIG "../config.ini"
 #define LOG "log"
 
 int log_fd;
@@ -159,23 +159,23 @@ void announce(int socket, char *buffer, char *IP)
                     /* Verify integrity of fields */
                     if (!isNumeric(seeds[1]) || !isNumeric(seeds[2])) {
                         fprintf(stderr, "Size of piecesize must be integers\n");
-                        exit_if ( write(log_fd, "\nSize of piecesize must be integers", 35) == -1, "ERROR write log" );
+                        _log(log_fd, "\nSize of piecesize must be integers", "ERROR write log"); //exit_if ( write(log_fd, "\nSize of piecesize must be integers", 35) == -1, "ERROR write log" );
                         exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
                         return;
                     }
 
                     fprintf(stdout,"add:%s|key:%s|taille:%d|piece:%d\n", seeds[0], seeds[3],atoi(seeds[1]), atoi(seeds[2]));
-                    exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write socket" );
-                    exit_if ( write(log_fd, seeds[3], strlen(seeds[3])*sizeof(char)) == -1, "ERROR write socket" );
-                    exit_if ( write(log_fd, "\nadd ", 5) == -1, "ERROR write socket" );
-                    exit_if ( write(log_fd, seeds[0], strlen(seeds[0])*sizeof(char)) == -1, "ERROR write socket" );
+                    _log(log_fd, "\nkey ", "ERROR write log"); //exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write socket" );
+                    _log(log_fd, seeds[3], "ERROR write log"); //exit_if ( write(log_fd, seeds[3], strlen(seeds[3])*sizeof(char)) == -1, "ERROR write socket" );
+                    _log(log_fd, "\nadd ", "ERROR write log"); //exit_if ( write(log_fd, "\nadd ", 5) == -1, "ERROR write socket" );
+                    _log(log_fd, seeds[0], "ERROR write log"); //exit_if ( write(log_fd, seeds[0], strlen(seeds[0])*sizeof(char)) == -1, "ERROR write socket" );
 
                     int add = hash__add(seeds[3], IP, port, seeds[0], atoi(seeds[1]), atoi(seeds[2]));
 
                     if (!add)
                     {
                         fprintf(stderr, "Problem adding in hash_table");
-                        exit_if ( write(log_fd, "\nProblem adding in hash_table", 33) == -1, "ERROR write log" );
+                        _log(log_fd, "\nProblem adding in hash_table", "ERROR write log"); //exit_if ( write(log_fd, "\nProblem adding in hash_table", 33) == -1, "ERROR write log" );
                         exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
                         return;
                     }
@@ -193,8 +193,8 @@ void announce(int socket, char *buffer, char *IP)
                 key_leech[tmp] = '\0';
                 //TODO : renvoyer une liste de peers avec les clés ???
                 fprintf(stdout,"key:%s\n", key_leech);
-                exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write log" );
-                exit_if ( write(log_fd, key_leech, strlen(key_leech)*sizeof(char)) == -1, "ERROR write log" );
+                _log(log_fd, "\nkey ", "ERROR write log"); //exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write log" );
+                _log(log_fd, key_leech, "ERROR write log"); //exit_if ( write(log_fd, key_leech, strlen(key_leech)*sizeof(char)) == -1, "ERROR write log" );
                 tmp = 0;
                 break;
             }
@@ -216,7 +216,7 @@ void announce(int socket, char *buffer, char *IP)
                 /* error case */
                 else {
                     fprintf(stderr, "Wrong key word");
-                    exit_if ( write(log_fd, "\nNo key word", 12) == -1, "ERROR write log" );
+                    _log(log_fd, "\nNo key word", "ERROR write log"); //exit_if ( write(log_fd, "\nNo key word", 12) == -1, "ERROR write log" );
                     exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
                     return;
                 }
@@ -229,7 +229,7 @@ void announce(int socket, char *buffer, char *IP)
             /* if we start by giving the seeds */
             if (!seed && !leech) {
                 fprintf(stderr, "Bracket without key word\n");
-                exit_if ( write(log_fd, "\nBracket without key word", 25) == -1, "ERROR write log" );
+                _log(log_fd, "\nBracket without key word", "ERROR write log"); //exit_if ( write(log_fd, "\nBracket without key word", 25) == -1, "ERROR write log" );
                 exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
             }
 
@@ -251,29 +251,29 @@ void announce(int socket, char *buffer, char *IP)
                     /* Verify integrity of fields */
                     if (!isNumeric(seeds[1]) || !isNumeric(seeds[2])) {
                         fprintf(stderr, "Size of piecesize must be integers\n");
-                        exit_if ( write(log_fd, "\nSize of piecesize must be integers", 35) == -1, "ERROR write log" );
+                        _log(log_fd, "\nSize of piecesize must be integers", "ERROR write log"); //exit_if ( write(log_fd, "\nSize of piecesize must be integers", 35) == -1, "ERROR write log" );
                         exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
                         return;
                     }
 
                     fprintf(stdout,"add:%s|key:%s|taille:%d|piece:%d\n", seeds[0], seeds[3],atoi(seeds[1]), atoi(seeds[2]));
-                    exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write log" );
-                    exit_if ( write(log_fd, seeds[3], strlen(seeds[3])*sizeof(char)) == -1, "ERROR write log" );
-                    exit_if ( write(log_fd, "\nadd ", 5) == -1, "ERROR write log" );
-                    exit_if ( write(log_fd, seeds[0], strlen(seeds[0])*sizeof(char)) == -1, "ERROR write log" );
+                    _log(log_fd, "\nkey ", "ERROR write log"); //exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write log" );
+                    _log(log_fd, seeds[3], "ERROR write log"); //exit_if ( write(log_fd, seeds[3], strlen(seeds[3])*sizeof(char)) == -1, "ERROR write log" );
+                    _log(log_fd, "\nadd ", "ERROR write log"); //exit_if ( write(log_fd, "\nadd ", 5) == -1, "ERROR write log" );
+                    _log(log_fd, seeds[0], "ERROR write log"); //exit_if ( write(log_fd, seeds[0], strlen(seeds[0])*sizeof(char)) == -1, "ERROR write log" );
 
                     int add = hash__add(seeds[3], IP, port, seeds[0], atoi(seeds[1]), atoi(seeds[2]));
 
                     if (!add) {
                         fprintf(stderr, "Problem adding in hash_table");
-                        exit_if ( write(log_fd, "\nProblem adding in hash_table", 33) == -1, "ERROR write log" );
+                        _log(log_fd, "\nProblem adding in hash_table", "ERROR write log"); //exit_if ( write(log_fd, "\nProblem adding in hash_table", 33) == -1, "ERROR write log" );
                         exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
                         return;
                     }
                     seed_arg = 0;
                 } else {
                     fprintf(stderr, "Not enough parameters for a file\n");
-                    exit_if ( write(log_fd, "\nNot enough parameters for a file", 33) == -1, "ERROR write log" );
+                    _log(log_fd, "\nNot enough parameters for a file", "ERROR write log"); //exit_if ( write(log_fd, "\nNot enough parameters for a file", 33) == -1, "ERROR write log" );
                     exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
                     return;
                 }
@@ -284,8 +284,8 @@ void announce(int socket, char *buffer, char *IP)
                 key_leech[tmp] = '\0';
                 //TODO : renvoyer une liste de peers avec les clés ???
                 fprintf(stdout,"key:%s\n", key_leech);
-                exit_if ( write(log_fd, "key ", 4) == -1, "ERROR writing log" );
-                exit_if ( write(log_fd, key_leech, strlen(key_leech)*sizeof(char)) == -1, "ERROR writing log" );
+                _log(log_fd, "key ", "ERROR write log"); //exit_if ( write(log_fd, "key ", 4) == -1, "ERROR writing log" );
+                _log(log_fd, key_leech, "ERROR write log"); //exit_if ( write(log_fd, key_leech, strlen(key_leech)*sizeof(char)) == -1, "ERROR writing log" );
 
                 tmp = 0;
                 /* If both seeds and leechs args were given, it's finished */
@@ -454,22 +454,22 @@ void look(int socket, char *buffer, char *IP)
     if (!isNumeric(size))
     {
         send(socket, "> nok", 5, 0);
-        exit_if( write(log_fd,"\nNaN size",9) == -1, "ERROR NaN size" );
+        _log(log_fd, "\nNaN size", "ERROR write log"); //exit_if( write(log_fd,"\nNaN size",9) == -1, "ERROR NaN size" );
         return;
     }
 
     if (given_size && atoi(size) < 0) {
         send(socket, "> nok", 5, 0);
-        exit_if( write(log_fd,"\nNegative size",9) == -1, "ERROR negative size" );
+        _log(log_fd, "\nNegative size", "ERROR write log"); //exit_if( write(log_fd,"\nNegative size",9) == -1, "ERROR negative size" );
         return;
     }
 
-    exit_if( write(log_fd,"\nfilename:",10) == -1, "ERROR writing to log" );
-    exit_if( write(log_fd,name,strlen(name)*sizeof(char)) == -1, "ERROR writing to log" );
-    exit_if( write(log_fd,"\nsize:",6) == -1, "ERROR writing to log" );
-    exit_if( write(log_fd,size,strlen(size)*sizeof(char)) == -1, "ERROR writing to log" );
-    exit_if( write(log_fd,"\ncomparator:",12) == -1, "ERROR writing to log" );
-    exit_if( write(log_fd,&comparator,sizeof(char)) == -1, "ERROR writing to log" );
+    _log(log_fd, "\nfilename:", "ERROR write log"); //exit_if( write(log_fd,"\nfilename:",10) == -1, "ERROR writing to log" );
+    _log(log_fd, name, "ERROR write log"); //xit_if( write(log_fd,name,strlen(name)*sizeof(char)) == -1, "ERROR writing to log" );
+    _log(log_fd, "\nsize:", "ERROR write log"); //exit_if( write(log_fd,"\nsize:",6) == -1, "ERROR writing to log" );
+    _log(log_fd, size, "ERROR write log"); //exit_if( write(log_fd,size,strlen(size)*sizeof(char)) == -1, "ERROR writing to log" );
+    _log(log_fd, "\ncomparator:", "ERROR write log"); //exit_if( write(log_fd,"\ncomparator:",12) == -1, "ERROR writing to log" );
+    _log(log_fd, &comparator, "ERROR write log"); //exit_if( write(log_fd,&comparator,sizeof(char)) == -1, "ERROR writing to log" );
 
     char find[1024] = {'\0'};
     strcat(find,"> list [");
@@ -541,9 +541,9 @@ void update(int socket, char *buffer, char *IP)
             {
                 /* We add a new file OR a new owner in the existing file */
                 printf("update seed:%s\n",key);
-                exit_if ( write(log_fd, "\nupdate ", 8) == -1, "ERROR write log" );
-                exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write log" );
-                exit_if ( write(log_fd, key, strlen(key)*sizeof(char)) == -1, "ERROR write log" );
+                _log(log_fd, "\nupdate ", "ERROR write log");// exit_if ( write(log_fd, "\nupdate ", 8) == -1, "ERROR write log" );
+                _log(log_fd, "\nkey ", "ERROR write log"); //exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write log" );
+                _log(log_fd, key, "ERROR write log"); //exit_if ( write(log_fd, key, strlen(key)*sizeof(char)) == -1, "ERROR write log" );
 
                 /*int add = hash__add(seeds[3]
                                     ,IP
@@ -557,8 +557,8 @@ void update(int socket, char *buffer, char *IP)
             {
                 /* Add leeching ??? */
                 printf("add leech:%s\n",key);
-                exit_if ( write(log_fd, "key ", 4) == -1, "ERROR writing log" );
-                exit_if ( write(log_fd, key, strlen(key)*sizeof(key)) == -1, "ERROR writing log" );
+                _log(log_fd, "key ", "ERROR write log"); //exit_if ( write(log_fd, "key ", 4) == -1, "ERROR writing log" );
+                _log(log_fd, key, "ERROR write log"); //exit_if ( write(log_fd, key, strlen(key)*sizeof(key)) == -1, "ERROR writing log" );
 
             }
             break;
@@ -583,9 +583,9 @@ void update(int socket, char *buffer, char *IP)
 
                 /* We add a new file OR a new owner in the existing file */
                 printf("update seed:%s\n",key);
-                exit_if ( write(log_fd, "\nupdate ", 8) == -1, "ERROR write log" );
-                exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write log" );
-                exit_if ( write(log_fd, key, strlen(key)*sizeof(char)) == -1, "ERROR write log" );
+                _log(log_fd, "\nupdate ", "ERROR write log"); //exit_if ( write(log_fd, "\nupdate ", 8) == -1, "ERROR write log" );
+                _log(log_fd, "\nkey ", "ERROR write log"); //exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write log" );
+                _log(log_fd, key, "ERROR write log"); //exit_if ( write(log_fd, key, strlen(key)*sizeof(char)) == -1, "ERROR write log" );
 
                 /*int add = hash__add(seeds[3]
                                     ,IP
@@ -602,8 +602,8 @@ void update(int socket, char *buffer, char *IP)
 
                 /* Add leeching ??? */
                 printf("add leech:%s\n",key);
-                exit_if ( write(log_fd, "key ", 4) == -1, "ERROR writing log" );
-                exit_if ( write(log_fd, key, strlen(key)*sizeof(key)) == -1, "ERROR writing log" );
+                _log(log_fd, "key ", "ERROR write log"); //exit_if ( write(log_fd, "key ", 4) == -1, "ERROR writing log" );
+                _log(log_fd, key, "ERROR write log"); //exit_if ( write(log_fd, key, strlen(key)*sizeof(key)) == -1, "ERROR writing log" );
             }
             break;
         /* Case when we encounter a character */
@@ -631,7 +631,7 @@ void getfile(int socket, char *buffer, char *IP)
     if (p == NULL)
     {
         fprintf(stderr, "No \"%c\" found.\n", space);
-        exit_if( write(log_fd,"\nNo \"%c\" found",13) == -1, "ERROR writing log" );
+        _log(log_fd, "\nNo \"%c\" found", "ERROR write log"); //exit_if( write(log_fd,"\nNo \"%c\" found",13) == -1, "ERROR writing log" );
         exit_if (send(socket,"> nok", 5,0) == -1, "ERROR sending to socket");
         return;
     }
@@ -659,9 +659,9 @@ void getfile(int socket, char *buffer, char *IP)
     if (f == NULL)
     {
         fprintf(stderr, "File with key %s not found in the hash table\n", key);
-        exit_if( write(log_fd,"\nFile with key ",15) == -1, "ERROR writing log" );
-        exit_if( write(log_fd,key,strlen(key)*sizeof(char)) == -1, "ERROR writing log" );
-        exit_if( write(log_fd," not found in the hash table",28) == -1, "ERROR writing log" );
+        _log(log_fd, "\nFile with key ", "ERROR write log"); //exit_if( write(log_fd,"\nFile with key ",15) == -1, "ERROR writing log" );
+        _log(log_fd, key, "ERROR write log"); //exit_if( write(log_fd,key,strlen(key)*sizeof(char)) == -1, "ERROR writing log" );
+        _log(log_fd, " not found in the hash table", "ERROR write log"); //exit_if( write(log_fd," not found in the hash table",28) == -1, "ERROR writing log" );
         exit_if (send(socket,"> nok", 5,0) == -1, "ERROR sending to socket");
         return;
     }
@@ -707,10 +707,10 @@ void treat_socket(void *arg)
     printf("IP Received %s\n", ip);
     printf("Socket:%d\n",socket);
 
-    exit_if( write(log_fd,"\nIP Received:",13) == -1, "ERROR writing log" );
-    exit_if( write(log_fd,ip,strlen(ip)*sizeof(char)) == -1, "ERROR writing log" );
-    exit_if( write(log_fd,"\nSocket:",7) == -1, "ERROR writing log" );
-    exit_if( write(log_fd,itoa(socket,10),strlen(itoa(socket,10))*sizeof(char)) == -1, "ERROR writing log" );
+    _log(log_fd, "\nIP Received:", "ERROR write log"); //exit_if( write(log_fd,"\nIP Received:",13) == -1, "ERROR writing log" );
+    _log(log_fd, ip, "ERROR write log"); //exit_if( write(log_fd,ip,strlen(ip)*sizeof(char)) == -1, "ERROR writing log" );
+    _log(log_fd, "\nSocket:", "ERROR write log"); //exit_if( write(log_fd,"\nSocket:",7) == -1, "ERROR writing log" );
+    _log(log_fd, itoa(socket,10), "ERROR write log"); //exit_if( write(log_fd,itoa(socket,10),strlen(itoa(socket,10))*sizeof(char)) == -1, "ERROR writing log" );
 
     /* Read all the message received*/
     int rr;
