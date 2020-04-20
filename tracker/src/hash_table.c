@@ -91,8 +91,6 @@ int hash__add(char* key,char* IP, int port,char* name, int length, int piecesize
     own->port = port;
     SLIST_INSERT_HEAD(&f->owners,own,next_owner);
 
-    printf("add-----key:%s,name:%s,taille:%d,piece:%d\n",f->key,f->name,f->length,f->piecesize);
-
     SLIST_INSERT_HEAD(&hash_table[index],f,next_file);
     pthread_mutex_unlock(&mutex_table[index]);
 
@@ -149,7 +147,7 @@ int has_size(char compn, int size, int size2){
     return 0;
 }
 
-int hash__getfiles(char compn,char* name, int size,char* files_found){
+int hash__getfiles(char* name, char compn, int size,char* files_found){
     int nb = 0;
     if(size == -1 && !strcmp(name,"-1"))
         return nb;

@@ -156,6 +156,6 @@ int isNumeric (const char * s)
     return *p == '\0';
 }
 
-void log (int fd, char * log_msg, char * err_msg) {
+void _log (int fd, char * log_msg, char * err_msg) {
     exit_if ( write(fd, log_msg, strlen(log_msg)) == -1, err_msg );
 }

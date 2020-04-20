@@ -27,6 +27,8 @@ void get_command(char *buffer, char *command);
 
 int isNumeric (const char * s);
 
-void log(int fd, char * log_msg, char * err_msg);
+
+void _log (int fd, char * log_msg, char * err_msg);
+
 
 #endif

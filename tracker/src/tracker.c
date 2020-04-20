@@ -126,6 +126,8 @@ void announce(int socket, char *buffer, char *IP)
     (void)seed;
     (void)leech;
 
+    char arg[1024];
+
     /* Array of arguments for all file arguments : key, IP, port, filename, length, piecesize */
     char seeds[4][1024];
 
@@ -196,21 +198,39 @@ void announce(int socket, char *buffer, char *IP)
                 tmp = 0;
                 break;
             }
+
+            /* Not key words recognized yet */
+            else {
+                arg[tmp] = '\0';
+                tmp = 0;
+
+                /* if seed/leech key word is given */
+                if (!strcmp(arg,SEED)) {
+                    seed = 1;
+                    seed_arg = 0;
+                    leech = 0;
+                } else if (!strcmp(arg,LEECH)) {
+                    leech = 1;
+                    seed = 0;
+                }
+                /* error case */
+                else {
+                    fprintf(stderr, "Wrong key word");
+                    exit_if ( write(log_fd, "\nNo key word", 12) == -1, "ERROR write log" );
+                    exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
+                    return;
+                }
+            }
+
             i++;
             break;
         case '[':
 
             /* if we start by giving the seeds */
-            if (!seed && !leech)
-            {
-                seed = 1;
-                seed_arg = 0;
-            }
-            /* else if it is for leechs */
-            else if (seed && !leech)
-            {
-                leech = 1;
-                seed = 0;
+            if (!seed && !leech) {
+                fprintf(stderr, "Bracket without key word\n");
+                exit_if ( write(log_fd, "\nBracket without key word", 25) == -1, "ERROR write log" );
+                exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
             }
 
             tmp = 0;
@@ -280,6 +300,9 @@ void announce(int socket, char *buffer, char *IP)
                 seeds[seed_arg][tmp] = buffer[i];
             else if (!seed && leech)
                 key_leech[tmp] = buffer[i];
+            else
+                arg[tmp] = buffer[i];
+
             tmp++;
             i++;
             break;
@@ -314,9 +337,10 @@ void look(int socket, char *buffer, char *IP)
     char size[64] = "-1";
     char comparator = '=';
     int given_size = 0, given_name = 0;
+    int end = 0;
 
     /* Read all characters */
-    while (buffer[i] != 0 && buffer[i] != '\n' && buffer[i] != ']')
+    while (buffer[i] != 0 && buffer[i] != '\n' && !end)
     {
         switch (buffer[i])
         {
@@ -338,10 +362,14 @@ void look(int socket, char *buffer, char *IP)
             arg[tmp] = '\0';
             tmp = 0;
 
-            if (strcmp(arg, "filename") == 0)
+            if (!strcmp(arg, "filename")) {
                 given_name = 1;
-            else if (strcmp(arg, "filesize") == 0)
+                given_size = 0;
+            }
+            else if (!strcmp(arg, "filesize")) {
+                given_name = 0;
                 given_size = 1;
+            }
             else
             {
                 send(socket, "> nok", 5, 0);
@@ -358,7 +386,10 @@ void look(int socket, char *buffer, char *IP)
                 send(socket, "> nok", 5, 0);
                 return;
             }
+
             given_size = 1;
+            given_name = 0;
+
             comparator = buffer[i];
 
             i++;
@@ -373,13 +404,24 @@ void look(int socket, char *buffer, char *IP)
                 send(socket, "> nok", 5, 0);
                 return;
             }
+
             given_size = 1;
+            given_name = 0;
+
             comparator = buffer[i];
 
             i++;
             break;
         case '[':
             i++;
+            break;
+        case ']':
+            if (buffer[i-1] != '"') {
+                send(socket, "> nok", 5, 0);
+                return;
+            }
+
+            end = 1;
             break;
         case '"':
             arg[tmp] = '\0';
@@ -400,6 +442,15 @@ void look(int socket, char *buffer, char *IP)
         }
     }
 
+    if (!end) {
+        send(socket, "> nok", 5, 0);
+        return;
+    }
+
+    printf("filename:%s\n", name);
+    printf("size:%s\n", size);
+    printf("comparator:%c\n", comparator);
+
     if (!isNumeric(size))
     {
         send(socket, "> nok", 5, 0);
@@ -413,10 +464,6 @@ void look(int socket, char *buffer, char *IP)
         return;
     }
 
-    printf("filename:%s\n", name);
-    printf("size:%s\n", size);
-    printf("comparator:%c\n", comparator);
-
     exit_if( write(log_fd,"\nfilename:",10) == -1, "ERROR writing to log" );
     exit_if( write(log_fd,name,strlen(name)*sizeof(char)) == -1, "ERROR writing to log" );
     exit_if( write(log_fd,"\nsize:",6) == -1, "ERROR writing to log" );
@@ -426,17 +473,16 @@ void look(int socket, char *buffer, char *IP)
 
     char find[1024] = {'\0'};
     strcat(find,"> list [");
-    hash__getfiles(comparator, name, atoi(size), find);
+    hash__getfiles(name, comparator, atoi(size), find);
 
+    //todo : logfd
     printf("%s\n", find);
     printf("%d\n", atoi(size));
 
     strcat(find,"]");
 
     send(socket,find,strlen(find)*sizeof(char),0);
-    // exit_if( send(socket, "> list [", 8, 0) == -1, "ERROR writing to socket");
-    // exit_if( send(socket, find, strlen(find)*sizeof(char), 0) == -1, "ERROR writing to socket");
-    // exit_if( send(socket, "]", 1, 0) == -1, "ERROR writing to socket");
+
     hash__print();
     return;
 }
@@ -624,7 +670,7 @@ void getfile(int socket, char *buffer, char *IP)
     char msg[1024] = {'\0'};
     strcat(msg,"> peers ");
     strcat(msg,key);
-    strcat(msg,"[");
+    strcat(msg," [");
 
     /* Writing peers */
     int nb_owner = 0;
@@ -635,20 +681,13 @@ void getfile(int socket, char *buffer, char *IP)
         strcat(msg,":");
         char* port = itoa(own->port,10);
         strcat(msg,port);
-        // exit_if( send(socket, own->IP, strlen(own->IP)*sizeof(char), 0) == -1, "ERROR sending to socket");
-        // exit_if( send(socket, ":", 1, 0) == -1, "ERROR sending to socket");
-        //
-        // exit_if( send(socket,port , strlen(port)*sizeof(char), 0) == -1, "ERROR sending to socket");
-
         if (nb_owner != f->nb_owners - 1)
             strcat(msg," ");
-            //exit_if( send(socket, " ", 1, 0) == -1, "ERROR sending to socket");
 
         nb_owner++;
     }
     strcat(msg,"]");
     send(socket,msg,strlen(msg)*sizeof(char),0);
-    //exit_if( send(socket, "]", 1, 0) == -1, "ERROR sending to socket");
 
     return;
 }
@@ -665,9 +704,13 @@ void treat_socket(void *arg)
     int socket = socket_with_ip.socketfd;
     char *ip = socket_with_ip.ip;
 
-    printf("SOCKET:%d\n",socket);
-
     printf("IP Received %s\n", ip);
+    printf("Socket:%d\n",socket);
+
+    exit_if( write(log_fd,"\nIP Received:",13) == -1, "ERROR writing log" );
+    exit_if( write(log_fd,ip,strlen(ip)*sizeof(char)) == -1, "ERROR writing log" );
+    exit_if( write(log_fd,"\nSocket:",7) == -1, "ERROR writing log" );
+    exit_if( write(log_fd,itoa(socket,10),strlen(itoa(socket,10))*sizeof(char)) == -1, "ERROR writing log" );
 
     /* Read all the message received*/
     int rr;
