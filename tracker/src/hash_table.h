@@ -15,10 +15,16 @@
 /**
 * @struct owner hash_table.h
 */
-struct owner {
-    char* IP; /** IP adress of the owner of the file */
-    int port; /** port of the owner of the file */
-    SLIST_ENTRY(owner) next_owner; /** next_owner for queue bsd lib*/
+struct seeder {
+    char* IP; /** IP adress of the seeder of the file */
+    int port; /** port of the seeder of the file */
+    SLIST_ENTRY(seeder) next_seeder; /** next_seeder for queue bsd lib*/
+};
+
+struct leecher {
+    char* IP; /** IP adress of the leecher of the file */
+    int port; /** port of the leecher of the file */
+    LIST_ENTRY(leecher) next_leecher; /** next_leecher for queue bsd lib*/
 };
 
 /**
@@ -30,8 +36,10 @@ struct file {
         int length; /** total length of the file */
         int piecesize; /** size of the piece */
 
-        int nb_owners; /** total number of owners */
-        SLIST_HEAD(,owner) owners; /** list of owners of the file */
+        int nb_seeders; /** total number of seeders */
+        int nb_leechers; /** total number of leechers */
+        SLIST_HEAD(,seeder) seeders; /** list of seeder of the file */
+        LIST_HEAD(,leecher) leechers; /** list of leecher of the file */
 
         SLIST_ENTRY(file) next_file; /** next_file for queue bsd lib */
 };
@@ -72,8 +80,18 @@ void hash__table_init();
  *
  * @return 1 if the file has been added correctly, 0 otherwise
  * */
-int hash__add(char* key,char* IP, int port,char* name, int length, int piecesize);
+int hash__add_seeder(char* key,char* IP, int port,char* name, int length, int piecesize);
 
+/**
+ * Add a leecher in the file with the IP and port
+ * @param IP IP of the leecher
+ * @param port port where the leecher listen to other peer
+ * @param key_table the table of keys
+ * @param nb_key the number of key in the table
+ *
+ * @return 1 if the file has been added correctly, 0 otherwise
+ * */
+int hash__add_leecher(char* IP, int port, char* key_table[], int nb_key);
 
 /**
  * Search a file in the hash_table depending of the key but also on different possible
