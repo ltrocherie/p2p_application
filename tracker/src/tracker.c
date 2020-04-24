@@ -170,7 +170,7 @@ void announce(int socket, char *buffer, char *IP)
                     _log(log_fd, "\nadd ", "ERROR write log"); //exit_if ( write(log_fd, "\nadd ", 5) == -1, "ERROR write socket" );
                     _log(log_fd, seeds[0], "ERROR write log"); //exit_if ( write(log_fd, seeds[0], strlen(seeds[0])*sizeof(char)) == -1, "ERROR write socket" );
 
-                    int add = hash__add(seeds[3], IP, port, seeds[0], atoi(seeds[1]), atoi(seeds[2]));
+                    int add = hash__add_seeder(seeds[3], IP, port, seeds[0], atoi(seeds[1]), atoi(seeds[2]));
 
                     if (!add)
                     {
@@ -262,7 +262,7 @@ void announce(int socket, char *buffer, char *IP)
                     _log(log_fd, "\nadd ", "ERROR write log"); //exit_if ( write(log_fd, "\nadd ", 5) == -1, "ERROR write log" );
                     _log(log_fd, seeds[0], "ERROR write log"); //exit_if ( write(log_fd, seeds[0], strlen(seeds[0])*sizeof(char)) == -1, "ERROR write log" );
 
-                    int add = hash__add(seeds[3], IP, port, seeds[0], atoi(seeds[1]), atoi(seeds[2]));
+                    int add = hash__add_seeder(seeds[3], IP, port, seeds[0], atoi(seeds[1]), atoi(seeds[2]));
 
                     if (!add) {
                         fprintf(stderr, "Problem adding in hash_table");
@@ -673,18 +673,18 @@ void getfile(int socket, char *buffer, char *IP)
     strcat(msg," [");
 
     /* Writing peers */
-    int nb_owner = 0;
-    struct owner *own;
-    SLIST_FOREACH(own, &f->owners, next_owner)
+    int nb_seeder = 0;
+    struct seeder *seed;
+    SLIST_FOREACH(seed, &f->seeders, next_seeder)
     {
-        strcat(msg,own->IP);
+        strcat(msg,seed->IP);
         strcat(msg,":");
-        char* port = itoa(own->port,10);
+        char* port = itoa(seed->port,10);
         strcat(msg,port);
-        if (nb_owner != f->nb_owners - 1)
+        if (nb_seeder != f->nb_seeders - 1)
             strcat(msg," ");
 
-        nb_owner++;
+        nb_seeder++;
     }
     strcat(msg,"]");
     send(socket,msg,strlen(msg)*sizeof(char),0);
