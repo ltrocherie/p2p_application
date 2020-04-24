@@ -7,7 +7,9 @@ public class Peer {
     static final AnnounceToTracker ann = new AnnounceToTracker();
 
   public static void main(String[] args) {
+      PeerConfig.getElementFromConfig();
       try{
+          System.out.println(PeerConfig.);
           ann.announceTracker(args,"../seed");
       }
       catch(Exception e){
