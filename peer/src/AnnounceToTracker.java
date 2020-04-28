@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
-
+import java.util.Timer;
 /**
  * */
 
@@ -20,24 +20,42 @@ public class AnnounceToTracker extends PeerConfig implements Sender{
           TODO : Rules announce, look, getfile
       */
         try{
+            System.out.println(super.trackerPort);
             Socket socket = new Socket(super.trackerIp,super.trackerPort);
             /*File[] fileL = super.fileList("../seed"); // This fonctionne pas normalement en ce moment.
             String message = super.parseFileList(fileL);*/
             DatFileParser getMessage= new DatFileParser();
             String message = getMessage.getFilesFrom(super.seedFile);
-            message = "announce listen " + super.inPort + " seed [" + message;
-            message = message.substring(0,message.length() - 1) + "]";
-            System.out.println(message);
+            int inPor = super.inPort;
+            if(inPor==0){
+                ServerSocket s = new ServerSocket(0);
+                inPor = s.getLocalPort();
+                s.close();
+            }
+            if(message !="") {
+                message = "announce listen " + inPor + " seed [" + message;
+                message = message.substring(0, message.length() - 1) + "]";
+            }else{
+                message = "announce listen " + super.inPort + " seed []";
+            }
             BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),true);
             pw.println(message);
             System.out.println(">"+message);
             String str = br.readLine();// Ca c'est pour suivre en temps réel sur le terminal.
+            System.out.println(str.equals("> ok"));
+            if(str.equals("> ok")){
+                PeerConfig.okAnnounce = true;
+            }
             System.out.println("<"+str);
             pw.println("END");
             pw.close();
             br.close();
             socket.close();
+            if(PeerConfig.okAnnounce){
+                Timer timer = new Timer();
+                timer.schedule(new UpdateAnnounce(),0,PeerConfig.period*1000);
+            }
         }catch(Exception e){
             System.out.println("Socket connecting error");
         }
