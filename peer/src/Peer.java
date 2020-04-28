@@ -8,13 +8,17 @@ public class Peer {
 
   public static void main(String[] args) {
       PeerConfig.getElementFromConfig();
-      try{
-          System.out.println(PeerConfig.);
-          ann.announceTracker(args,"../seed");
+      PeerConfig.getElementFromCommandLine(args);
+
+
+      /*try{
+          ann.sendMessage("../seed");
       }
       catch(Exception e){
           System.out.println("Erreur lors de l'envoi de announce");
-      }
+      }*/
+
+
       /* idea :
 		use 1 thread that constently updates the files in the folder with the buffermaps
 		use 1 thread that constently listen on 1 port

@@ -18,7 +18,10 @@ public class PeerConfig{
 
 	  static final String folderName = "../seed";
 	  static int pieceSize = 1024;
-
+	  static int maxNbPair = 5;
+	  static int maxPieceSize = 2048;
+	  static int period = 10;
+	  static String seedFile = "../seed.dat";
 
 	  public static void getElementFromConfig(){
 		  try {
@@ -46,8 +49,17 @@ public class PeerConfig{
 						  case "open-port":
 						  	inPort = Integer.parseInt(arra[1]);
 						  	break;
+						  case "max-pair":
+						  	maxNbPair = Integer.parseInt(arra[1]);
+						  	break;
+						  case "max-piece-size" :
+						  	maxPieceSize = Integer.parseInt(arra[1]);
+						  	break;
+						  case "update-period" :
+						  	period = Integer.parseInt(arra[1]);
+						  	break;
 						  default :
-						  	System.out.println("Impossible de lire la configuration :"+it);
+						  	System.out.println("Can't interpret the config :"+it);
 					  }
 
 				  }
@@ -58,6 +70,18 @@ public class PeerConfig{
 			  e.printStackTrace();
 		  }
 	  }
+
+	public static void getElementFromCommandLine(String[] args){
+		if(args.length>0){
+			port = Integer.parseInt(args[0]);
+		}
+		if(args.length>1){
+			trackerIp = args[1];
+		}
+		if(args.length>2){
+			trackerPort = Integer.parseInt(args[2]);
+		}
+	}
 	  /*** PRIVATE METHODS ***/
 
 	File[] fileList(String folder){
