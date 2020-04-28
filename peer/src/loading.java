@@ -16,6 +16,7 @@ class loading {
     JPanel announcePanel;
     JPanel configPanel;
     JPanel filePanel;
+    JPanel menuConfigPanel;
 
     public loading(guiRunner runner){
         loadMainPage(runner);
@@ -26,6 +27,7 @@ class loading {
         loadAnnouncePanel(runner);
         loadConfigPanel(runner);
         loadFilePanel(runner);
+        loadMenuConfigPanel(runner);
     }
 
     void loadConfigPanel(guiRunner runner){
@@ -186,7 +188,7 @@ class loading {
         textPort.add(tf2);
         textPortT.add(tf3);
         Sender flusher = new ConfigTrackerSender();
-        bBack.addActionListener(new ButtonListener(runner,8,flusher,texts));
+        bBack.addActionListener(new ButtonListener(runner,9,flusher,texts));
 
         bAddAddrT.addActionListener(new buttonListenerSender(sendAddress,textAddT,true));
         bAddPort.addActionListener(new buttonListenerSender(sendPort,textPort,true));
@@ -263,7 +265,7 @@ class loading {
         ArrayList<JTextField> fileArray = new ArrayList<JTextField>();
         Sender send= new AddFileSender();
         fileArray.add(fileTf);
-        bBack.addActionListener(new ButtonListener(runner,8,send,fileArray));
+        bBack.addActionListener(new ButtonListener(runner,9,send,fileArray));
         bAdd.addActionListener(new buttonListenerSender(send,fileArray,true));
         this.filePanel = panel;
     }
@@ -308,8 +310,8 @@ class loading {
         panel.add(buttonSend,gbc);
 
 
-        buttonSend.addActionListener(new buttonListenerSender(send,texts,false));
         buttonSend.addActionListener(new ButtonListener(runner,1,send,texts));
+        buttonSend.addActionListener(new buttonListenerSender(send,texts,false));
         this.announcePanel = panel;
 
     }
@@ -342,14 +344,204 @@ class loading {
         //Creating the menu bar
         JMenuBar mb = new JMenuBar();
         JButton m1 = new JButton("Config");
-        JButton m2 = new JButton("Close");
+        JButton m2 = new JButton("Add files");
         mb.add(m1);
         mb.add(m2);
 
-        JTextField tf = new JTextField(1000); // accepts upto 10 characters
-
+        m1.addActionListener(new ButtonListener(runner,8,send,arr));
+        m2.addActionListener(new ButtonListener(runner,7,send,arr));
         this.mainPanel = Buttons;
         this.menuBar = mb;
+    }
+
+    void loadMenuConfigPanel(guiRunner runner){
+        JPanel panel = new JPanel(new GridBagLayout());
+        JLabel mainText = new JLabel("You can change the config.                                             ");
+        JLabel seedText = new JLabel("seed.dat location :\n");
+        JLabel leechText = new JLabel("leech.dat location :\n");
+        JLabel portText = new JLabel("In port :\n");
+        JTextField seedTf = new JTextField(1000); // accepts upto 1000 characters
+        JTextField leechTf = new JTextField(1000); // accepts upto 1000 characters
+        JTextField portTf = new JTextField(1000); // accepts upto 1000 characters
+        JButton bChangeSeed = new JButton("Change");
+        JButton bChangeLeech = new JButton("Change");
+        JButton bChangePort = new JButton("Change");
+        JButton bAuto = new JButton("Auto");
+        JButton bBack = new JButton("Back");
+        GridBagConstraints gbc = new GridBagConstraints();
+
+
+        JLabel blank = new JLabel(""); // Sans ce bouton l'affichage des textfield collapse (l'espace est déjà rempli)
+
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.LINE_START;
+        gbc.gridheight = 1;
+        gbc.insets = new Insets(10, 15, 20, 0);
+        panel.add(mainText,gbc);
+
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 1;
+        gbc.weightx = 0.;
+        gbc.weighty = 0.;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.BASELINE_LEADING;
+        gbc.insets = new Insets(10, 10, 10, 10);
+        panel.add(seedText, gbc);
+
+
+        gbc.gridx = 1;
+        gbc.gridwidth = 2;
+        gbc.gridheight = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.BASELINE;
+        gbc.insets = new Insets(10, 0, 10, 10);
+        panel.add(seedTf, gbc);
+
+
+        gbc.gridx = 3;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.insets = new Insets(0, 10, 0, 5);
+        panel.add(bChangeSeed, gbc);
+
+
+
+
+
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 1;
+        gbc.weightx = 0.;
+        gbc.weighty = 0.;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.BASELINE_LEADING;
+        gbc.insets = new Insets(10, 10, 10, 10);
+        panel.add(leechText, gbc);
+
+
+        gbc.gridx = 1;
+        gbc.gridwidth = 2;
+        gbc.gridheight = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.BASELINE;
+        gbc.insets = new Insets(10, 0, 10, 10);
+        panel.add(leechTf, gbc);
+
+
+        gbc.gridx = 3;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.gridwidth =  GridBagConstraints.REMAINDER;
+        gbc.insets = new Insets(0, 10, 0, 5);
+        panel.add(bChangeLeech, gbc);
+
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 1;
+        gbc.weightx = 0.;
+        gbc.weighty = 0.;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.BASELINE_LEADING;
+        gbc.insets = new Insets(10, 10, 10, 10);
+        panel.add(portText, gbc);
+
+
+        gbc.gridx = 1;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.BASELINE;
+        gbc.insets = new Insets(10, 0, 10, 10);
+        panel.add(portTf, gbc);
+
+
+
+
+        gbc.gridx = 2;
+        //gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 1.;
+        gbc.anchor = GridBagConstraints.BASELINE_TRAILING;
+        gbc.insets = new Insets(10, 0, 5, 10);
+        panel.add(bAuto, gbc);
+
+        gbc.gridx = 3;
+        gbc.weightx = 0.;
+        gbc.gridwidth =  GridBagConstraints.REMAINDER;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.insets = new Insets(0, 5, 0, 5);
+        panel.add(bChangePort, gbc);
+
+
+        gbc.gridx = 2;
+        gbc.gridy = 4;
+        gbc.gridheight = GridBagConstraints.REMAINDER;
+        gbc.gridwidth = GridBagConstraints.RELATIVE;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 1.;
+        gbc.anchor = GridBagConstraints.BASELINE_TRAILING;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        panel.add(blank, gbc);
+
+        gbc.gridy = 4;
+        gbc.gridx = 3;
+        gbc.anchor = GridBagConstraints.BASELINE_TRAILING;
+        gbc.gridheight = GridBagConstraints.REMAINDER;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.;
+        gbc.insets = new Insets(10, 10, 0, 10);
+        panel.add(bBack, gbc);
+
+
+        Sender sendPort = new ConfigTrackerSender();
+        Sender sendSeed = new ConfigTrackerSender();
+        Sender sendLeech = new ConfigTrackerSender();
+        ArrayList<JTextField> textPort = new ArrayList<JTextField>();
+        ArrayList<JTextField> textSeed = new ArrayList<JTextField>();
+        ArrayList<JTextField> textLeech = new ArrayList<JTextField>();
+        ArrayList<JTextField> textAuto = new ArrayList<JTextField>();
+        ArrayList<JTextField> texts = new ArrayList<JTextField>();
+        textSeed.add(seedTf);
+        textPort.add(portTf);
+        textLeech.add(leechTf);
+        texts.add(seedTf);
+        texts.add(portTf);
+        texts.add(leechTf);
+        JTextField tf1 = new JTextField();
+        JTextField tf2 = new JTextField();
+        JTextField tf3 = new JTextField();
+        JTextField tf0 = new JTextField();
+        JTextField tf6 = new JTextField();
+        JTextField tf4 = new JTextField();
+        JTextField tf5 = new JTextField();
+        tf4.setText("4");
+        tf2.setText("2");
+        tf5.setText("5");
+        tf6.setText("6");
+        tf0.setText("0");
+        textSeed.add(tf4);
+        textPort.add(tf2);
+        textLeech.add(tf5);
+        textAuto.add(tf0);
+        textAuto.add(tf6);
+        Sender flusher = new ConfigTrackerSender();
+        bBack.addActionListener(new ButtonListener(runner,9,flusher,texts));
+        bAuto.addActionListener(new buttonListenerSender(sendPort,textAuto,true));
+        bChangeSeed.addActionListener(new buttonListenerSender(sendSeed,textSeed,true));
+        bChangePort.addActionListener(new buttonListenerSender(sendPort,textPort,true));
+        bChangeLeech.addActionListener(new buttonListenerSender(sendLeech,textLeech,true));
+        this.menuConfigPanel = panel;
+
     }
 
     void loadLookPage(guiRunner runner) {
@@ -422,7 +614,7 @@ class loading {
         Sender send = new lookTracker();
         ArrayList<JTextField> texts = new ArrayList<JTextField>();
         texts.add(tf);
-        bBack.addActionListener(new ButtonListener(runner,1,send,texts));
+        bBack.addActionListener(new ButtonListener(runner,9,send,texts));
         bSend.addActionListener(new buttonListenerSender(send,texts,false));
         bAdd.addActionListener(new buttonListenerSender(send,texts,true));
         this.lookPanel = panel;
@@ -491,7 +683,7 @@ class loading {
         Sender send = new GetFileTracker();
         ArrayList<JTextField> texts = new ArrayList<JTextField>();
         texts.add(tf);
-        bBack.addActionListener(new ButtonListener(runner,1,send,texts));
+        bBack.addActionListener(new ButtonListener(runner,9,send,texts));
         bSend.addActionListener(new buttonListenerSender(send,texts,false));
         this.getFPanel = panel;
     }
@@ -659,7 +851,7 @@ class loading {
         panel.add(bBack, gbc);
 
 
-        //bBack.addActionListener(new ButtonListener(runner,1));
+        //bBack.addActionListener(new ButtonListener(runner,9));
         this.intPanel = panel;
     }
 
@@ -694,6 +886,10 @@ class loading {
 
     public JPanel getFilePanel() {
         return filePanel;
+    }
+
+    public JPanel getMenuConfigPanel() {
+        return menuConfigPanel;
     }
 
     public JPanel getConfigPanel() {
