@@ -35,9 +35,11 @@ public class lookTracker extends PeerConfig implements Sender{
     }
 
     public void addValues(ArrayList<JTextField> texts){
-        this.message = this.message +texts.get(0).getText() +" ";
-        texts.get(0).setText("");
-        System.out.println(this.message);
+        if(!texts.get(0).getText().equals("")){
+            this.message = this.message +texts.get(0).getText() +" ";
+            texts.get(0).setText("");
+            System.out.println(this.message);
+        }
     }
 
     public void flush(ArrayList<JTextField> texts){
