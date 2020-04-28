@@ -39,7 +39,7 @@ public class DatFileParser {
     }
 
     public void addFileTo(String filename, String toAdd){
-        if(!lookForAFile(filename,toAdd)){
+        if(!lookForAFile(filename,toAdd) && !toAdd.equals("")){
             try{
                 FileWriter fr = new FileWriter(filename,true);
                 fr.write(toAdd+"\n");

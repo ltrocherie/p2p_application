@@ -9,7 +9,7 @@ import java.util.ListIterator;
  * */
 
 public class PeerConfig{
-	  static int port = 8080; // pas une super idée le port http pour nos connexions
+	  static int port = 11000; // pas une super idée le port http pour nos connexions
 
 	  static int inPort = 15000; // A voir, un pour les communications, l'autre pour les transferts de fichier
 	  static int outPort = 10000;
@@ -21,7 +21,9 @@ public class PeerConfig{
 	  static int maxNbPair = 5;
 	  static int maxPieceSize = 2048;
 	  static int period = 10;
-	  static String seedFile = "../seed.dat";
+	  static boolean okAnnounce = false;
+	  static String seedFile = "seed.dat";
+	  static String leechFile = "leech.dat";
 
 	  public static void getElementFromConfig(){
 		  try {

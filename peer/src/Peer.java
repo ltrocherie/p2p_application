@@ -24,7 +24,7 @@ public class Peer {
 		use 1 thread that constently listen on 1 port
 		create 1 thread every time the peer wants to send something
   	*/
-	//(new Thread(new Buffermap())).start();
+	(new Thread(new Buffermap())).start();
 
     //(new Thread(new SendToPeer("localhost", "< interested -785361703"))).start();
     //(new Thread(new ReceiveFromPeer("localhost"))).start();
