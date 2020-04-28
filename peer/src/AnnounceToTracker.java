@@ -36,7 +36,7 @@ public class AnnounceToTracker extends PeerConfig implements Sender{
                 message = "announce listen " + inPor + " seed [" + message;
                 message = message.substring(0, message.length() - 1) + "]";
             }else{
-                message = "announce listen " + super.inPort + " seed []";
+                message = "announce listen " + inPor + " seed []";
             }
             BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),true);

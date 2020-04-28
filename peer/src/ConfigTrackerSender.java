@@ -19,7 +19,7 @@ public class ConfigTrackerSender extends PeerConfig implements Sender{
     }
 
     public void addValues(ArrayList<JTextField> texts){
-        if(texts.get(1).getText() == "6" ||!texts.get(0).getText().equals("")){
+        if(texts.get(1).getText().equals("6") ||!texts.get(0).getText().equals("")){
             switch(texts.get(1).getText()){
                 case "1" :
                     super.trackerIp = texts.get(0).getText();
