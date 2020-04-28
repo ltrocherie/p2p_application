@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 public class guiRunner {
     JFrame frame;
     loading loader;
+    JPanel mainCurrentPanel;
 
     public guiRunner(){
         //Creating the Frame
@@ -14,6 +15,7 @@ public class guiRunner {
         loader = new loading(this);
     }
     public void run() {
+        this.mainCurrentPanel = this.loader.getAnnouncePanel();
         JPanel currentPanel = this.loader.getAnnouncePanel();
         JMenuBar menuBar = this.loader.getMenuBar();
         this.frame.getContentPane().add(BorderLayout.NORTH,menuBar);
@@ -24,7 +26,10 @@ public class guiRunner {
     void callChangeFrame(int toCall){
         switch(toCall){
             case 1 :
-                this.changePage(loader.getMainPanel());
+                if(PeerConfig.okAnnounce) {
+                    this.changePage(loader.getMainPanel());
+                    this.mainCurrentPanel = loader.getMainPanel();
+                }
                 break;
             case 2 :
                 this.changePage(loader.getLookPanel());
@@ -45,7 +50,10 @@ public class guiRunner {
                 this.changePage(loader.getFilePanel());
                 break;
             case 8 :
-                this.changePage(loader.getAnnouncePanel());
+                this.changePage(loader.getMenuConfigPanel());
+                break;
+            case 9 :
+                this.changePage(this.mainCurrentPanel);
                 break;
             default :
                 System.out.println("Error the page you want to load doesn't exist");

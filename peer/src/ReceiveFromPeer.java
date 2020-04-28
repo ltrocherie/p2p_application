@@ -14,7 +14,7 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
   public String receivePeer() throws Exception{
 
 
-    Socket connectionSocket = new Socket(connect, inPort);
+    Socket connectionSocket = new Socket(connect, inPort); // Attention ici inPort peut être set à 0 ce qui signifie attribution automatique de port
 
     BufferedReader br = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
     PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(connectionSocket.getOutputStream())),true);
