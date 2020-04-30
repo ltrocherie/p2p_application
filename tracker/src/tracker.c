@@ -271,21 +271,26 @@ void announce(int socket, char *buffer, char *IP)
                         return;
                     }
                     seed_arg = 0;
-                } else {
+                } else if (seed_arg != 0) {
                     fprintf(stderr, "Not enough parameters for a file\n");
                     _log(log_fd, "\nNot enough parameters for a file", "ERROR write log"); //exit_if ( write(log_fd, "\nNot enough parameters for a file", 33) == -1, "ERROR write log" );
                     exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
                     return;
                 }
+                seed = 0;
             }
             /* LEECH CASE : at the end of every word we show the key */
             else if (!seed && leech) {
                 /* Finish the word */
                 key_leech[tmp] = '\0';
-                //TODO : renvoyer une liste de peers avec les clés ???
-                fprintf(stdout,"key:%s\n", key_leech);
-                _log(log_fd, "key ", "ERROR write log"); //exit_if ( write(log_fd, "key ", 4) == -1, "ERROR writing log" );
-                _log(log_fd, key_leech, "ERROR write log"); //exit_if ( write(log_fd, key_leech, strlen(key_leech)*sizeof(char)) == -1, "ERROR writing log" );
+
+                if (!strcmp(key_leech,"\0")) {
+                    //TODO : renvoyer une liste de peers avec les clés ???
+                    fprintf(stdout,"key:%s\n", key_leech);
+                    _log(log_fd, "key ", "ERROR write log");
+                    _log(log_fd, key_leech, "ERROR write log");
+                }
+                leech = 0;
 
                 tmp = 0;
                 /* If both seeds and leechs args were given, it's finished */
