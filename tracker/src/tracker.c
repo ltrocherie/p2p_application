@@ -119,6 +119,9 @@ void announce(int socket, char *buffer, char *IP)
 
     int port = atoi(port_arg);
     // ajout du couple IP:port dans un tableau d'owners
+    //hash__add_ip_port(ip,port);
+    //si hash__add_ip_port == 0 -> erreur ajout dans la table
+
     /* SEEDS LEECHS TREATMENT */
 
     int end = 0;
@@ -206,7 +209,6 @@ void announce(int socket, char *buffer, char *IP)
                 key_leech[tmp] = '\0';
 
                 if (strcmp(key_leech,"\0")) {
-                    //hash__add_leecher(IP, port,key_leech, );
                     exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
                     fprintf(stdout,"add leech by :%s | key:%s\n", IP, key_leech);
                     _log(log_fd, "\nadd leech by :", "ERROR write log");
@@ -214,6 +216,8 @@ void announce(int socket, char *buffer, char *IP)
                     _log(log_fd, "\nleech key ", "ERROR write log");
                     _log(log_fd, key_leech, "ERROR write log");
                     exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+
+                    //hash__add_leecher(IP, port,key_leech );
                 }
 
                 tmp = 0;
@@ -327,7 +331,6 @@ void announce(int socket, char *buffer, char *IP)
                 key_leech[tmp] = '\0';
 
                 if (strcmp(key_leech,"\0")) {
-                    //hash__add_leecher(IP, port,key_leech, );
                     exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
                     fprintf(stdout,"add leech by :%s | key:%s\n", IP, key_leech);
                     _log(log_fd, "\nadd leech by :", "ERROR write log");
@@ -335,6 +338,8 @@ void announce(int socket, char *buffer, char *IP)
                     _log(log_fd, "leech key ", "ERROR write log");
                     _log(log_fd, key_leech, "ERROR write log");
                     exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+
+                    //hash__add_leecher(IP, port,key_leech );
                 }
                 leech = 0;
 
@@ -613,17 +618,37 @@ void update(int socket, char *buffer, char *IP)
                 printf("update by :%s | seed:%s\n",IP, key);
                 _log(log_fd, "\nupdate by :", "ERROR write log");
                 _log(log_fd, IP, "ERROR write log");
-                _log(log_fd, "\nupdate ", "ERROR write log");// exit_if ( write(log_fd, "\nupdate ", 8) == -1, "ERROR write log" );
-                _log(log_fd, "\nkey ", "ERROR write log"); //exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write log" );
-                _log(log_fd, key, "ERROR write log"); //exit_if ( write(log_fd, key, strlen(key)*sizeof(char)) == -1, "ERROR write log" );
+                _log(log_fd, "\nupdate ", "ERROR write log");
+                _log(log_fd, "\nkey ", "ERROR write log");   
+                _log(log_fd, key, "ERROR write log");        
                 exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
 
-                /*int add = hash__add(seeds[3]
-                                    ,IP
-                                    ,port
-                                    ,seeds[0]
-                                    ,atoi(seeds[1])
-                                    ,atoi(seeds[2]));*/
+                struct file* tmp = hash__search(key);
+                if (tmp == NULL) {
+                    exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+                    fprintf(stderr, "\nFile does not exist");
+                    _log(log_fd, "\nFile does not exist", "ERROR write log");
+                    exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+                    
+                    exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
+                    return;
+                }
+
+                int add = hash__add_seeder(key
+                                            ,IP
+                                            ,1000
+                                            ,tmp->name
+                                            ,tmp->length
+                                            ,tmp->piecesize);
+                if (!add) {
+                    exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+                    fprintf(stderr, "Problem adding in hash_table");
+                    _log(log_fd, "\nProblem adding in hash_table", "ERROR write log");
+                    exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+
+                    exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
+                    return;
+                }
             }
             /* Leeching case */
             else if (leech)
@@ -636,6 +661,8 @@ void update(int socket, char *buffer, char *IP)
                 _log(log_fd, "key ", "ERROR write log"); //exit_if ( write(log_fd, "key ", 4) == -1, "ERROR writing log" );
                 _log(log_fd, key, "ERROR write log"); //exit_if ( write(log_fd, key, strlen(key)*sizeof(key)) == -1, "ERROR writing log" );
                 exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+
+                //hash__add_leecher(IP, port,key_leech );
 
             }
             break;
@@ -666,12 +693,35 @@ void update(int socket, char *buffer, char *IP)
                 _log(log_fd, key, "ERROR write log"); //exit_if ( write(log_fd, key, strlen(key)*sizeof(char)) == -1, "ERROR write log" );
                 exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
 
-                /*int add = hash__add(seeds[3]
-                                    ,IP
-                                    ,port
-                                    ,seeds[0]
-                                    ,atoi(seeds[1])
-                                    ,atoi(seeds[2]));*/
+                struct file* tmp = hash__search(key);
+
+                if (tmp == NULL) {
+                    exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+                    fprintf(stderr, "\nFile does not exist");
+                    _log(log_fd, "\nFile does not exist", "ERROR write log");
+                    exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+                    
+                    exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
+                    return;
+                }
+
+                int add = hash__add_seeder(key
+                                            ,IP
+                                            ,1000
+                                            ,tmp->name
+                                            ,tmp->length
+                                            ,tmp->piecesize);
+                if (!add) {
+                    exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+                    fprintf(stderr, "Problem adding in hash_table");
+                    _log(log_fd, "\nProblem adding in hash_table", "ERROR write log");
+                    exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+
+                    exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
+                    return;
+                }
+
+                hash__print();
             }
             /* Leeching case */
             else if (leech)
