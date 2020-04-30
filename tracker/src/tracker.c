@@ -20,6 +20,7 @@
 #include "thpool.h"
 #include "tracker.h"
 #include "hash_table.h"
+//#include "dict.h"
 
 #define SIZE 1024
 
@@ -33,7 +34,7 @@
 #define SEED "seed"
 #define LEECH "leech"
 
-#define CONFIG "../config.ini"
+#define CONFIG "./config.ini"
 #define LOG "log"
 
 int log_fd;
@@ -94,7 +95,7 @@ void announce(int socket, char *buffer, char *IP)
     /* If the word wasn't "listen" : print the commands */
     if (strcmp(port_arg, "listen") != 0)
     {
-        exit_if(send(socket, "> nok", 5,0) == -1, "ERROR sending to socket");
+        exit_if(send(socket, "nok", 3,0) == -1, "ERROR sending to socket");
         return;
     }
 
@@ -109,9 +110,10 @@ void announce(int socket, char *buffer, char *IP)
     tmp = 0;
     i++;
 
+    /* Verify the port is a number */
     if (!isNumeric(port_arg))
     {
-        exit_if(send(socket, "> nok", 5,0) == -1, "ERROR sending to socket");
+        exit_if(send(socket, "nok", 3,0) == -1, "ERROR sending to socket");
         return;
     }
 
@@ -158,25 +160,36 @@ void announce(int socket, char *buffer, char *IP)
                 if (seed_arg == 3) {
                     /* Verify integrity of fields */
                     if (!isNumeric(seeds[1]) || !isNumeric(seeds[2])) {
+
+                        exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
                         fprintf(stderr, "Size of piecesize must be integers\n");
                         _log(log_fd, "\nSize of piecesize must be integers", "ERROR write log"); //exit_if ( write(log_fd, "\nSize of piecesize must be integers", 35) == -1, "ERROR write log" );
-                        exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
+                        exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+
+                        exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
                         return;
                     }
 
-                    fprintf(stdout,"add:%s|key:%s|taille:%d|piece:%d\n", seeds[0], seeds[3],atoi(seeds[1]), atoi(seeds[2]));
-                    _log(log_fd, "\nkey ", "ERROR write log"); //exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write socket" );
-                    _log(log_fd, seeds[3], "ERROR write log"); //exit_if ( write(log_fd, seeds[3], strlen(seeds[3])*sizeof(char)) == -1, "ERROR write socket" );
-                    _log(log_fd, "\nadd ", "ERROR write log"); //exit_if ( write(log_fd, "\nadd ", 5) == -1, "ERROR write socket" );
-                    _log(log_fd, seeds[0], "ERROR write log"); //exit_if ( write(log_fd, seeds[0], strlen(seeds[0])*sizeof(char)) == -1, "ERROR write socket" );
+                    exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+                    fprintf(stdout,"add seed by:%s | add:%s|key:%s|taille:%d|piece:%d\n", IP, seeds[0], seeds[3],atoi(seeds[1]), atoi(seeds[2]));
+                    _log(log_fd, "\nadd by :", "ERROR write log");
+                    _log(log_fd, IP, "ERROR write log");
+                    _log(log_fd, "\nkey ", "ERROR write log");
+                    _log(log_fd, seeds[3], "ERROR write log");
+                    _log(log_fd, "\nadd ", "ERROR write log");
+                    _log(log_fd, seeds[0], "ERROR write log");
+                    exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
 
                     int add = hash__add_seeder(seeds[3], IP, port, seeds[0], atoi(seeds[1]), atoi(seeds[2]));
 
                     if (!add)
                     {
+                        exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
                         fprintf(stderr, "Problem adding in hash_table");
-                        _log(log_fd, "\nProblem adding in hash_table", "ERROR write log"); //exit_if ( write(log_fd, "\nProblem adding in hash_table", 33) == -1, "ERROR write log" );
-                        exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
+                        _log(log_fd, "\nProblem adding in hash_table", "ERROR write log");
+                        exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+
+                        exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
                         return;
                     }
                     seed_arg = 0;
@@ -191,10 +204,18 @@ void announce(int socket, char *buffer, char *IP)
             else if (!seed && leech) {
                 /* Finish the word */
                 key_leech[tmp] = '\0';
-                //TODO : renvoyer une liste de peers avec les clés ???
-                fprintf(stdout,"key:%s\n", key_leech);
-                _log(log_fd, "\nkey ", "ERROR write log"); //exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write log" );
-                _log(log_fd, key_leech, "ERROR write log"); //exit_if ( write(log_fd, key_leech, strlen(key_leech)*sizeof(char)) == -1, "ERROR write log" );
+
+                if (strcmp(key_leech,"\0")) {
+                    //hash__add_leecher(IP, port,key_leech, );
+                    exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+                    fprintf(stdout,"add leech by :%s | key:%s\n", IP, key_leech);
+                    _log(log_fd, "\nadd leech by :", "ERROR write log");
+                    _log(log_fd, IP, "ERROR write log");
+                    _log(log_fd, "\nleech key ", "ERROR write log");
+                    _log(log_fd, key_leech, "ERROR write log");
+                    exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+                }
+
                 tmp = 0;
                 break;
             }
@@ -215,9 +236,12 @@ void announce(int socket, char *buffer, char *IP)
                 }
                 /* error case */
                 else {
+                    exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
                     fprintf(stderr, "Wrong key word");
-                    _log(log_fd, "\nNo key word", "ERROR write log"); //exit_if ( write(log_fd, "\nNo key word", 12) == -1, "ERROR write log" );
-                    exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
+                    _log(log_fd, "\nNo key word", "ERROR write log");
+                    exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+
+                    exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
                     return;
                 }
             }
@@ -228,9 +252,12 @@ void announce(int socket, char *buffer, char *IP)
 
             /* if we start by giving the seeds */
             if (!seed && !leech) {
+                exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
                 fprintf(stderr, "Bracket without key word\n");
-                _log(log_fd, "\nBracket without key word", "ERROR write log"); //exit_if ( write(log_fd, "\nBracket without key word", 25) == -1, "ERROR write log" );
-                exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
+                _log(log_fd, "\nBracket without key word", "ERROR write log");
+                exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+                
+                exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
             }
 
             tmp = 0;
@@ -250,31 +277,46 @@ void announce(int socket, char *buffer, char *IP)
                 {
                     /* Verify integrity of fields */
                     if (!isNumeric(seeds[1]) || !isNumeric(seeds[2])) {
+                        exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
                         fprintf(stderr, "Size of piecesize must be integers\n");
-                        _log(log_fd, "\nSize of piecesize must be integers", "ERROR write log"); //exit_if ( write(log_fd, "\nSize of piecesize must be integers", 35) == -1, "ERROR write log" );
-                        exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
+                        _log(log_fd, "\nSize of piecesize must be integers", "ERROR write log");
+                        exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+                        
+                        exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
                         return;
                     }
 
-                    fprintf(stdout,"add:%s|key:%s|taille:%d|piece:%d\n", seeds[0], seeds[3],atoi(seeds[1]), atoi(seeds[2]));
-                    _log(log_fd, "\nkey ", "ERROR write log"); //exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write log" );
-                    _log(log_fd, seeds[3], "ERROR write log"); //exit_if ( write(log_fd, seeds[3], strlen(seeds[3])*sizeof(char)) == -1, "ERROR write log" );
-                    _log(log_fd, "\nadd ", "ERROR write log"); //exit_if ( write(log_fd, "\nadd ", 5) == -1, "ERROR write log" );
-                    _log(log_fd, seeds[0], "ERROR write log"); //exit_if ( write(log_fd, seeds[0], strlen(seeds[0])*sizeof(char)) == -1, "ERROR write log" );
+                    exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+                    fprintf(stdout,"add seed by:%s | add:%s|key:%s|taille:%d|piece:%d\n", IP, seeds[0], seeds[3],atoi(seeds[1]), atoi(seeds[2]));
+                    _log(log_fd, "\nadd by :", "ERROR write log");
+                    _log(log_fd, IP, "ERROR write log");
+                    _log(log_fd, "\nkey ", "ERROR write log");
+                    _log(log_fd, seeds[3], "ERROR write log");
+                    _log(log_fd, "\nadd ", "ERROR write log");
+                    _log(log_fd, seeds[0], "ERROR write log");
+                    exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
 
                     int add = hash__add_seeder(seeds[3], IP, port, seeds[0], atoi(seeds[1]), atoi(seeds[2]));
 
                     if (!add) {
+                        exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
                         fprintf(stderr, "Problem adding in hash_table");
-                        _log(log_fd, "\nProblem adding in hash_table", "ERROR write log"); //exit_if ( write(log_fd, "\nProblem adding in hash_table", 33) == -1, "ERROR write log" );
-                        exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
+                        _log(log_fd, "\nProblem adding in hash_table", "ERROR write log");
+                        exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+
+                        exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
                         return;
                     }
                     seed_arg = 0;
-                } else if (seed_arg != 0) {
+                }
+                /* Else if not enough args in seeds */
+                else if (seed_arg != 0) {
+                    exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
                     fprintf(stderr, "Not enough parameters for a file\n");
-                    _log(log_fd, "\nNot enough parameters for a file", "ERROR write log"); //exit_if ( write(log_fd, "\nNot enough parameters for a file", 33) == -1, "ERROR write log" );
-                    exit_if ( send(socket, "> nok", 5, 0) == -1, "ERROR sending to socket" );
+                    _log(log_fd, "\nNot enough parameters for a file", "ERROR write log");
+                    exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+                    
+                    exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
                     return;
                 }
                 seed = 0;
@@ -284,11 +326,15 @@ void announce(int socket, char *buffer, char *IP)
                 /* Finish the word */
                 key_leech[tmp] = '\0';
 
-                if (!strcmp(key_leech,"\0")) {
-                    //TODO : renvoyer une liste de peers avec les clés ???
-                    fprintf(stdout,"key:%s\n", key_leech);
-                    _log(log_fd, "key ", "ERROR write log");
+                if (strcmp(key_leech,"\0")) {
+                    //hash__add_leecher(IP, port,key_leech, );
+                    exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+                    fprintf(stdout,"add leech by :%s | key:%s\n", IP, key_leech);
+                    _log(log_fd, "\nadd leech by :", "ERROR write log");
+                    _log(log_fd, IP, "ERROR write log");
+                    _log(log_fd, "leech key ", "ERROR write log");
                     _log(log_fd, key_leech, "ERROR write log");
+                    exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
                 }
                 leech = 0;
 
@@ -316,7 +362,7 @@ void announce(int socket, char *buffer, char *IP)
 
     hash__print();
     /* Everything happened good */
-    exit_if ( send(socket, "> ok", 4, 0) == -1, "ERROR sending to socket" );
+    exit_if ( send(socket, "ok", 2, 0) == -1, "ERROR sending to socket" );
 }
 
 void look(int socket, char *buffer, char *IP)
@@ -377,7 +423,7 @@ void look(int socket, char *buffer, char *IP)
             }
             else
             {
-                send(socket, "> nok", 5, 0);
+                send(socket, "nok", 3, 0);
                 return;
             }
             i++;
@@ -388,7 +434,7 @@ void look(int socket, char *buffer, char *IP)
             /* If the comparator is > with other than filesize, this is not valid */
             if (strcmp(arg, "filesize") != 0)
             {
-                send(socket, "> nok", 5, 0);
+                send(socket, "nok", 3, 0);
                 return;
             }
 
@@ -406,7 +452,7 @@ void look(int socket, char *buffer, char *IP)
             /* If the comparator is < with other than filesize, this is t valid */
             if (strcmp(arg, "filesize") != 0)
             {
-                send(socket, "> nok", 5, 0);
+                send(socket, "nok", 3, 0);
                 return;
             }
 
@@ -422,7 +468,7 @@ void look(int socket, char *buffer, char *IP)
             break;
         case ']':
             if (buffer[i-1] != '"') {
-                send(socket, "> nok", 5, 0);
+                send(socket, "nok", 3, 0);
                 return;
             }
 
@@ -448,41 +494,54 @@ void look(int socket, char *buffer, char *IP)
     }
 
     if (!end) {
-        send(socket, "> nok", 5, 0);
+        send(socket, "nok", 3, 0);
         return;
     }
 
+    exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+    printf("look by :%s\n", IP);
     printf("filename:%s\n", name);
     printf("size:%s\n", size);
     printf("comparator:%c\n", comparator);
+    exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
 
     if (!isNumeric(size))
     {
-        send(socket, "> nok", 5, 0);
-        _log(log_fd, "\nNaN size", "ERROR write log"); //exit_if( write(log_fd,"\nNaN size",9) == -1, "ERROR NaN size" );
+        send(socket, "nok", 3, 0);
+        exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+        _log(log_fd, "\nNaN size", "ERROR write log");
+        exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
         return;
     }
 
     if (given_size && atoi(size) < 0) {
-        send(socket, "> nok", 5, 0);
-        _log(log_fd, "\nNegative size", "ERROR write log"); //exit_if( write(log_fd,"\nNegative size",9) == -1, "ERROR negative size" );
+        send(socket, "nok", 3, 0);
+        exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+        _log(log_fd, "\nNegative size", "ERROR write log");
+        exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+
         return;
     }
 
-    _log(log_fd, "\nfilename:", "ERROR write log"); //exit_if( write(log_fd,"\nfilename:",10) == -1, "ERROR writing to log" );
-    _log(log_fd, name, "ERROR write log"); //xit_if( write(log_fd,name,strlen(name)*sizeof(char)) == -1, "ERROR writing to log" );
-    _log(log_fd, "\nsize:", "ERROR write log"); //exit_if( write(log_fd,"\nsize:",6) == -1, "ERROR writing to log" );
-    _log(log_fd, size, "ERROR write log"); //exit_if( write(log_fd,size,strlen(size)*sizeof(char)) == -1, "ERROR writing to log" );
-    _log(log_fd, "\ncomparator:", "ERROR write log"); //exit_if( write(log_fd,"\ncomparator:",12) == -1, "ERROR writing to log" );
-    _log(log_fd, &comparator, "ERROR write log"); //exit_if( write(log_fd,&comparator,sizeof(char)) == -1, "ERROR writing to log" );
+    exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+    _log(log_fd, "\nlook by :", "ERROR write log");
+    _log(log_fd, IP, "ERROR write log");
+    _log(log_fd, "\nfilename:", "ERROR write log");  
+    _log(log_fd, name, "ERROR write log");           
+    _log(log_fd, "\nsize:", "ERROR write log");      
+    _log(log_fd, size, "ERROR write log");           
+    _log(log_fd, "\ncomparator:", "ERROR write log");
+    _log(log_fd, &comparator, "ERROR write log");
+    exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
 
     char find[1024] = {'\0'};
     strcat(find,"> list [");
     hash__getfiles(name, comparator, atoi(size), find);
 
-    //todo : logfd
+    exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
     printf("%s\n", find);
     printf("%d\n", atoi(size));
+    exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
 
     strcat(find,"]");
 
@@ -501,7 +560,12 @@ void update(int socket, char *buffer, char *IP)
 
     /* If there is no space in the command */
     if (p == NULL) {
+        exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
         fprintf(stderr, "No \"%c\" found.\n", space);
+        _log(log_fd, "\nNo \"%c\" found", "ERROR write log");
+        exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+
+        exit_if (send(socket,"nok", 3,0) == -1, "ERROR sending to socket");
         return;
     }
 
@@ -545,10 +609,14 @@ void update(int socket, char *buffer, char *IP)
             if (seed)
             {
                 /* We add a new file OR a new owner in the existing file */
-                printf("update seed:%s\n",key);
+                exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+                printf("update by :%s | seed:%s\n",IP, key);
+                _log(log_fd, "\nupdate by :", "ERROR write log");
+                _log(log_fd, IP, "ERROR write log");
                 _log(log_fd, "\nupdate ", "ERROR write log");// exit_if ( write(log_fd, "\nupdate ", 8) == -1, "ERROR write log" );
                 _log(log_fd, "\nkey ", "ERROR write log"); //exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write log" );
                 _log(log_fd, key, "ERROR write log"); //exit_if ( write(log_fd, key, strlen(key)*sizeof(char)) == -1, "ERROR write log" );
+                exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
 
                 /*int add = hash__add(seeds[3]
                                     ,IP
@@ -561,9 +629,13 @@ void update(int socket, char *buffer, char *IP)
             else if (leech)
             {
                 /* Add leeching ??? */
-                printf("add leech:%s\n",key);
+                exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+                printf("update by :%s | leech:%s\n",IP, key);
+                _log(log_fd, "\nupdate by :", "ERROR write log");
+                _log(log_fd, IP, "ERROR write log");
                 _log(log_fd, "key ", "ERROR write log"); //exit_if ( write(log_fd, "key ", 4) == -1, "ERROR writing log" );
                 _log(log_fd, key, "ERROR write log"); //exit_if ( write(log_fd, key, strlen(key)*sizeof(key)) == -1, "ERROR writing log" );
+                exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
 
             }
             break;
@@ -576,10 +648,8 @@ void update(int socket, char *buffer, char *IP)
             i++;
 
             /* If we didnt have neither seed or leech in [], we don't care */
-            if (!strcmp(key, "\0")) {
-                printf("no key\n");
+            if (!strcmp(key, "\0"))
                 break;
-            }
 
             /* Seed case */
             if (seed)
@@ -587,10 +657,14 @@ void update(int socket, char *buffer, char *IP)
                 seed = 0;
 
                 /* We add a new file OR a new owner in the existing file */
-                printf("update seed:%s\n",key);
+                exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+                printf("update by :%s | seed:%s\n",IP, key);
+                _log(log_fd, "\nupdate by :", "ERROR write log");
+                _log(log_fd, IP, "ERROR write log");
                 _log(log_fd, "\nupdate ", "ERROR write log"); //exit_if ( write(log_fd, "\nupdate ", 8) == -1, "ERROR write log" );
                 _log(log_fd, "\nkey ", "ERROR write log"); //exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write log" );
                 _log(log_fd, key, "ERROR write log"); //exit_if ( write(log_fd, key, strlen(key)*sizeof(char)) == -1, "ERROR write log" );
+                exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
 
                 /*int add = hash__add(seeds[3]
                                     ,IP
@@ -606,9 +680,13 @@ void update(int socket, char *buffer, char *IP)
                 end = 1;
 
                 /* Add leeching ??? */
-                printf("add leech:%s\n",key);
-                _log(log_fd, "key ", "ERROR write log"); //exit_if ( write(log_fd, "key ", 4) == -1, "ERROR writing log" );
-                _log(log_fd, key, "ERROR write log"); //exit_if ( write(log_fd, key, strlen(key)*sizeof(key)) == -1, "ERROR writing log" );
+                exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+                printf("update by :%s | leech:%s\n",IP, key);
+                _log(log_fd, "\nupdate by :", "ERROR write log");
+                _log(log_fd, IP, "ERROR write log");
+                _log(log_fd, "key ", "ERROR write log");
+                _log(log_fd, key, "ERROR write log");   
+                exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
             }
             break;
         /* Case when we encounter a character */
@@ -622,7 +700,7 @@ void update(int socket, char *buffer, char *IP)
     }
 
     /* Everything happened good */
-    exit_if ( send(socket, "> ok", 5,0) == -1, "ERROR sending to socket");
+    exit_if ( send(socket, "ok", 3,0) == -1, "ERROR sending to socket");
 }
 
 void getfile(int socket, char *buffer, char *IP)
@@ -635,9 +713,12 @@ void getfile(int socket, char *buffer, char *IP)
     /* If there is no space in the command */
     if (p == NULL)
     {
+        exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
         fprintf(stderr, "No \"%c\" found.\n", space);
-        _log(log_fd, "\nNo \"%c\" found", "ERROR write log"); //exit_if( write(log_fd,"\nNo \"%c\" found",13) == -1, "ERROR writing log" );
-        exit_if (send(socket,"> nok", 5,0) == -1, "ERROR sending to socket");
+        _log(log_fd, "\nNo \"%c\" found", "ERROR write log");
+        exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+
+        exit_if (send(socket,"nok", 3,0) == -1, "ERROR sending to socket");
         return;
     }
 
@@ -663,11 +744,16 @@ void getfile(int socket, char *buffer, char *IP)
 
     if (f == NULL)
     {
-        fprintf(stderr, "File with key %s not found in the hash table\n", key);
+        exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+        fprintf(stderr, "get file by:%s | File with key %s not found in the hash table\n", IP, key);
+        _log(log_fd, "\ngetfile by :", "ERROR write log");
+        _log(log_fd, IP, "ERROR write log");
         _log(log_fd, "\nFile with key ", "ERROR write log"); //exit_if( write(log_fd,"\nFile with key ",15) == -1, "ERROR writing log" );
         _log(log_fd, key, "ERROR write log"); //exit_if( write(log_fd,key,strlen(key)*sizeof(char)) == -1, "ERROR writing log" );
         _log(log_fd, " not found in the hash table", "ERROR write log"); //exit_if( write(log_fd," not found in the hash table",28) == -1, "ERROR writing log" );
-        exit_if (send(socket,"> nok", 5,0) == -1, "ERROR sending to socket");
+        exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+        
+        exit_if (send(socket,"nok", 3,0) == -1, "ERROR sending to socket");
         return;
     }
 
@@ -740,7 +826,7 @@ void treat_socket(void *arg)
     else if (!strcmp(command, GET))
         getfile(socket, buffer, ip);
     else
-        exit_if(send(socket, "> nok", 5,0) == -1, "ERROR sending to socket");
+        exit_if(send(socket, "nok", 3,0) == -1, "ERROR sending to socket");
     close(socket);
     return;
 }
@@ -753,6 +839,10 @@ int main(int argc, char *argv[])
 
     /* Pool of threads which will retrieve work to do in the queue of work */
     threadpool thpool = thpool_init(5);
+
+    /* init a dictionary of users */
+    //where all users have their own unique IP adresse for update
+
 
     /* Open and write in log */
     log_fd = open(LOG, O_CREAT | O_WRONLY | O_APPEND,0755);
@@ -827,7 +917,8 @@ int main(int argc, char *argv[])
         socket_ip arg = {*sock_thread, inet_ntoa(cli_addr.sin_addr)};
         thpool_add_work(thpool, (void *)treat_socket, &arg);
     }
-    close(sockfd); //useless now
+    
+    exit_if ( pthread_mutex_destroy(&log_lock) != 0, "ERROR init mutex" );  
     close(log_fd);
 
     hash__table_end();
