@@ -84,14 +84,13 @@ int hash__add_seeder(char* key,char* IP, int port,char* name, int length, int pi
 
 /**
  * Add a leecher in the file with the IP and port
+ * @param key the file with the key key
  * @param IP IP of the leecher
  * @param port port where the leecher listen to other peer
- * @param key_table the table of keys
- * @param nb_key the number of key in the table
  *
  * @return 1 if the file has been added correctly, 0 otherwise
  * */
-int hash__add_leecher(char* IP, int port, char* key_table[], int nb_key);
+int hash__add_leecher(char* key, char* IP, int port, char* key_table[]);
 
 /**
  * Search a file in the hash_table depending of the key but also on different possible

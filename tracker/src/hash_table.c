@@ -99,35 +99,33 @@ int hash__add_seeder(char* key,char* IP, int port,char* name, int length, int pi
     return bool;
 }
 
-int hash__add_leecher(char* IP, int port, char* key_table[], int nb_key){
+int hash__add_leecher(char* key, char* IP, int port){
     int nb = 0;
-    for(int i=0;i<nb_key;i++){
-        int found = 1;
-        int index = hash_value(key_table[i]);
-        struct file *p;
-        pthread_mutex_lock(&mutex_table[index]);
-        SLIST_FOREACH(p,&hash_table[index],next_file){
-            if(!strcmp(p->key,key_table[i])){
-                struct leecher *l;
-                LIST_FOREACH(l,&p->leechers,next_leecher)
-                    if(!strcmp(IP,l->IP) || port == l->port){
-                        found = 0;
-                        nb ++;
-                    }
-                if(found){
-                    struct leecher *leech = malloc(sizeof(struct leecher));
-                    leech->IP = malloc(sizeof(char) * 16);
-                    strcpy(leech->IP,IP);
-                    leech->port = port;
-                    LIST_INSERT_HEAD(&p->leechers,leech,next_leecher);
-                    p->nb_leechers ++;
+    int found = 1;
+    int index = hash_value(key);
+    struct file *p;
+    pthread_mutex_lock(&mutex_table[index]);
+    SLIST_FOREACH(p,&hash_table[index],next_file){
+        if(!strcmp(p->key,key_table[i])){
+            struct leecher *l;
+            LIST_FOREACH(l,&p->leechers,next_leecher)
+                if(!strcmp(IP,l->IP) || port == l->port){
+                    found = 0;
                     nb ++;
                 }
+            if(found){
+                struct leecher *leech = malloc(sizeof(struct leecher));
+                leech->IP = malloc(sizeof(char) * 16);
+                strcpy(leech->IP,IP);
+                leech->port = port;
+                LIST_INSERT_HEAD(&p->leechers,leech,next_leecher);
+                p->nb_leechers ++;
+                nb ++;
             }
         }
-        pthread_mutex_unlock(&mutex_table[index]);
     }
-    return nb == nb_key;
+    pthread_mutex_unlock(&mutex_table[index]);
+    return nb;
 }
 
 
