@@ -90,7 +90,7 @@ int hash__add_seeder(char* key,char* IP, int port,char* name, int length, int pi
  *
  * @return 1 if the file has been added correctly, 0 otherwise
  * */
-int hash__add_leecher(char* key, char* IP, int port, char* key_table[]);
+int hash__add_leecher(char* key, char* IP, int port);
 
 /**
  * Search a file in the hash_table depending of the key but also on different possible

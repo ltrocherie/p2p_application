@@ -28,3 +28,6 @@ $(BLD)thpool.o:
 
 $(BLD)hash_table.o:
 		cc $(FLAGS) -o $@ -c $(SRC)hash_table.c
+
+$(BLD)port_table.o:
+		cc $(FLAGS) -o $@ -c $(SRC)port_table.c

@@ -217,7 +217,17 @@ void announce(int socket, char *buffer, char *IP)
                     _log(log_fd, key_leech, "ERROR write log");
                     exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
 
-                    //hash__add_leecher(IP, port,key_leech );
+                    int add_leech = hash__add_leecher(key_leech, IP, port);
+                    if (!add_leech)
+                    {
+                        exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+                        fprintf(stderr, "Problem adding leech in hash_table");
+                        _log(log_fd, "\nProblem adding in hash_table", "ERROR write log");
+                        exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+
+                        exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
+                        return;
+                    }
                 }
 
                 tmp = 0;
@@ -260,7 +270,7 @@ void announce(int socket, char *buffer, char *IP)
                 fprintf(stderr, "Bracket without key word\n");
                 _log(log_fd, "\nBracket without key word", "ERROR write log");
                 exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
-                
+
                 exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
             }
 
@@ -285,7 +295,7 @@ void announce(int socket, char *buffer, char *IP)
                         fprintf(stderr, "Size of piecesize must be integers\n");
                         _log(log_fd, "\nSize of piecesize must be integers", "ERROR write log");
                         exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
-                        
+
                         exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
                         return;
                     }
@@ -319,7 +329,7 @@ void announce(int socket, char *buffer, char *IP)
                     fprintf(stderr, "Not enough parameters for a file\n");
                     _log(log_fd, "\nNot enough parameters for a file", "ERROR write log");
                     exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
-                    
+
                     exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
                     return;
                 }
@@ -339,7 +349,17 @@ void announce(int socket, char *buffer, char *IP)
                     _log(log_fd, key_leech, "ERROR write log");
                     exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
 
-                    //hash__add_leecher(IP, port,key_leech );
+                    int add_leech = hash__add_leecher(key_leech, IP, port);
+                    if (!add_leech)
+                    {
+                        exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+                        fprintf(stderr, "Problem adding leech in hash_table");
+                        _log(log_fd, "\nProblem adding in hash_table", "ERROR write log");
+                        exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+
+                        exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
+                        return;
+                    }
                 }
                 leech = 0;
 
@@ -531,10 +551,10 @@ void look(int socket, char *buffer, char *IP)
     exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
     _log(log_fd, "\nlook by :", "ERROR write log");
     _log(log_fd, IP, "ERROR write log");
-    _log(log_fd, "\nfilename:", "ERROR write log");  
-    _log(log_fd, name, "ERROR write log");           
-    _log(log_fd, "\nsize:", "ERROR write log");      
-    _log(log_fd, size, "ERROR write log");           
+    _log(log_fd, "\nfilename:", "ERROR write log");
+    _log(log_fd, name, "ERROR write log");
+    _log(log_fd, "\nsize:", "ERROR write log");
+    _log(log_fd, size, "ERROR write log");
     _log(log_fd, "\ncomparator:", "ERROR write log");
     _log(log_fd, &comparator, "ERROR write log");
     exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
@@ -619,8 +639,8 @@ void update(int socket, char *buffer, char *IP)
                 _log(log_fd, "\nupdate by :", "ERROR write log");
                 _log(log_fd, IP, "ERROR write log");
                 _log(log_fd, "\nupdate ", "ERROR write log");
-                _log(log_fd, "\nkey ", "ERROR write log");   
-                _log(log_fd, key, "ERROR write log");        
+                _log(log_fd, "\nkey ", "ERROR write log");
+                _log(log_fd, key, "ERROR write log");
                 exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
 
                 struct file* tmp = hash__search(key);
@@ -629,7 +649,7 @@ void update(int socket, char *buffer, char *IP)
                     fprintf(stderr, "\nFile does not exist");
                     _log(log_fd, "\nFile does not exist", "ERROR write log");
                     exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
-                    
+
                     exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
                     return;
                 }
@@ -662,7 +682,17 @@ void update(int socket, char *buffer, char *IP)
                 _log(log_fd, key, "ERROR write log"); //exit_if ( write(log_fd, key, strlen(key)*sizeof(key)) == -1, "ERROR writing log" );
                 exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
 
-                //hash__add_leecher(IP, port,key_leech );
+                int add_leech = hash__add_leecher(key, IP, 1000);
+                if (!add_leech)
+                {
+                    exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+                    fprintf(stderr, "Problem adding leech in hash_table");
+                    _log(log_fd, "\nProblem adding in hash_table", "ERROR write log");
+                    exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+
+                    exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
+                    return;
+                }
 
             }
             break;
@@ -700,7 +730,7 @@ void update(int socket, char *buffer, char *IP)
                     fprintf(stderr, "\nFile does not exist");
                     _log(log_fd, "\nFile does not exist", "ERROR write log");
                     exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
-                    
+
                     exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
                     return;
                 }
@@ -735,7 +765,7 @@ void update(int socket, char *buffer, char *IP)
                 _log(log_fd, "\nupdate by :", "ERROR write log");
                 _log(log_fd, IP, "ERROR write log");
                 _log(log_fd, "key ", "ERROR write log");
-                _log(log_fd, key, "ERROR write log");   
+                _log(log_fd, key, "ERROR write log");
                 exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
             }
             break;
@@ -802,7 +832,7 @@ void getfile(int socket, char *buffer, char *IP)
         _log(log_fd, key, "ERROR write log"); //exit_if( write(log_fd,key,strlen(key)*sizeof(char)) == -1, "ERROR writing log" );
         _log(log_fd, " not found in the hash table", "ERROR write log"); //exit_if( write(log_fd," not found in the hash table",28) == -1, "ERROR writing log" );
         exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
-        
+
         exit_if (send(socket,"nok", 3,0) == -1, "ERROR sending to socket");
         return;
     }
@@ -967,8 +997,8 @@ int main(int argc, char *argv[])
         socket_ip arg = {*sock_thread, inet_ntoa(cli_addr.sin_addr)};
         thpool_add_work(thpool, (void *)treat_socket, &arg);
     }
-    
-    exit_if ( pthread_mutex_destroy(&log_lock) != 0, "ERROR init mutex" );  
+
+    exit_if ( pthread_mutex_destroy(&log_lock) != 0, "ERROR init mutex" );
     close(log_fd);
 
     hash__table_end();

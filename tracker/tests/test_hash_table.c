@@ -65,8 +65,9 @@ void test_hash__add_leecher(){
     hash__add_seeder("3OGenstil","225.250.225.230",210,"Un delegue",1028,1);
     hash__add_seeder("TT","5.5.5.5",1000,"Un delegue",10,4);
 
-    char* T[3] = {"LROTPbestdlesGAY4EVER","3OGenstil","TT"};
-    assert(hash__add_leecher("125.125.125.125",8080,T,3));
+    assert(hash__add_leecher("LROTPbestdlesGAY4EVER","125.125.125.125",8080));
+    assert(hash__add_leecher("3OGenstil","125.125.125.125",8080));
+    assert(hash__add_leecher("TT","125.125.125.125",8080));
 
     hash__table_end();
     printf("SUCCESS\n");

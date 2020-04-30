@@ -106,7 +106,7 @@ int hash__add_leecher(char* key, char* IP, int port){
     struct file *p;
     pthread_mutex_lock(&mutex_table[index]);
     SLIST_FOREACH(p,&hash_table[index],next_file){
-        if(!strcmp(p->key,key_table[i])){
+        if(!strcmp(p->key,key)){
             struct leecher *l;
             LIST_FOREACH(l,&p->leechers,next_leecher)
                 if(!strcmp(IP,l->IP) || port == l->port){
@@ -210,9 +210,15 @@ void hash__print(){
         struct file *f;
         SLIST_FOREACH(f,&hash_table[i],next_file){
             printf("A l'indice %d,il y a %s %s [",i,f->name,f->key);
+            int nb = 0;
             struct seeder *seed;
             SLIST_FOREACH(seed,&f->seeders,next_seeder){
-                    printf("%s:%d ",seed->IP,seed->port);
+                if(nb)
+                    printf(" %s:%d",seed->IP,seed->port);
+                else {
+                    printf("%s:%d",seed->IP,seed->port);
+                    nb ++;
+                }
             }
             printf("]\n");
         }
