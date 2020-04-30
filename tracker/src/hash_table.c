@@ -214,7 +214,7 @@ void hash__print(){
             printf("A l'indice %d,il y a %s %s [",i,f->name,f->key);
             struct seeder *seed;
             SLIST_FOREACH(seed,&f->seeders,next_seeder){
-                    printf("%s:%d",seed->IP,seed->port);
+                    printf("%s:%d ",seed->IP,seed->port);
             }
             printf("]\n");
         }
