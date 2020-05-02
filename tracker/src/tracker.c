@@ -683,6 +683,7 @@ void update(int socket, char *buffer, char *IP)
                 exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
 
                 int add_leech = hash__add_leecher(key, IP, 1000);
+                
                 if (!add_leech)
                 {
                     exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
