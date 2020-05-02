@@ -41,10 +41,20 @@ int hash__update_seeder(struct file* f,char* IP, int port,char* name, int length
     if(piecesize == -1 || piecesize != f->piecesize)
         return 0;
 
+    /* If he is already in the seeders, we return */
     struct seeder* seed;
     SLIST_FOREACH(seed,&f->seeders,next_seeder)
         if(!strcmp(IP,seed->IP) && port == seed->port)
             return 1;
+            
+    /* If the owner is in the leecher, we delete it */
+    struct leecher *leech;
+    LIST_FOREACH(leech,&f->leechers,next_leecher)
+        if(!strcmp(IP,leech->IP) && port == leech->port) {
+            LIST_REMOVE(leech, next_leecher);
+            f->nb_leechers--;
+        }
+
 
     /* Add a new seeder in the list */
     seed = malloc(sizeof(struct seeder));
@@ -109,7 +119,7 @@ int hash__add_leecher(char* key, char* IP, int port){
         if(!strcmp(p->key,key)){
             struct leecher *l;
             LIST_FOREACH(l,&p->leechers,next_leecher)
-                if(!strcmp(IP,l->IP) || port == l->port){
+                if(!strcmp(IP,l->IP) && port == l->port){
                     found = 0;
                     nb ++;
                 }
@@ -209,7 +219,7 @@ void hash__print(){
         pthread_mutex_lock(&mutex_table[i]);
         struct file *f;
         SLIST_FOREACH(f,&hash_table[i],next_file){
-            printf("A l'indice %d,il y a %s %s [",i,f->name,f->key);
+            printf("i:%d | name:%s,key:%s seeders(%d) [",i,f->name,f->key,f->nb_seeders);
             int nb = 0;
             struct seeder *seed;
             SLIST_FOREACH(seed,&f->seeders,next_seeder){
@@ -218,6 +228,17 @@ void hash__print(){
                 else {
                     printf("%s:%d",seed->IP,seed->port);
                     nb ++;
+                }
+            }
+            printf("] leechers(%d) [",f->nb_leechers);
+            int nb2=0;
+            struct leecher *leech;
+            LIST_FOREACH(leech,&f->leechers,next_leecher){
+                if(nb2)
+                    printf(" %s:%d",leech->IP,leech->port);
+                else {
+                    printf("%s:%d",leech->IP,leech->port);
+                    nb2 ++;
                 }
             }
             printf("]\n");
