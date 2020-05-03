@@ -17,7 +17,7 @@ clean:
 	rm -rf $(SRC)*.o *~ \#*#
 	rm -rf $(BLD)*
 
-tracker: $(BLD)utils.o $(BLD)thpool.o $(BLD)hash_table.o
+tracker: $(BLD)utils.o $(BLD)thpool.o $(BLD)hash_table.o $(BLD)port_table.o 
 	cc $(FLAGS) -g3 -o $(BLD)$@ $(SRC)$@.c $^ -pthread
 
 $(BLD)utils.o:
