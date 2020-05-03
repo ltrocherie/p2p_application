@@ -219,7 +219,7 @@ void hash__print(){
         pthread_mutex_lock(&mutex_table[i]);
         struct file *f;
         SLIST_FOREACH(f,&hash_table[i],next_file){
-            printf("i:%d | name:%s,key:%s seeders(%d) [",i,f->name,f->key,f->nb_seeders);
+            printf("\ni:%d | name:%s,key:%s seeders(%d) [",i,f->name,f->key,f->nb_seeders);
             int nb = 0;
             struct seeder *seed;
             SLIST_FOREACH(seed,&f->seeders,next_seeder){
@@ -241,7 +241,7 @@ void hash__print(){
                     nb2 ++;
                 }
             }
-            printf("]\n");
+            printf("]");
         }
         pthread_mutex_unlock(&mutex_table[i]);
     }
