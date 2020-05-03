@@ -13,7 +13,7 @@
  *
  * @return hashed index value : where to store the file
  * */
-int hash_value(char* key){
+int hash_value_port(char* key){
     int hash = 0;
     for (int i = 0; i < strlen(key); i++)
         hash = 31 * hash + key[i];
@@ -21,7 +21,7 @@ int hash_value(char* key){
 }
 
 int port__add(char* IP, int port){
-    int index = hash_value(IP);
+    int index = hash_value_port(IP);
     struct peer *p;
     pthread_mutex_lock(&port_mutex_table[index]);
     SLIST_FOREACH(p,&port_table[index],next_peer)
@@ -39,7 +39,7 @@ int port__add(char* IP, int port){
 }
 
 int port__search(char *IP){
-    int index = hash_value(IP);
+    int index = hash_value_port(IP);
     struct peer *p;
     pthread_mutex_lock(&port_mutex_table[index]);
     SLIST_FOREACH(p,&port_table[index],next_peer){
@@ -64,7 +64,7 @@ void port__print(){
         pthread_mutex_lock(&port_mutex_table[i]);
         struct peer *p;
         SLIST_FOREACH(p,&port_table[i],next_peer)
-            printf("A l'indice %d,il y a %s:%d\n",i,p->IP,p->port);
+            printf("\ni:%d | ip=%s:port=%d",i,p->IP,p->port);
         pthread_mutex_unlock(&port_mutex_table[i]);
     }
 }
