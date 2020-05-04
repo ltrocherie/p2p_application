@@ -262,8 +262,9 @@ void hash__peer_print(){
                 int found = 0;
                 for(int j = 0;j<owner;j++){
                     struct seeder *soso = (T1+j);
-                    if(strcmp(seed->IP,soso->IP) && seed->port == soso->port){
-                        strcat(*(T2+j)," ");
+                    if(!strcmp(seed->IP,soso->IP) && seed->port == soso->port){
+                        if(strcmp(*(T2+j),""))
+                            strcat(*(T2+j)," ");
                         strcat(*(T2+j),f->key);
                         found = 1;
                     }
@@ -275,11 +276,42 @@ void hash__peer_print(){
                         T2 = realloc(T2,n*35*sizeof(char*));
                         T3 = realloc(T3,n*35*sizeof(char*));
                     }
-                    //strcpy(tmp->IP,seed->IP);
-                    (T1+owner)->IP = seed->IP;
+                    (T1+owner)->IP = malloc(16*sizeof(char*));
+                    strcpy((T1+owner)->IP,seed->IP);
                     (T1+owner)->port = seed->port;
                     *(T2+owner) = malloc(35*sizeof(char)*20);
+                    *(T3+owner) = malloc(35*sizeof(char)*20);
+                    strcpy(*(T3+owner),"");
                     strcpy(*(T2+owner),f->key);
+                    owner++;
+                }
+            }
+            struct leecher *leech;
+            LIST_FOREACH(leech,&f->leechers,next_leecher){
+                int found = 0;
+                for(int j = 0;j<owner;j++){
+                    struct seeder *soso = (T1+j);
+                    if(!strcmp(leech->IP,soso->IP) && leech->port == soso->port){
+                        if(strcmp(*(T3+j),""))
+                            strcat(*(T3+j)," ");
+                        strcat(*(T3+j),f->key);
+                        found = 1;
+                    }
+                }
+                if(!found){
+                    if(owner >= n){
+                        n *= 2;
+                        T1 = realloc(T1,n*sizeof(struct seeder));
+                        T2 = realloc(T2,n*35*sizeof(char*));
+                        T3 = realloc(T3,n*35*sizeof(char*));
+                    }
+                    (T1+owner)->IP = malloc(16*sizeof(char));
+                    strcpy((T1+owner)->IP,leech->IP);
+                    (T1+owner)->port = leech->port;
+                    *(T2+owner) = malloc(35*sizeof(char)*20);
+                    *(T3+owner) = malloc(35*sizeof(char)*20);
+                    strcpy(*(T2+owner),"");
+                    strcpy(*(T3+owner),f->key);
                     owner++;
                 }
             }
@@ -288,12 +320,14 @@ void hash__peer_print(){
     }
     for(int i = 0; i<owner; i++){
         struct seeder* soso = (T1+i);
-        printf("%s\n",soso->IP);
-        printf(":%d\n",soso->port);
-        printf("%s:%d [%s]\n",soso->IP,soso->port,*(T2+i));
+        printf("%s:%d seed [%s] leech [%s]\n",soso->IP,soso->port,*(T2+i),*(T3+i));
+        free((T1+i)->IP);
         free(*(T2+i));
+        free(*(T3+i));
     }
     free(T1);
+    free(T2);
+    free(T3);
 }
 
 void hash__table_end(){

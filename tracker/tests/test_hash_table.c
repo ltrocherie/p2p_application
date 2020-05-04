@@ -52,7 +52,6 @@ void test_hash__add_seeder(){
     hash__add_seeder("3OGenstil","225.250.225.230",210,"Un delegue",1028,1);
     f = hash__search("3OGenstil");
     verif(f,"3OGenstil","225.250.225.230",210,"Un delegue",1028,1);
-    hash__peer_print();
     hash__table_end();
     printf("SUCCESS\n");
 }
@@ -74,11 +73,27 @@ void test_hash__add_leecher(){
 }
 
 void test_hash__print(){
-    printf("Test de hash__print:\n");
+    printf("Test de hash__print:");
     hash__table_init();
     hash__add_seeder("LROTPbestdlesGAY4EVER","255.255.255.255",255,"Le delegue",2054,3);
     hash__add_seeder("3OGenstil","225.250.225.230",210,"Un delegue",1028,1);
     hash__print();
+    hash__table_end();
+    printf("SUCCESS\n");
+}
+
+void test_hash__peer_print(){
+    printf("Test de hash__peer_print:\n");
+    hash__table_init();
+    //On ajoute 3 éléments qui ont le fichier
+    hash__add_seeder("LROTPbestdlesGAY4EVER","255.255.255.255",255,"Le delegue",2054,3);
+    hash__add_seeder("3OGenstil","255.255.255.255",255,"Un delegue",1028,1);
+    hash__add_seeder("TT","5.5.5.5",1000,"Un delegue",10,4);
+    //On ajoute 3 éléments qui téléchargent le fichier
+    hash__add_leecher("LROTPbestdlesGAY4EVER","5.5.5.5",1000);
+    hash__add_leecher("3OGenstil","255.225.240.230",8000);
+    hash__add_leecher("TT","255.255.255.255",3000);
+    hash__peer_print();
     hash__table_end();
     printf("SUCCESS\n");
 }
@@ -123,6 +138,7 @@ int main(int argc, char const *argv[]) {
     test_hash__add_seeder();
     test_hash__add_leecher();
     test_hash__print();
+    test_hash__peer_print();
     test_hash__getfiles();
     return 0;
 }
