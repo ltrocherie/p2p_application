@@ -570,7 +570,7 @@ void look(int socket, char *buffer, char *IP)
     exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
 
     char find[1024] = {'\0'};
-    strcat(find,"> list [");
+    strcat(find,"list [");
     hash__getfiles(name, comparator, atoi(size), find);
 
     exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
@@ -707,8 +707,8 @@ void update(int socket, char *buffer, char *IP)
                 printf("update by :%s | leech:%s\n",IP, key);
                 _log(log_fd, "\nupdate by :", "ERROR write log");
                 _log(log_fd, IP, "ERROR write log");
-                _log(log_fd, "key ", "ERROR write log"); //exit_if ( write(log_fd, "key ", 4) == -1, "ERROR writing log" );
-                _log(log_fd, key, "ERROR write log"); //exit_if ( write(log_fd, key, strlen(key)*sizeof(key)) == -1, "ERROR writing log" );
+                _log(log_fd, "key ", "ERROR write log");
+                _log(log_fd, key, "ERROR write log");
                 exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
 
 
@@ -768,9 +768,9 @@ void update(int socket, char *buffer, char *IP)
                 printf("update by :%s | seed:%s\n",IP, key);
                 _log(log_fd, "\nupdate by :", "ERROR write log");
                 _log(log_fd, IP, "ERROR write log");
-                _log(log_fd, "\nupdate ", "ERROR write log"); //exit_if ( write(log_fd, "\nupdate ", 8) == -1, "ERROR write log" );
-                _log(log_fd, "\nkey ", "ERROR write log"); //exit_if ( write(log_fd, "\nkey ", 5) == -1, "ERROR write log" );
-                _log(log_fd, key, "ERROR write log"); //exit_if ( write(log_fd, key, strlen(key)*sizeof(char)) == -1, "ERROR write log" );
+                _log(log_fd, "\nupdate ", "ERROR write log");
+                _log(log_fd, "\nkey ", "ERROR write log");
+                _log(log_fd, key, "ERROR write log");
                 exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
 
                 struct file* tmp = hash__search(key);
@@ -946,9 +946,9 @@ void getfile(int socket, char *buffer, char *IP)
         fprintf(stderr, "get file by:%s | File with key %s not found in the hash table\n", IP, key);
         _log(log_fd, "\ngetfile by :", "ERROR write log");
         _log(log_fd, IP, "ERROR write log");
-        _log(log_fd, "\nFile with key ", "ERROR write log"); //exit_if( write(log_fd,"\nFile with key ",15) == -1, "ERROR writing log" );
-        _log(log_fd, key, "ERROR write log"); //exit_if( write(log_fd,key,strlen(key)*sizeof(char)) == -1, "ERROR writing log" );
-        _log(log_fd, " not found in the hash table", "ERROR write log"); //exit_if( write(log_fd," not found in the hash table",28) == -1, "ERROR writing log" );
+        _log(log_fd, "\nFile with key ", "ERROR write log");
+        _log(log_fd, key, "ERROR write log");
+        _log(log_fd, " not found in the hash table", "ERROR write log");
         exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
 
         exit_if (send(socket,"nok", 3,0) == -1, "ERROR sending to socket");
@@ -957,7 +957,7 @@ void getfile(int socket, char *buffer, char *IP)
 
     hash__print();
     char msg[1024] = {'\0'};
-    strcat(msg,"> peers ");
+    strcat(msg,"peers ");
     strcat(msg,key);
     strcat(msg," [");
 
