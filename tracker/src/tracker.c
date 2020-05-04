@@ -130,8 +130,6 @@ void announce(int socket, char *buffer, char *IP)
         return;
     }
 
-    port__print();
-
     /* SEEDS LEECHS TREATMENT */
 
     int end = 0;
@@ -228,6 +226,7 @@ void announce(int socket, char *buffer, char *IP)
                     exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
 
                     int add_leech = hash__add_leecher(key_leech, IP, port);
+
                     if (!add_leech)
                     {
                         exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
@@ -395,7 +394,9 @@ void announce(int socket, char *buffer, char *IP)
         }
     }
 
+    port__print();
     hash__print();
+
     /* Everything happened good */
     exit_if ( send(socket, "ok", 2, 0) == -1, "ERROR sending to socket" );
 }
