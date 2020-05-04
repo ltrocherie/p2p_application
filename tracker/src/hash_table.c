@@ -272,8 +272,8 @@ void hash__peer_print(){
                     if(owner >= n){
                         n *= 2;
                         T1 = realloc(T1,n*sizeof(struct seeder));
-                        T2 = realloc(T2,n*35*sizeof(char));
-                        T3 = realloc(T3,n*35*sizeof(char));
+                        T2 = realloc(T2,n*35*sizeof(char*));
+                        T3 = realloc(T3,n*35*sizeof(char*));
                     }
                     //strcpy(tmp->IP,seed->IP);
                     (T1+owner)->IP = seed->IP;
@@ -287,7 +287,6 @@ void hash__peer_print(){
         pthread_mutex_unlock(&mutex_table[i]);
     }
     for(int i = 0; i<owner; i++){
-        printf("Coucou\n");
         struct seeder* soso = (T1+i);
         printf("%s\n",soso->IP);
         printf(":%d\n",soso->port);
