@@ -640,6 +640,25 @@ void update(int socket, char *buffer, char *IP)
                 break;
             }
 
+            int port = port__search(IP);
+            if ( port == -1) {
+                exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+                fprintf(stderr, "Error no default port found");
+                _log(log_fd, "\nError no default port found", "ERROR write     log");
+                exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+
+                exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
+                return;
+            }
+
+            exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+            fprintf(stdout,"default port for %s : %d",IP,port);
+            _log(log_fd, "\nDefault port for ", "ERROR write log");
+            _log(log_fd, IP, "ERROR write log");
+            _log(log_fd, " : ", "ERROR write log");
+            _log(log_fd, itoa(port,10), "ERROR write log");
+            exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+
             /* Seed case */
             if (seed)
             {
@@ -664,25 +683,6 @@ void update(int socket, char *buffer, char *IP)
                     return;
                 }
 
-                int port = port__search(IP);
-                if ( port == -1) {
-                    exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
-                    fprintf(stderr, "Error no default port found");
-                    _log(log_fd, "\nError no default port found", "ERROR write     log");
-                    exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
-
-                    exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
-                    return;
-                }
-
-                exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
-                fprintf(stdout,"default port for %s : %d",IP,port);
-                _log(log_fd, "\nDefault port for ", "ERROR write log");
-                _log(log_fd, IP, "ERROR write log");
-                _log(log_fd, " : ", "ERROR write log");
-                _log(log_fd, itoa(port,10), "ERROR write log");
-                exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
-
                 int add = hash__add_seeder(key
                                             ,IP
                                             ,port
@@ -702,33 +702,12 @@ void update(int socket, char *buffer, char *IP)
             /* Leeching case */
             else if (leech)
             {
-
                 exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
                 printf("update by :%s | leech:%s\n",IP, key);
                 _log(log_fd, "\nupdate by :", "ERROR write log");
                 _log(log_fd, IP, "ERROR write log");
                 _log(log_fd, "key ", "ERROR write log");
                 _log(log_fd, key, "ERROR write log");
-                exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
-
-
-                int port = port__search(IP);
-                if ( port == -1) {
-                    exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
-                    fprintf(stderr, "Error no default port found");
-                    _log(log_fd, "\nError no default port found", "ERROR write     log");
-                    exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
-
-                    exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
-                    return;
-                }
-
-                exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
-                fprintf(stdout,"default port for %s : %d",IP,port);
-                _log(log_fd, "\nDefault port for ", "ERROR write log");
-                _log(log_fd, IP, "ERROR write log");
-                _log(log_fd, " : ", "ERROR write log");
-                _log(log_fd, itoa(port,10), "ERROR write log");
                 exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
 
                 int add_leech = hash__add_leecher(key, IP, port);
@@ -758,6 +737,25 @@ void update(int socket, char *buffer, char *IP)
             if (!strcmp(key, "\0"))
                 break;
 
+            int port = port__search(IP);
+            if ( port == -1) {
+                exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+                fprintf(stderr, "Error no default port found");
+                _log(log_fd, "\nError no default port found", "ERROR write     log");
+                exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+
+                exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
+                return;
+            }
+
+            exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+            fprintf(stdout,"default port for %s : %d",IP,port);
+            _log(log_fd, "\nDefault port for ", "ERROR write log");
+            _log(log_fd, IP, "ERROR write log");
+            _log(log_fd, " : ", "ERROR write log");
+            _log(log_fd, itoa(port,10), "ERROR write log");
+            exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+
             /* Seed case */
             if (seed)
             {
@@ -785,25 +783,6 @@ void update(int socket, char *buffer, char *IP)
                     return;
                 }
 
-                int port = port__search(IP);
-                if ( port == -1) {
-                    exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
-                    fprintf(stderr, "Error no default port found");
-                    _log(log_fd, "\nError no default port found", "ERROR write     log");
-                    exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
-
-                    exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
-                    return;
-                }
-
-                exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
-                fprintf(stdout,"default port for %s : %d",IP,port);
-                _log(log_fd, "\nDefault port for ", "ERROR write log");
-                _log(log_fd, IP, "ERROR write log");
-                _log(log_fd, " : ", "ERROR write log");
-                _log(log_fd, itoa(port,10), "ERROR write log");
-                exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
-
                 int add = hash__add_seeder(key
                                             ,IP
                                             ,port
@@ -820,8 +799,6 @@ void update(int socket, char *buffer, char *IP)
                     exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
                     return;
                 }
-
-                hash__print();
             }
             /* Leeching case */
             else if (leech)
@@ -848,26 +825,6 @@ void update(int socket, char *buffer, char *IP)
                     exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
                     return;
                 }
-
-                int port = port__search(IP);
-
-                if ( port == -1) {
-                    exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
-                    fprintf(stderr, "Error no default port found");
-                    _log(log_fd, "\nError no default port found", "ERROR write     log");
-                    exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
-
-                    exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
-                    return;
-                }
-
-                exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
-                fprintf(stdout,"default port for %s : %d",IP,port);
-                _log(log_fd, "\nDefault port for ", "ERROR write log");
-                _log(log_fd, IP, "ERROR write log");
-                _log(log_fd, " : ", "ERROR write log");
-                _log(log_fd, itoa(port,10), "ERROR write log");
-                exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
 
                 int add = hash__add_leecher(key
                                             ,IP
