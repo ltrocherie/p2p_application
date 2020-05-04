@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 public class gui {
 
     public static void main(String args[]) {
+       PeerConfig.getElementFromConfig();
        guiRunner gR= new guiRunner();
        gR.run();
     }

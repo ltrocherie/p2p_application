@@ -283,6 +283,7 @@ class loading {
         fileArray.add(fileTf);
         bBack.addActionListener(new ButtonListener(runner,9,send,fileArray));
         bAdd.addActionListener(new buttonListenerSender(send,fileArray,true));
+        bAdd.addActionListener(new buttonListenerSender(send,fileArray,false));
         this.filePanel = panel;
     }
 

@@ -14,7 +14,7 @@ class UpdateAnnounce extends TimerTask{
                 inPor = s.getLocalPort();
                 s.close();
             }
-            String message = getMessage.getFilesFrom(PeerConfig.seedFile);
+            String message = getMessage.getFilesKeyFrom(PeerConfig.seedFile);
             if(message !="") {
                 message = "update seed [" + message;
                 message = message.substring(0, message.length() - 1) + "]";
