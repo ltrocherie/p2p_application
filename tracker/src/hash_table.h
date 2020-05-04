@@ -120,6 +120,11 @@ int hash__getfiles(char* name, char compn, int size, char* files_found);
 void hash__print();
 
 /**
+ * Print all the peers in hash_table
+ * */
+void hash__peer_print();
+
+/**
  * Free all table memory by freeing each elements inside
  * @return hash_table freeed
  * */
