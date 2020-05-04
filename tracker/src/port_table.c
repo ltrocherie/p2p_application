@@ -67,6 +67,7 @@ void port__print(){
             printf("\ni:%d | ip=%s:port=%d",i,p->IP,p->port);
         pthread_mutex_unlock(&port_mutex_table[i]);
     }
+    printf("\n");
 }
 
 void port__table_end(){

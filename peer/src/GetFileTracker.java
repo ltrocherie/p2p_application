@@ -20,7 +20,7 @@ public class GetFileTracker extends PeerConfig implements Sender{
             Socket socket = new Socket(super.trackerIp,super.trackerPort);
             BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),true);
-            pw.println(message + texts.get(0).getText());
+            pw.println(message + texts.get(0).getText()+ " ");
             System.out.println(">" + message + texts.get(0).getText());
             String str = br.readLine();// Ca c'est pour suivre en temps réel sur le terminal.
             System.out.println("<"+str);

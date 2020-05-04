@@ -30,6 +30,7 @@ public class AnnounceToTracker extends PeerConfig implements Sender{
             if(inPor==0){
                 ServerSocket s = new ServerSocket(0);
                 inPor = s.getLocalPort();
+                super.inPort = inPor;
                 s.close();
             }
             if(message !="") {
@@ -41,10 +42,9 @@ public class AnnounceToTracker extends PeerConfig implements Sender{
             BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),true);
             pw.println(message);
-            System.out.println(">"+message);
+            System.out.println("> "+message);
             String str = br.readLine();// Ca c'est pour suivre en temps réel sur le terminal.
-            System.out.println(str.equals("> ok"));
-            if(str.equals("> ok")){
+            if(str.equals("ok")){
                 PeerConfig.okAnnounce = true;
             }
             System.out.println("<"+str);

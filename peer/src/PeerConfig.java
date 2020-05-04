@@ -22,7 +22,7 @@ public class PeerConfig{
 	  static int maxPieceSize = 2048;
 	  static int period = 10;
 	  static boolean okAnnounce = false;
-	  static String seedFile = "seed.dat";
+	  static String seedFile = "../seed.dat";
 	  static String leechFile = "leech.dat";
 
 	  public static void getElementFromConfig(){
@@ -93,7 +93,7 @@ public class PeerConfig{
 	}
 
 	String parseFileList(File[] fileL) throws Exception{
-	    String message = "announce listen " + inPort + " seed [";
+	    String message = "[";
 	    for (final File fileEntry : fileL) {
 	        message = message + fileEntry.getName();
 	        message = message + " " + fileEntry.length();
@@ -102,5 +102,14 @@ public class PeerConfig{
 	    }
 	    message = message.substring(0,message.length() - 1) + "]";
 	    return message;
+	}
+
+	String parseFileKeyList(File[] fileL) throws Exception{
+		String message = "announce listen " + inPort + " seed [";
+		for (final File fileEntry : fileL) {
+			message = message + " " + Buffermap.getFileChecksumMD5(fileEntry) + " ";
+		}
+		message = message.substring(0,message.length() - 1) + "]";
+		return message;
 	}
 }

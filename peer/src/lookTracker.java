@@ -29,6 +29,7 @@ public class lookTracker extends PeerConfig implements Sender{
             pw.close();
             br.close();
             socket.close();
+            message = "look [";
         }catch(Exception e){
             System.out.println("Error in look"); // Faudra peut être donner des erreurs plus explicites.
         }
