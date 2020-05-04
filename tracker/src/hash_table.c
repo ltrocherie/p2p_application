@@ -250,51 +250,51 @@ void hash__print(){
 void hash__peer_print(){
     int n = 2;
     int owner = 0;
-    struct seeder** T1 = malloc(n*sizeof(struct seeder));
-    char** T2 = malloc(n*16*sizeof(char));
-    char** T3 = malloc(n*16*sizeof(char));
+    struct seeder* T1 = malloc(n*sizeof(struct seeder));
+    char** T2 = malloc(n*35*sizeof(char*));
+    char** T3 = malloc(n*35*sizeof(char*));
     for(int i = 0; i<HASH_TABLE_LENGTH;i++){
         pthread_mutex_lock(&mutex_table[i]);
         struct file *f;
         SLIST_FOREACH(f,&hash_table[i],next_file){
             struct seeder *seed;
             SLIST_FOREACH(seed,&f->seeders,next_seeder){
-                int found = 1;
+                int found = 0;
                 for(int j = 0;j<owner;j++){
-                    struct seeder *soso = *(T1+j);
+                    struct seeder *soso = (T1+j);
                     if(strcmp(seed->IP,soso->IP) && seed->port == soso->port){
                         strcat(*(T2+j)," ");
                         strcat(*(T2+j),f->key);
-                        found = 0;
+                        found = 1;
                     }
                 }
-                if(found){
-                    owner++;
+                if(!found){
                     if(owner >= n){
                         n *= 2;
                         T1 = realloc(T1,n*sizeof(struct seeder));
-                        T2 = realloc(T2,n*16*sizeof(char));
-                        T3 = realloc(T3,n*16*sizeof(char));
+                        T2 = realloc(T2,n*35*sizeof(char));
+                        T3 = realloc(T3,n*35*sizeof(char));
                     }
-                    *(T1+owner) = seed;
-                    *(T2+owner) = malloc(16*sizeof(char)*20);
+                    //strcpy(tmp->IP,seed->IP);
+                    (T1+owner)->IP = seed->IP;
+                    (T1+owner)->port = seed->port;
+                    *(T2+owner) = malloc(35*sizeof(char)*20);
                     strcpy(*(T2+owner),f->key);
-
+                    owner++;
                 }
             }
         }
         pthread_mutex_unlock(&mutex_table[i]);
     }
-    printf("%d\n",owner);
     for(int i = 0; i<owner; i++){
-        //struct seeder* soso = *(T1+i);
-        printf("coucou\n");
-        printf("%s\n",*(T2+i));
-        //printf("%s\n",soso->IP);
-        //printf("%s:%d [%s]\n",soso->IP,soso->port,*(T2+i));
+        printf("Coucou\n");
+        struct seeder* soso = (T1+i);
+        printf("%s\n",soso->IP);
+        printf(":%d\n",soso->port);
+        printf("%s:%d [%s]\n",soso->IP,soso->port,*(T2+i));
         free(*(T2+i));
-        free(*(T1+i));
     }
+    free(T1);
 }
 
 void hash__table_end(){

@@ -52,7 +52,7 @@ void test_hash__add_seeder(){
     hash__add_seeder("3OGenstil","225.250.225.230",210,"Un delegue",1028,1);
     f = hash__search("3OGenstil");
     verif(f,"3OGenstil","225.250.225.230",210,"Un delegue",1028,1);
-
+    hash__peer_print();
     hash__table_end();
     printf("SUCCESS\n");
 }
