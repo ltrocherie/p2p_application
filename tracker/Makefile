@@ -8,7 +8,7 @@ FLAGS= -Wall
 
 all: build
 
-build: tracker
+build: dir tracker
 
 tests: $(BLD)utils.o $(BLD)thpool.o $(BLD)hash_table.o
 	cc $(FLAGS) -o $(BLD)$@ $(TST)test_hash_table.c $^ -pthread
@@ -16,6 +16,7 @@ tests: $(BLD)utils.o $(BLD)thpool.o $(BLD)hash_table.o
 clean:
 	rm -rf $(SRC)*.o *~ \#*#
 	rm -rf $(BLD)*
+	rmdir $(BLD)
 
 tracker: $(BLD)utils.o $(BLD)thpool.o $(BLD)hash_table.o $(BLD)port_table.o 
 	cc $(FLAGS) -g3 -o $(BLD)$@ $(SRC)$@.c $^ -pthread
@@ -31,3 +32,6 @@ $(BLD)hash_table.o:
 
 $(BLD)port_table.o:
 		cc $(FLAGS) -o $@ -c $(SRC)port_table.c
+
+dir:
+	mkdir -p $(BLD)
