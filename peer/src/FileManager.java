@@ -7,12 +7,12 @@ import java.security.MessageDigest;
 /**
  * */
 
-public class Buffermap extends PeerConfig implements Runnable{
+public class FileManager extends PeerConfig implements Runnable{
 
 	Map<String, boolean[]> fileManager;
 
 
-	public Buffermap(){
+	public FileManager(){
 		fileManager = new HashMap<String, boolean[]>();
 		try{
 			buffermapInit();

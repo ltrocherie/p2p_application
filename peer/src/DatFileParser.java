@@ -28,7 +28,7 @@ public class DatFileParser {
                         message = message + currentFile.getName();
                         message = message + " " + currentFile.length();
                         message = message + " " + PeerConfig.pieceSize;
-                        message = message + " " + Buffermap.getFileChecksumMD5(currentFile) + " ";
+                        message = message + " " + FileManager.getFileChecksumMD5(currentFile) + " ";
                     }
                 }
             }

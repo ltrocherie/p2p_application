@@ -6,7 +6,7 @@ import java.net.*;
 public class Peer {
   
   static final AnnounceToTracker ann = new AnnounceToTracker();
-  static private Buffermap buffermap;
+  static private FileManager buffermap;
 
   public static void main(String[] args) {
     PeerConfig.getElementFromConfig();
@@ -26,11 +26,9 @@ public class Peer {
   	use 1 thread that constently listen on 1 port
   	create 1 thread every time the peer wants to send something
   	*/
-  	buffermap = new Buffermap();
     //(new Thread(buffermap)).start(); //doesn't work
     //boolean[] tab = {true, false, true};
     //buffermap.buffermapUpdate("coucou", tab);
-    buffermap.printAll();
 
     //(new Thread(new SendToPeer("localhost", "< interested -785361703"))).start();
     //(new Thread(new ReceiveFromPeer("localhost"))).start();
