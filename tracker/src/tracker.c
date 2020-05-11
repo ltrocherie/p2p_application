@@ -119,7 +119,7 @@ void announce(int socket, char *buffer, char *IP)
     }
 
     int port = atoi(port_arg);
-    
+
     if ( !port__add(IP,port) ) {
         exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
         fprintf(stderr, "Error adding in port_table\n");
@@ -612,6 +612,7 @@ void update(int socket, char *buffer, char *IP)
     /* SEEDS LEECHS TREATMENT */
     int end = 0;
     int seed = 0, leech = 0;
+    int port;
     (void)seed;
     (void)leech;
 
@@ -641,7 +642,7 @@ void update(int socket, char *buffer, char *IP)
                 break;
             }
 
-            int port = port__search(IP);
+            port = port__search(IP);
             if ( port == -1) {
                 exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
                 fprintf(stderr, "Error no default port found");
@@ -738,7 +739,7 @@ void update(int socket, char *buffer, char *IP)
             if (!strcmp(key, "\0"))
                 break;
 
-            int port = port__search(IP);
+            port = port__search(IP);
             if ( port == -1) {
                 exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
                 fprintf(stderr, "Error no default port found");
@@ -901,7 +902,7 @@ void getfile(int socket, char *buffer, char *IP)
     if (f == NULL)
     {
         exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
-        fprintf(stderr, "get file by:%s | File with key %s not found in the hash table\n", IP, key);
+        printf("get file by:%s | File with key %s not found in the hash table\n", IP, key);
         _log(log_fd, "\ngetfile by :", "ERROR write log");
         _log(log_fd, IP, "ERROR write log");
         _log(log_fd, "\nFile with key ", "ERROR write log");
@@ -968,7 +969,7 @@ void treat_socket(void *arg)
     if (rr < 0)
         error("ERROR reading from socket");
 
-    printf("\nHere is the message: %s", buffer);
+    printf("\nHere is the message: %scoucou", buffer);
 
     get_command(buffer, command);
     printf("\ncommand:%s\n", command);
