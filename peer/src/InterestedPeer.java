@@ -38,7 +38,7 @@ public class InterestedPeer extends PeerConfig implements Sender{
             br.close();
             socket.close();
         }catch(Exception e){
-            System.out.println("Error in Interseted Rule"); // Faudra peut être donner des erreurs plus explicites.
+            System.out.println("Error in Interested Rule"); // Faudra peut être donner des erreurs plus explicites.
         }
         message = "interested ";
     }
