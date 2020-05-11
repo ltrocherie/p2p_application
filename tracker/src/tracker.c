@@ -19,8 +19,6 @@
 #include "utils.h"
 #include "thpool.h"
 #include "tracker.h"
-#include "hash_table.h"
-//#include "dict.h"
 #include "port_table.h"
 
 #define SIZE 1024
@@ -48,15 +46,18 @@ void error(char *msg)
 }
 
 /**
- * Parse the buffer given by the peer in order to figure out what the port is but also
- * which files will be added to the hash_table and finally all leechs incoming.
+ * Announce a new peer with a default port, files provided in seed and leeched files in this order:
+ * annouce listen <port> seed [filename1 filesize1 piecesize1 key1 filename2 ...] leech [key3 key4 ...]
+ * Given port will be added in the hash table of IP:port in order to have default port for the future for this peer
+ * Files given in parameters will be added in the associated lists in order to provide the trackers all informations about the current network
+ * If everything happened correctly, files will be added to the hash_table and all leechs incoming.
  *
  * @param socket socket of the current connection
  * @param buffer message given by the peer
  * @param IP IP of the peer
  *
- * @return will display "> ok" if everything happened right with all files added in hash_table,
- * will display the usage otherwise on stderr. Be careful, if the command has not the right number of arguments for seed (for example) corrects files before the error will be still
+ * @return will send "ok" in the socket if everything happened right with all files added in hash_table or "nok" if not.
+ * Be careful, if the command has not the right number of arguments for seed (for example) corrects files before the error will be still
  * added to the hash table
  * */
 void announce(int socket, char *buffer, char *IP)
@@ -174,7 +175,7 @@ void announce(int socket, char *buffer, char *IP)
 
                         exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
                         fprintf(stderr, "Size of piecesize must be integers\n");
-                        _log(log_fd, "\nSize of piecesize must be integers", "ERROR write log"); //exit_if ( write(log_fd, "\nSize of piecesize must be integers", 35) == -1, "ERROR write log" );
+                        _log(log_fd, "\nSize of piecesize must be integers", "ERROR write log");
                         exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
 
                         exit_if ( send(socket, "nok", 3, 0) == -1, "ERROR sending to socket" );
@@ -401,6 +402,17 @@ void announce(int socket, char *buffer, char *IP)
     exit_if ( send(socket, "ok", 2, 0) == -1, "ERROR sending to socket" );
 }
 
+/**
+ * Retrieve files based on criterions ; can be the filename but also the size of the file
+ * You can give only one criterion if you want.
+ *
+ * @param socket socket of the current connection
+ * @param buffer message given by the peer
+ * @param IP IP of the peer
+ *
+ * @return will send the list of files which satisfied all criterions in the socket if everything happened right in this order:
+ * list [filename1 filesize1 piecesize1 key1 filename2 ...] (this list can be empty though) or "nok" if the sent command is not good.
+ * */
 void look(int socket, char *buffer, char *IP)
 {
     char *p, space = ' ';
@@ -587,6 +599,108 @@ void look(int socket, char *buffer, char *IP)
     return;
 }
 
+/**
+ * Retrieve a list of peers based on an unique key.
+ *
+ * @param socket socket of the current connection
+ * @param buffer message given by the peer
+ * @param IP IP of the peer
+ *
+ * @return will send the list of peers based on the unique key given:
+ * peers [ip1:port1 ip2:port2 ...] (this list can be empty though) or "nok" if the file does not exists.
+ * */
+void getfile(int socket, char *buffer, char *IP)
+{
+    char *p, space = ' ';
+
+    /* Returns the pointer of the first occurence of the separator */
+    p = strchr(buffer, space);
+
+    /* If there is no space in the command */
+    if (p == NULL)
+    {
+        exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+        fprintf(stderr, "No \"%c\" found.\n", space);
+        _log(log_fd, "\nNo \"%c\" found", "ERROR write log");
+        exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+
+        exit_if (send(socket,"nok", 3,0) == -1, "ERROR sending to socket");
+        return;
+    }
+
+    /* Pointer of next word */
+    buffer = p + 1;
+    int i = 0, tmp = 0;
+
+    char key[1024];
+
+    /* Read all characters */
+    while (buffer[i] != 0 && buffer[i] != '\n' && buffer[i] != ' ')
+    {
+        key[tmp] = buffer[i];
+        i++;
+        tmp++;
+    }
+
+    key[tmp] = '\0';
+
+    struct file *f = NULL;
+
+    f = hash__search(key);
+
+    if (f == NULL)
+    {
+        exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
+        printf("get file by:%s | File with key %s not found in the hash table\n", IP, key);
+        _log(log_fd, "\ngetfile by :", "ERROR write log");
+        _log(log_fd, IP, "ERROR write log");
+        _log(log_fd, "\nFile with key ", "ERROR write log");
+        _log(log_fd, key, "ERROR write log");
+        _log(log_fd, " not found in the hash table", "ERROR write log");
+        exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
+
+        exit_if (send(socket,"nok", 3,0) == -1, "ERROR sending to socket");
+        return;
+    }
+
+    hash__print();
+    char msg[1024] = {'\0'};
+    strcat(msg,"peers ");
+    strcat(msg,key);
+    strcat(msg," [");
+
+    /* Writing peers */
+    int nb_seeder = 0;
+    struct seeder *seed;
+    SLIST_FOREACH(seed, &f->seeders, next_seeder)
+    {
+        strcat(msg,seed->IP);
+        strcat(msg,":");
+        char* port = itoa(seed->port,10);
+        strcat(msg,port);
+        if (nb_seeder != f->nb_seeders - 1)
+            strcat(msg," ");
+
+        nb_seeder++;
+    }
+    strcat(msg,"]");
+    send(socket,msg,strlen(msg)*sizeof(char),0);
+
+    return;
+}
+
+/**
+ * Periodical update where peers send all their files (and new files) and leechs (and new leechs) in order to add the in the hash table of files.
+ * If you add a file in seed/leech that already exists for you (you are already in the list of owners) nothing will happen, otherwise, you will be added in the list
+ * with your default port added during your first announce.
+ * If you send a file in leech at time t1 and then the same file is sent in seed at time t2, the file will be added in the list of seeds and deleted in leechs
+ *
+ * @param socket socket of the current connection
+ * @param buffer message given by the peer
+ * @param IP IP of the peer
+ *
+ * @return send "ok" in the socket if all updates were good or send "nok" if something wrong happened : files do not exists in lists or you don't have a default port
+ * */
 void update(int socket, char *buffer, char *IP)
 {
     char *p, space = ' ';
@@ -860,86 +974,10 @@ void update(int socket, char *buffer, char *IP)
     return;
 }
 
-void getfile(int socket, char *buffer, char *IP)
-{
-    char *p, space = ' ';
-
-    /* Returns the pointer of the first occurence of the separator */
-    p = strchr(buffer, space);
-
-    /* If there is no space in the command */
-    if (p == NULL)
-    {
-        exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
-        fprintf(stderr, "No \"%c\" found.\n", space);
-        _log(log_fd, "\nNo \"%c\" found", "ERROR write log");
-        exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
-
-        exit_if (send(socket,"nok", 3,0) == -1, "ERROR sending to socket");
-        return;
-    }
-
-    /* Pointer of next word */
-    buffer = p + 1;
-    int i = 0, tmp = 0;
-
-    char key[1024];
-
-    /* Read all characters */
-    while (buffer[i] != 0 && buffer[i] != '\n' && buffer[i] != ' ')
-    {
-        key[tmp] = buffer[i];
-        i++;
-        tmp++;
-    }
-
-    key[tmp] = '\0';
-
-    struct file *f = NULL;
-
-    f = hash__search(key);
-
-    if (f == NULL)
-    {
-        exit_if (pthread_mutex_lock(&log_lock), "Error mutex lock log");
-        printf("get file by:%s | File with key %s not found in the hash table\n", IP, key);
-        _log(log_fd, "\ngetfile by :", "ERROR write log");
-        _log(log_fd, IP, "ERROR write log");
-        _log(log_fd, "\nFile with key ", "ERROR write log");
-        _log(log_fd, key, "ERROR write log");
-        _log(log_fd, " not found in the hash table", "ERROR write log");
-        exit_if (pthread_mutex_unlock(&log_lock), "Error mutex unlock log");
-
-        exit_if (send(socket,"nok", 3,0) == -1, "ERROR sending to socket");
-        return;
-    }
-
-    hash__print();
-    char msg[1024] = {'\0'};
-    strcat(msg,"peers ");
-    strcat(msg,key);
-    strcat(msg," [");
-
-    /* Writing peers */
-    int nb_seeder = 0;
-    struct seeder *seed;
-    SLIST_FOREACH(seed, &f->seeders, next_seeder)
-    {
-        strcat(msg,seed->IP);
-        strcat(msg,":");
-        char* port = itoa(seed->port,10);
-        strcat(msg,port);
-        if (nb_seeder != f->nb_seeders - 1)
-            strcat(msg," ");
-
-        nb_seeder++;
-    }
-    strcat(msg,"]");
-    send(socket,msg,strlen(msg)*sizeof(char),0);
-
-    return;
-}
-
+/**
+ * Treat a socket with a thread depending on the command given : read the socket and do the associated treatment
+ * @param arg struct socket_ip where the IP and the message are stored
+ * */
 void treat_socket(void *arg)
 {
     char buffer[SIZE];
@@ -955,11 +993,11 @@ void treat_socket(void *arg)
     printf("\nIP Received %s", ip);
     printf("\nSocket:%d",socket);
 
-    _log(log_fd, "\nIP Received:", "ERROR write log"); //exit_if( write(log_fd,"\nIP Received:",13) == -1, "ERROR writing log" );
-    _log(log_fd, ip, "ERROR write log"); //exit_if( write(log_fd,ip,strlen(ip)*sizeof(char)) == -1, "ERROR writing log" );
-    _log(log_fd, "\nSocket:", "ERROR write log"); //exit_if( write(log_fd,"\nSocket:",7) == -1, "ERROR writing log" );
-    _log(log_fd, itoa(socket,10), "ERROR write log"); //exit_if( write(log_fd,itoa(socket,10),strlen(itoa(socket,10))*sizeof(char)) == -1, "ERROR writing log" );
-
+    _log(log_fd, "\nIP Received:", "ERROR write log");
+    _log(log_fd, ip, "ERROR write log"); 
+    _log(log_fd, "\nSocket:", "ERROR write log");
+    _log(log_fd, itoa(socket,10), "ERROR write log");
+    
     /* Read all the message received*/
     int rr;
     bzero(buffer, SIZE);
@@ -969,7 +1007,7 @@ void treat_socket(void *arg)
     if (rr < 0)
         error("ERROR reading from socket");
 
-    printf("\nHere is the message: %scoucou", buffer);
+    printf("\nHere is the message: %s", buffer);
 
     get_command(buffer, command);
     printf("\ncommand:%s\n", command);
