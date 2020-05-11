@@ -11,8 +11,9 @@ public class FileManager extends PeerConfig implements Runnable{
 
 	Map<String, boolean[]> fileManager;
 
+	private static final FileManager fileManagerInstance = new FileManager();
 
-	public FileManager(){
+	private FileManager(){
 		fileManager = new HashMap<String, boolean[]>();
 		try{
 			buffermapInit();
@@ -20,6 +21,12 @@ public class FileManager extends PeerConfig implements Runnable{
 			e.printStackTrace();
 		}
 	}
+
+	public static FileManager getInstance(){
+		return fileManagerInstance;
+	}
+
+	// client methods
 
 	public static String getFileChecksumMD5(File file) throws Exception
 	{
@@ -88,6 +95,19 @@ public class FileManager extends PeerConfig implements Runnable{
 		}
 		boolean[] ret = {false};
 		return ret;
+	}
+
+	String getBuffermapToString(String hash){
+		String res = "";
+		for(Map.Entry<String, boolean[]> entry: fileManager.entrySet()){
+			if(entry.getKey().equals(hash)){
+				for(boolean bit: entry.getValue()){
+					if(bit == true){res += "1";}
+					if(bit == false){res += "0";}
+				}
+			}
+		}
+		return res;
 	}
 
 	void printBuffermap(boolean[] buffermap){
