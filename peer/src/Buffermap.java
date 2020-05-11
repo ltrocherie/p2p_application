@@ -2,16 +2,23 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.Arrays; 
+import java.util.concurrent.BlockingQueue;
 import java.security.MessageDigest;
 /**
  * */
 
 public class Buffermap extends PeerConfig implements Runnable{
 
-	List<Map.Entry<String, boolean[]>> fileManager;
+	Map<String, boolean[]> fileManager;
+
 
 	public Buffermap(){
-		fileManager = new ArrayList<>();
+		fileManager = new HashMap<String, boolean[]>();
+		try{
+			buffermapInit();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 
 	public static String getFileChecksumMD5(File file) throws Exception
@@ -52,6 +59,7 @@ public class Buffermap extends PeerConfig implements Runnable{
 	void buffermapInit() throws Exception{
 		// gets all the files in the seed/ folder and adds them in the file manager
 		File[] filelist = fileList(folderName); 
+		System.out.println(filelist.length);
 	    for (File f : filelist) {
 	    	String hash = getFileChecksumMD5(f);
 	    	long bmlength = f.length()/pieceSize + 1;
@@ -59,22 +67,67 @@ public class Buffermap extends PeerConfig implements Runnable{
 	    	for(boolean b: buffermap){
 	    		b = true;
 	    	}
-	    	Map.Entry<String, boolean[]> tuple = new AbstractMap.SimpleEntry<>(hash, buffermap);
-	    	fileManager.add(tuple);
+	    	fileManager.put(hash, buffermap);
     	}
     	return;
 	}
 
 	void buffermapUpdate(String hash, boolean[] buffermap){
-		for(Map.Entry<String, boolean[]> tuple: fileManager){
+		for(Map.Entry<String, boolean[]> tuple: fileManager.entrySet()){
 			if(tuple.getKey().equals(hash)){
 				tuple.setValue(buffermap);
 				return;
 			}
 		}
-		// else : may need to add a new entry
+		Map.Entry<String, boolean[]> newEntry = new AbstractMap.SimpleEntry<>(hash, buffermap);
+	    fileManager.put(hash, buffermap);
 		return;
 	}
+
+	boolean[] getBuffermap(String hash){
+		for(Map.Entry<String, boolean[]> tuple: fileManager.entrySet()){
+			if(tuple.getKey().equals(hash)){
+				return tuple.getValue();
+			}
+		}
+		boolean[] ret = {false};
+		return ret;
+	}
+
+	void printBuffermap(boolean[] buffermap){
+		String res = new String();
+		for(boolean bit: buffermap){
+			if(bit == true){res += "1";}
+			if(bit == false){res += "0";}
+		}
+		System.out.println(res);
+		return;
+	}
+
+	void printAll(){
+		System.out.println(fileManager.size());
+		String res;
+		
+		for(Map.Entry<String, boolean[]> tuple: fileManager.entrySet()){
+			res = tuple.getKey() + " : ";	
+			for(boolean bit: tuple.getValue()){
+				if(bit == true){res += "1";}
+				if(bit == false){res += "0";}
+			}
+		System.out.println(res);
+		return;
+		}
+		/*
+		fileManager.forEach((hash, buffermap) -> res = tuple.getKey() + " : ";	
+			for(boolean bit: tuple.getValue()){
+				if(bit == true){res += "1";}
+				if(bit == false){res += "0";}
+			}
+			System.out.println(res););
+		*/
+		
+	}
+
 
 	public void run(){
 		try{
