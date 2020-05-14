@@ -4,17 +4,24 @@ import java.util.*;
 import java.util.Arrays; 
 import java.util.concurrent.BlockingQueue;
 import java.security.MessageDigest;
+import java.util.concurrent.locks.ReentrantLock;
 /**
  * */
 
 public class FileManager extends PeerConfig implements Runnable{
 
+	// Data structure
 	Map<String, boolean[]> fileManager;
 
+	// lock for concurrent accesses
+	ReentrantLock lock;
+
+	// Instance for singleton behavior
 	private static final FileManager fileManagerInstance = new FileManager();
 
 	private FileManager(){
 		fileManager = new HashMap<String, boolean[]>();
+		lock = new ReentrantLock();
 		try{
 			buffermapInit();
 		}catch(Exception e){
@@ -77,27 +84,34 @@ public class FileManager extends PeerConfig implements Runnable{
 	}
 
 	void buffermapUpdate(String hash, boolean[] buffermap){
+		lock.lock();
 		for(Map.Entry<String, boolean[]> entry: fileManager.entrySet()){
 			if(entry.getKey().equals(hash)){
 				entry.setValue(buffermap);
+				lock.unlock();
 				return;
 			}
 		}
 	    fileManager.put(hash, buffermap);
+	    lock.unlock();
 		return;
 	}
 
 	boolean[] getBuffermap(String hash){
+		lock.lock();
 		for(Map.Entry<String, boolean[]> entry: fileManager.entrySet()){
 			if(entry.getKey().equals(hash)){
+				lock.unlock();
 				return entry.getValue();
 			}
 		}
-		boolean[] ret = {false};
+		boolean[] ret = {};
+		lock.unlock();
 		return ret;
 	}
 
 	String getBuffermapToString(String hash){
+		lock.lock();
 		String res = "";
 		for(Map.Entry<String, boolean[]> entry: fileManager.entrySet()){
 			if(entry.getKey().equals(hash)){
@@ -107,16 +121,19 @@ public class FileManager extends PeerConfig implements Runnable{
 				}
 			}
 		}
+		lock.unlock();
 		return res;
 	}
 
 	void printBuffermap(boolean[] buffermap){
+		lock.lock();
 		String res = new String();
 		for(boolean bit: buffermap){
 			if(bit == true){res += "1";}
 			if(bit == false){res += "0";}
 		}
 		System.out.println(res);
+		lock.unlock();
 		return;
 	}
 
@@ -134,12 +151,13 @@ public class FileManager extends PeerConfig implements Runnable{
 			System.out.println(res);
 			return;
 		}*/
-
+		lock.lock();
 		for(Map.Entry<String, boolean[]> entry: fileManager.entrySet()){
 			res = entry.getKey() + " has the buffermap: ";	
 			System.out.println(res);
 			printBuffermap(entry.getValue());
 		}
+		lock.unlock();
 		return;
 		/*
 		fileManager.forEach((hash, buffermap) -> res = tuple.getKey() + " : ";	

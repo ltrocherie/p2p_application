@@ -33,6 +33,9 @@ public class Peer {
     //(new Thread(new SendToPeer("localhost", "< interested -785361703"))).start();
     //(new Thread(new ReceiveFromPeer("localhost"))).start();
 
+    Thread t = (new Thread(new PeerSecond()));
+    t.start();
+    System.out.println("main exec");
     FileManager fm = FileManager.getInstance();
     fm.printAll();
 
