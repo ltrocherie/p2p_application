@@ -8,16 +8,18 @@ import java.util.ArrayList;
 public class ReceiveFromPeer extends PeerConfig implements Runnable{
 
   String connect;
+  int port;
 
-  public ReceiveFromPeer(String connect){
+  public ReceiveFromPeer(String connect, int port){
     this.connect = connect;
+    this.port = port;
   }
 
   public void receivePeer() throws Exception{
 
     while(true){
       //Socket connectionSocket = new Socket(connect, peerBasePort); // Attention ici inPort peut être set à 0 ce qui signifie attribution automatique de port
-      ServerSocket welcomeSocket = new ServerSocket(peerBasePort);
+      ServerSocket welcomeSocket = new ServerSocket(port);
       Socket connectionSocket = welcomeSocket.accept();
 
       BufferedReader br = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
