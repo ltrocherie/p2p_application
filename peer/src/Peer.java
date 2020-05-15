@@ -42,9 +42,10 @@ public class Peer {
     */
 
     //(new Thread(new SendToPeer("127.0.0.1", "interested 46a89dffeb294ee81b452b4cf552cc38"))).start(); // aled
-    (new Thread(new SendToPeer("127.0.0.1", "getpieces 46a89dffeb294ee81b452b4cf552cc38 [1 2 3]"))).start(); // aled
+    //(new Thread(new SendToPeer("127.0.0.1", "getpieces 46a89dffeb294ee81b452b4cf552cc38 [1 2 3]"))).start(); // aled
 
-
+    (new SendToPeer("127.0.0.1", "interested 46a89dffeb294ee81b452b4cf552cc38")).run(); // aled
+    (new SendToPeer("127.0.0.1", "getpieces 46a89dffeb294ee81b452b4cf552cc38 [1 2 3]")).run(); // aled
   }
 
 }

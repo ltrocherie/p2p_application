@@ -15,10 +15,10 @@ public class SendToPeer extends PeerConfig implements Runnable{
 
   public void announcePeer() throws Exception{
     
-    ServerSocket welcomeSocket = new ServerSocket(peerBasePort);
-    Socket socket = welcomeSocket.accept();
+    //ServerSocket welcomeSocket = new ServerSocket(peerBasePort);
+    //Socket socket = welcomeSocket.accept();
     
-    //Socket socket = new Socket(connect, peerBasePort);
+    Socket socket = new Socket(connect, peerBasePort);
 
     BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
     PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),true);
