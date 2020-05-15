@@ -22,10 +22,10 @@ public class SendToPeer extends PeerConfig implements Runnable{
 
     BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
     PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),true);
-    System.out.println("Sending " + cmd);        
+    //System.out.println("Sending " + cmd);        
     // Tells another peer what is given in cmd
     pw.println(cmd);
-    System.out.println("Command sent");
+    //System.out.println("Command sent");
     String answer = br.readLine();
     System.out.println(answer);
 

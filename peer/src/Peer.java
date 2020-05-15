@@ -3,7 +3,7 @@ import java.net.*;
 /**
  * */
 
-public class Peer {
+public class Peer extends PeerConfig{
   
   static final AnnounceToTracker ann = new AnnounceToTracker();
   static private FileManager buffermap;
