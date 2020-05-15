@@ -11,40 +11,34 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
     this.connect = connect;
   }
 
-  public String receivePeer() throws Exception{
+  public void receivePeer() throws Exception{
 
 
-    Socket connectionSocket = new Socket(connect, inPort); // Attention ici inPort peut être set à 0 ce qui signifie attribution automatique de port
+    Socket connectionSocket = new Socket(connect, peerBasePort); // Attention ici inPort peut être set à 0 ce qui signifie attribution automatique de port
 
     BufferedReader br = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
     PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(connectionSocket.getOutputStream())),true);
 
-    String message = br.readLine();
-    System.out.println(message);
-    String answer = "";
+    while(true){ // exception when not connected to a peer
+      String message = br.readLine();
+      System.out.println(message);
+      String answer = "";
 
-    // Analyzing the message
-    String delims = " ";
-    String[] tokens = message.split(delims);
-    /*
-    for (int i = 0; i<tokens.length; i++) {
-      System.out.println(tokens[i]);
-    }
-    */
-    if(tokens[0].equals("<")){ // first part for the request of another peer
-      switch(tokens[1]){
+      // Analyzing the message
+      String delims = " ";
+      String[] tokens = message.split(delims);
+      /*
+      for (int i = 0; i<tokens.length; i++) {
+        System.out.println(tokens[i]);
+      }
+      */
+      switch(tokens[0]){
         /* TODO : analyze the input */
         case "interested":
           //answer with have
-          String buffermap = "false";
-          File[] filelist = fileList(folderName); 
-          for (File f : filelist) {
-            String hash = "" + f.hashCode();
-            System.out.println(f.getName() + hash);
-            if(hash.equals(tokens[2]))
-              buffermap = "true";
-          }
-          answer = "> have " + tokens[2] + " " + buffermap; 
+          String buffermap = "";
+          FileManager fm = FileManager.getInstance();
+          answer = "have " + tokens[1] + " " + fm.getBuffermapToString(tokens[1]); 
           pw.println(answer);
           break;
         case "getpieces":
@@ -59,16 +53,9 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
           answer = "> Input not understood, please try again";
           pw.println(answer);
       }
-    }else{
-      if(tokens[0].equals(">")){ // second part for analyzing an answer
-      } 
-      else{
-        answer = "> Input not understood, please try again";
-        pw.println(answer);
-      }
+        
+      
     }
-    
-    return answer;
   }
 
   public void run(){

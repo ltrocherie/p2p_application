@@ -33,11 +33,15 @@ public class Peer {
     //(new Thread(new SendToPeer("localhost", "< interested -785361703"))).start();
     //(new Thread(new ReceiveFromPeer("localhost"))).start();
 
+    /*
     Thread t = (new Thread(new PeerSecond()));
     t.start();
     System.out.println("main exec");
     FileManager fm = FileManager.getInstance();
     fm.printAll();
+    */
+    (new Thread(new SendToPeer("127.0.0.1", "interested 6503f4e83628d295d95500d6e68d8f24"))).start(); // aled
+
 
   }
 
