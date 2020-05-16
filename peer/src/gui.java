@@ -2,12 +2,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-public class gui {
+public class gui extends PeerConfig{
 
     public static void main(String args[]) {
        PeerConfig.getElementFromConfig();
        guiRunner gR= new guiRunner();
        gR.run();
+       (new Thread(new ReceiveFromPeer("127.0.0.1", peerBasePort))).start();
+
     }
 }
 
