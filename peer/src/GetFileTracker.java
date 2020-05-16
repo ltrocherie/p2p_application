@@ -23,6 +23,20 @@ public class GetFileTracker extends PeerConfig implements Sender{
             pw.println(message + texts.get(0).getText()+ " ");
             System.out.println(">" + message + texts.get(0).getText());
             String str = br.readLine();// Ca c'est pour suivre en temps réel sur le terminal.
+            
+            // gets the data structure
+            FileManager fm = FileManager.getInstance();
+            
+            // handles the answer and stores it 
+            String delims = "[ \\[\\]]";
+            String[] tokens = message.split(delims);
+            String[] peersData = new String[tokens.length - 2];
+            for(int i = 2; i < tokens.length; i++){
+                peersData[i - 2] = tokens[i];
+            }
+
+            fm.peerUpdate(tokens[1], peersData);
+
             System.out.println("<"+str);
             pw.println("END");
             texts.get(0).setText("");
