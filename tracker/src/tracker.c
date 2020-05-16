@@ -14,12 +14,14 @@
 #include <fcntl.h>
 #include <string.h>
 #include <pthread.h>
+#include <signal.h>
 
 #include "queue.h"
 #include "utils.h"
 #include "thpool.h"
 #include "tracker.h"
 #include "port_table.h"
+#include "hash_table.h"
 
 #define SIZE 1024
 
@@ -37,13 +39,31 @@
 #define LOG "log"
 
 int log_fd;
+int *sock_thread;
+
 pthread_mutex_t log_lock;
 
-void error(char *msg)
-{
-    perror(msg);
-    exit(1);
-}
+threadpool thpool;
+
+int keepRunning;
+
+/* Function to call upon signal reception */ 
+void signal_handler(int signo) { 
+    printf("Received: signal %d\n", signo);
+
+    free(sock_thread);
+
+    exit_if ( pthread_mutex_destroy(&log_lock) != 0, "ERROR init mutex" );
+  
+    close(log_fd);
+
+    port__table_end();
+    hash__table_end();
+
+    thpool_destroy(thpool);
+
+    keepRunning = 0;
+} 
 
 /**
  * Announce a new peer with a default port, files provided in seed and leeched files in this order:
@@ -1004,8 +1024,7 @@ void treat_socket(void *arg)
     rr = read(socket, buffer, SIZE - 1);
 
     /* If there is no byte read : error */
-    if (rr < 0)
-        error("ERROR reading from socket");
+    exit_if( rr < 0, "ERROR reading from socket");
 
     printf("\nHere is the message: %s", buffer);
 
@@ -1028,12 +1047,19 @@ void treat_socket(void *arg)
 
 int main(int argc, char *argv[])
 {
-    int sockfd, newsockfd, *sock_thread, portno;
+    int sockfd, newsockfd, portno, keepRunning = 1;
     socklen_t clilen;
     struct sockaddr_in serv_addr, cli_addr;
 
+    /* Initialize the sigaction structure */ 
+    struct sigaction s;
+    s.sa_handler = signal_handler; 
+    
+    /* Install the signal handler */ 
+    sigaction(SIGINT, &s, NULL); 
+
     /* Pool of threads which will retrieve work to do in the queue of work */
-    threadpool thpool = thpool_init(5);
+    thpool = thpool_init(5);
 
     /* init a dictionary of users */
     port__table_init();
@@ -1053,10 +1079,9 @@ int main(int argc, char *argv[])
     if (argc < 2) {
         FILE* config = NULL;
         config = fopen(CONFIG, "r");
-        if (config == NULL) {
-            perror("Error opening config.ini");
-            return -1;
-        }
+
+        exit_if (config == NULL, "Error opening config.ini");
+
         char *p;
 
         char *line = malloc( sizeof(char)* 1024 );
@@ -1089,15 +1114,13 @@ int main(int argc, char *argv[])
     /* link socket to the address */
     exit_if ( bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0, "ERROR on binding");
 
-    show_local_ip(portno);
-
     /* maximum 5 entries */
     listen(sockfd, 5);
 
     clilen = sizeof(cli_addr);
 
     /* Listen to every connection */
-    for (;;)
+    while(keepRunning)
     {
         /* accept incoming connection */
         newsockfd = accept(sockfd, (struct sockaddr *)&cli_addr, &clilen);
@@ -1111,14 +1134,5 @@ int main(int argc, char *argv[])
         socket_ip arg = {*sock_thread, inet_ntoa(cli_addr.sin_addr)};
         thpool_add_work(thpool, (void *)treat_socket, &arg);
     }
-
-    exit_if ( pthread_mutex_destroy(&log_lock) != 0, "ERROR init mutex" );
-    close(log_fd);
-
-    port__table_end();
-    hash__table_end();
-
-    thpool_destroy(thpool);
-
     return 0;
 }
