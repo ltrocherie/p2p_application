@@ -1,5 +1,7 @@
 import java.io.*;
 import java.net.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 /**
@@ -66,9 +68,24 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
             //System.out.println(indexes);
             String buffermap = fm.getBuffermapToString(tokens[1]); 
             answer = "data " + tokens[1] + " [";
-            // TODO : need to add the indexes + file part
+            String fileToSend = new String(Files.readAllBytes(Paths.get("../seed/R_seaux_Rapport_mi_parcours.pdf"))); // problem of path
+            // splits the file
+            
+            String[] filePieces = new String[fileToSend.length()/pieceSize];
+            int globalIndex = 0;
+            for (int i = 0; i < fileToSend.length(); i++) {
+              char[] tmp = new char[pieceSize];
+              tmp[i % pieceSize] = fileToSend.charAt(i);
+              if(i % pieceSize == 0){
+                String piece = new String(tmp);
+                filePieces[globalIndex] = piece;
+                tmp = new char[pieceSize];
+              }
+            }
+            
+            // creates the answer
             for (int i = 0; i < indexes.size(); i++) {
-              answer += Character.forDigit(indexes.get(i),10) + ":" + "%Piece" + Character.forDigit(i,10) + "%";
+              answer += Character.forDigit(indexes.get(i),10) + ":" + filePieces[i];
               if(i != indexes.size() - 1)
                 answer += " ";
             }
@@ -118,6 +135,7 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
       receivePeer();
     } catch (Exception e){
       System.out.println("Listening Interrupted.");
+      e.printStackTrace();
     }
     return;
   }
