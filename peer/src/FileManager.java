@@ -11,7 +11,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public class FileManager extends PeerConfig implements Runnable{
 
 	// Data structure
-	Map<String, boolean[]> fileManager;
+	Map<String, boolean[]> fileManager; // stores the hash and the buffermap for each file of this peer
+	Map<String, String[]> peerManager;	// stores the hash of a file on the network and all the peers who have it
 
 	// lock for concurrent accesses
 	ReentrantLock lock;
@@ -22,6 +23,7 @@ public class FileManager extends PeerConfig implements Runnable{
 	private FileManager(){
 		fileManager = new HashMap<String, boolean[]>();
 		lock = new ReentrantLock();
+		peerManager = new HashMap<String, String[]>();
 		try{
 			buffermapInit();
 		}catch(Exception e){
@@ -33,6 +35,7 @@ public class FileManager extends PeerConfig implements Runnable{
 		return fileManagerInstance;
 	}
 
+	//////////////////////////////////////////////////////////////////////////////////////////////////
 	// client methods
 
 	public static String getFileChecksumMD5(File file) throws Exception
@@ -69,6 +72,9 @@ public class FileManager extends PeerConfig implements Runnable{
 	    //return complete hash
 	   return sb.toString();
 	}
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////
+	// Methods to handle the file manager
 
 	void buffermapInit() throws Exception{
 		// gets all the files in the seed/ folder and adds them in the file manager
@@ -170,6 +176,51 @@ public class FileManager extends PeerConfig implements Runnable{
 		
 	}
 
+	//////////////////////////////////////////////////////////////////////////////////////////////////
+	// Methods to handle the peer manager
+
+	String[] getPeers(String hash){
+		lock.lock();
+		for(Map.Entry<String, String[]> entry: peerManager.entrySet()){
+			if(entry.getKey().equals(hash)){
+				lock.unlock();
+				return entry.getValue();
+			}
+		}
+		String[] ret = {};
+		lock.unlock();
+		return ret;
+	}
+
+	void peerUpdate(String fileHash, String[] peers){
+		lock.lock();
+		for(Map.Entry<String, String[]> entry: peerManager.entrySet()){
+			if(entry.getKey().equals(fileHash)){
+				entry.setValue(peers);
+				lock.unlock();
+				return;
+			}
+		}
+	    peerManager.put(fileHash, peers);
+	    lock.unlock();
+		return;
+	}
+
+	void printAllPeers(){
+		String res;
+		lock.lock();
+		for(Map.Entry<String, String[]> entry: peerManager.entrySet()){
+			res = entry.getKey() + " is owned by : ";
+			for(String peer: entry.getValue()){
+				res += peer + " ";
+			}
+			System.out.println(res);
+		}
+		lock.unlock();
+		return;		
+	}
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public void run(){
 		try{
