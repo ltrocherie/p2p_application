@@ -18,8 +18,12 @@ clean:
 	rm -rf $(BLD)*
 	rmdir $(BLD)
 
-tracker: $(BLD)utils.o $(BLD)thpool.o $(BLD)hash_table.o $(BLD)port_table.o 
-	cc $(FLAGS) -g3 -o $(BLD)$@ $(SRC)$@.c $^ -pthread
+tracker: $(BLD)utils.o $(BLD)thpool.o $(BLD)hash_table.o $(BLD)port_table.o
+	@if [ -z $(N_THREADS) ]; then \
+		cc $(FLAGS) -g3 -o $(BLD)$@ $(SRC)$@.c $^ -pthread; \
+	else \
+		cc $(FLAGS) -g3 -o $(BLD)$@ $(SRC)$@.c $^ -pthread -DN_THREADS=$(N_THREADS); \
+	fi; \
 
 $(BLD)utils.o:
 		cc $(FLAGS) -o $@ -c $(SRC)utils.c
