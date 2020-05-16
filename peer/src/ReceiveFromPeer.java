@@ -68,24 +68,29 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
             //System.out.println(indexes);
             String buffermap = fm.getBuffermapToString(tokens[1]); 
             answer = "data " + tokens[1] + " [";
-            String fileToSend = new String(Files.readAllBytes(Paths.get("../seed/R_seaux_Rapport_mi_parcours.pdf"))); // problem of path
+            String fileToSend = new String(Files.readAllBytes(Paths.get("../seed/file1.txt"))); // problem of path
             // splits the file
-            
-            String[] filePieces = new String[fileToSend.length()/pieceSize];
+            //System.out.println(fileToSend);
+            String[] filePieces = new String[fileToSend.length()/pieceSize + 1];
             int globalIndex = 0;
+            char[] tmp = new char[pieceSize];
             for (int i = 0; i < fileToSend.length(); i++) {
-              char[] tmp = new char[pieceSize];
               tmp[i % pieceSize] = fileToSend.charAt(i);
-              if(i % pieceSize == 0){
+              if(i % pieceSize == 0 && i > 0){
                 String piece = new String(tmp);
                 filePieces[globalIndex] = piece;
+                globalIndex++;
                 tmp = new char[pieceSize];
+                System.out.println("File cutting");              
               }
             }
-            
+            String piece = new String(tmp);
+            filePieces[globalIndex] = piece;
+            globalIndex++;
+            tmp = new char[pieceSize];
             // creates the answer
             for (int i = 0; i < indexes.size(); i++) {
-              answer += Character.forDigit(indexes.get(i),10) + ":" + filePieces[i];
+              answer += Character.forDigit(indexes.get(i),10) + ":"+ filePieces[indexes.get(i) - 1];
               if(i != indexes.size() - 1)
                 answer += " ";
             }

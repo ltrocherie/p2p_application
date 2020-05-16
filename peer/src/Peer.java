@@ -37,6 +37,8 @@ public class Peer extends PeerConfig{
     Thread t = (new Thread(new PeerSecond()));
     t.start();
     System.out.println("main exec");
+    */
+    /*
     FileManager fm = FileManager.getInstance();
     fm.printAll();
     */
@@ -44,8 +46,8 @@ public class Peer extends PeerConfig{
     //(new Thread(new SendToPeer("127.0.0.1", "interested 46a89dffeb294ee81b452b4cf552cc38"))).start(); // aled
     //(new Thread(new SendToPeer("127.0.0.1", "getpieces 46a89dffeb294ee81b452b4cf552cc38 [1 2 3]"))).start(); // aled
 
-    (new SendToPeer("127.0.0.1", "interested 46a89dffeb294ee81b452b4cf552cc38")).run(); // aled
-    (new SendToPeer("127.0.0.1", "getpieces 46a89dffeb294ee81b452b4cf552cc38 [1 2 3]")).run(); // aled
+    //(new SendToPeer("127.0.0.1", "interested 46a89dffeb294ee81b452b4cf552cc38")).run(); // aled
+    (new SendToPeer("127.0.0.1", "getpieces ec8405655a41ced6a7e3f80e46131837 [1]")).run(); // aled
   }
 
 }
