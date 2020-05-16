@@ -25,6 +25,10 @@
 
 #define SIZE 1024
 
+#ifndef N_THREADS
+#define N_THREADS 5
+#endif
+
 #define ANNOUNCE "announce"
 #define LOOK "look"
 #define UPDATE "update"
@@ -1059,7 +1063,7 @@ int main(int argc, char *argv[])
     sigaction(SIGINT, &s, NULL); 
 
     /* Pool of threads which will retrieve work to do in the queue of work */
-    thpool = thpool_init(5);
+    thpool = thpool_init(N_THREADS);
 
     /* init a dictionary of users */
     port__table_init();
