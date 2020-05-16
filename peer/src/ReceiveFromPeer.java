@@ -68,9 +68,8 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
             //System.out.println(indexes);
             String buffermap = fm.getBuffermapToString(tokens[1]); 
             answer = "data " + tokens[1] + " [";
-            String fileToSend = new String(Files.readAllBytes(Paths.get("../seed/file1.txt"))); // problem of path
+            String fileToSend = new String(Files.readAllBytes(Paths.get(fm.getPath(tokens[1])))); // problem of path
             // splits the file
-            //System.out.println(fileToSend);
             String[] filePieces = new String[fileToSend.length()/pieceSize + 1];
             int globalIndex = 0;
             char[] tmp = new char[pieceSize];
@@ -81,7 +80,7 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
                 filePieces[globalIndex] = piece;
                 globalIndex++;
                 tmp = new char[pieceSize];
-                System.out.println("File cutting");              
+                //System.out.println("File cutting");              
               }
             }
             String piece = new String(tmp);

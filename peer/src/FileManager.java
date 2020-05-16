@@ -13,6 +13,7 @@ public class FileManager extends PeerConfig implements Runnable{
 	// Data structure
 	Map<String, boolean[]> fileManager; // stores the hash and the buffermap for each file of this peer
 	Map<String, String[]> peerManager;	// stores the hash of a file on the network and all the peers who have it
+	Map<String, String> fileMatch; // stores the hash of a file and its path
 
 	// lock for concurrent accesses
 	ReentrantLock lock;
@@ -24,6 +25,7 @@ public class FileManager extends PeerConfig implements Runnable{
 		fileManager = new HashMap<String, boolean[]>();
 		lock = new ReentrantLock();
 		peerManager = new HashMap<String, String[]>();
+		fileMatch = new HashMap<String, String>();
 		try{
 			buffermapInit();
 		}catch(Exception e){
@@ -85,6 +87,7 @@ public class FileManager extends PeerConfig implements Runnable{
 	    	boolean[] buffermap = new boolean[(int) bmlength];
 	    	Arrays.fill(buffermap, Boolean.TRUE);
 	    	fileManager.put(hash, buffermap);
+	    	fileMatch.put(hash,f.getPath());
     	}
     	return;
 	}
@@ -214,6 +217,32 @@ public class FileManager extends PeerConfig implements Runnable{
 			for(String peer: entry.getValue()){
 				res += peer + " ";
 			}
+			System.out.println(res);
+		}
+		lock.unlock();
+		return;		
+	}
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////
+
+	String getPath(String hash){
+		lock.lock();
+		for(Map.Entry<String, String> entry: fileMatch.entrySet()){
+			if(entry.getKey().equals(hash)){
+				lock.unlock();
+				return entry.getValue();
+			}
+		}
+		String ret = "";
+		lock.unlock();
+		return ret;
+	}
+
+	void printAllPaths(){
+		String res;
+		lock.lock();
+		for(Map.Entry<String, String> entry: fileMatch.entrySet()){
+			res = entry.getKey() + " is at: " + entry.getValue();
 			System.out.println(res);
 		}
 		lock.unlock();
