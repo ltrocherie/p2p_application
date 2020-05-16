@@ -95,8 +95,12 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
             // TODO
             break;
 
+          case "nok":
+            // TODO
+            break;
+
           default:
-            answer = "> Input not understood, please try again";
+            answer = "nok";
             pw.println(answer);
         }
           
