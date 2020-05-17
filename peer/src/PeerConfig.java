@@ -100,7 +100,7 @@ public class PeerConfig{
 	        message = message + fileEntry.getName();
 	        message = message + " " + fileEntry.length();
 	        message = message + " " + pieceSize;
-	        message = message + " " + Buffermap.getFileChecksumMD5(fileEntry) + " ";
+	        message = message + " " + FileManager.getFileChecksumMD5(fileEntry) + " ";
 	    }
 	    message = message.substring(0,message.length() - 1) + "]";
 	    return message;
@@ -109,7 +109,7 @@ public class PeerConfig{
 	String parseFileKeyList(File[] fileL) throws Exception{
 		String message = "announce listen " + inPort + " seed [";
 		for (final File fileEntry : fileL) {
-			message = message + " " + Buffermap.getFileChecksumMD5(fileEntry) + " ";
+			message = message + " " + FileManager.getFileChecksumMD5(fileEntry) + " ";
 		}
 		message = message.substring(0,message.length() - 1) + "]";
 		return message;

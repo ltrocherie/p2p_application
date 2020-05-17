@@ -56,7 +56,7 @@ public class DatFileParser {
                     String stri = it.next();
                     File currentFile = new File(stri);
                     if(f.exists() && !f.isDirectory()) {
-                        message = message + Buffermap.getFileChecksumMD5(currentFile) + " ";
+                        message = message + FileManager.getFileChecksumMD5(currentFile) + " ";
                     }
                 }
             }
