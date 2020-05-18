@@ -1,15 +1,20 @@
 SRC=src/
 BLD=build/
 TST=tests/
+DOC=html/
+LAT=latex/
 
 FLAGS= -Wall
 
-.PHONY: all build tests clean
+.PHONY: all build tests clean doxygen 
 
 all: build
 
-build: dir tracker
+build: dir tracker #doxygen
 
+doxygen:
+	doxygen dox
+	
 tests: $(BLD)utils.o $(BLD)thpool.o $(BLD)hash_table.o
 	cc $(FLAGS) -o $(BLD)$@ $(TST)test_hash_table.c $^ -pthread
 
@@ -17,6 +22,10 @@ clean:
 	rm -rf $(SRC)*.o *~ \#*#
 	rm -rf $(BLD)*
 	rmdir $(BLD)
+	rm -rf $(DOC)*
+	rmdir $(DOC)
+	rm -rf $(LAT)*
+	rmdir $(LAT)
 
 tracker: $(BLD)utils.o $(BLD)thpool.o $(BLD)hash_table.o $(BLD)port_table.o
 	@if [ -z $(N_THREADS) ]; then \
