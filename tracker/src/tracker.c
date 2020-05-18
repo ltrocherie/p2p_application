@@ -49,11 +49,14 @@ pthread_mutex_t log_lock;
 
 threadpool thpool;
 
-int keepRunning;
-
-/* Function to call upon signal reception */ 
+/**
+ * Function to call upon signal reception 
+ * 
+ * @param signo signal received but the handler
+ * @return program terminated by the signal handler
+ * */
 void signal_handler(int signo) { 
-    printf("Received: signal %d\n", signo);
+    printf("\nReceived: signal interruption");
 
     free(sock_thread);
 
@@ -66,7 +69,7 @@ void signal_handler(int signo) {
 
     thpool_destroy(thpool);
 
-    keepRunning = 0;
+    exit(0);
 } 
 
 /**
@@ -1051,7 +1054,7 @@ void treat_socket(void *arg)
 
 int main(int argc, char *argv[])
 {
-    int sockfd, newsockfd, portno, keepRunning = 1;
+    int sockfd, newsockfd, portno;
     socklen_t clilen;
     struct sockaddr_in serv_addr, cli_addr;
 
@@ -1124,7 +1127,7 @@ int main(int argc, char *argv[])
     clilen = sizeof(cli_addr);
 
     /* Listen to every connection */
-    while(keepRunning)
+    for(;;)
     {
         /* accept incoming connection */
         newsockfd = accept(sockfd, (struct sockaddr *)&cli_addr, &clilen);
