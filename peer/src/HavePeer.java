@@ -23,7 +23,7 @@ public class HavePeer extends PeerConfig implements Sender{
         texts.get(0).setText("");
         try{
             // TODO : iterate on peerBasePort for each peer
-            ServerSocket welcomeSocket = new ServerSocket(super.peerBasePort);
+            ServerSocket welcomeSocket = new ServerSocket(super.inPort);
             Socket socket = welcomeSocket.accept();
 
             BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));

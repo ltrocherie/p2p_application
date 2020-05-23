@@ -33,7 +33,7 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
         if(message == null){
           break;
         }
-        System.out.println(message);
+        System.out.println("<" + message);
         PeerConfig.writeInLogs(message);
         String answer = "";
         boolean interestedSent = false;
@@ -57,6 +57,7 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
           case "interested":
             //answer with have
             answer = "have " + tokens[1] + " " + fm.getBuffermapToString(tokens[1]); 
+            System.out.println("Sending > " + answer);
             pw.println(answer);
             interestedSent = true;
             break;
@@ -95,6 +96,7 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
                 answer += " ";
             }
             answer += "]";
+            System.out.println("Sending > " + answer);
             pw.println(answer);
             break;
 
@@ -106,6 +108,7 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
             */
             if(!interestedSent){ // checks
               answer = "have " + tokens[1] + " " + fm.getBuffermapToString(tokens[1]);
+              System.out.println("Sending > " + answer);
               pw.println(answer);
             }
             interestedSent = false;
@@ -123,6 +126,7 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
 
           default:
             answer = "nok";
+            System.out.println("Sending > " + answer);
             pw.println(answer);
         }
           
