@@ -14,6 +14,7 @@ public class FileManager extends PeerConfig implements Runnable{
 	Map<String, boolean[]> fileManager; // stores the hash and the buffermap for each file of this peer
 	Map<String, String[]> peerManager;	// stores the hash of a file on the network and all the peers who have it
 	Map<String, String> fileMatch; // stores the hash of a file and its path
+	Map<String, String[]> filePieces; // stores the pieces for a given file
 
 	// lock for concurrent accesses
 	ReentrantLock lock;
@@ -26,6 +27,7 @@ public class FileManager extends PeerConfig implements Runnable{
 		lock = new ReentrantLock();
 		peerManager = new HashMap<String, String[]>();
 		fileMatch = new HashMap<String, String>();
+		filePieces = new HashMap<String, String[]>();
 		try{
 			buffermapInit();
 		}catch(Exception e){
