@@ -28,6 +28,7 @@ public class SendToPeer extends PeerConfig implements Runnable{
     //System.out.println("Command sent");
     String answer = br.readLine();
     System.out.println(answer);
+    PeerConfig.writeInLogs(answer);
 
     pw.close();
     //br.close();
@@ -39,9 +40,11 @@ public class SendToPeer extends PeerConfig implements Runnable{
   public void run(){
     try{
       System.out.println("Thread started");
+      PeerConfig.writeInLogs("Thread started");
       announcePeer();
     } catch (Exception e){
       System.out.println("Sending Interrupted.");
+      PeerConfig.writeInLogs("Sending Interrupted");
       e.printStackTrace();
     }
     return;

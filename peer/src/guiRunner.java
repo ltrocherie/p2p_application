@@ -57,6 +57,7 @@ public class guiRunner {
                 break;
             default :
                 System.out.println("Error the page you want to load doesn't exist");
+                PeerConfig.writeInLogs("Error the page you want to load doesn't exist");
         }
     }
 

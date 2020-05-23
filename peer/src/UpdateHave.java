@@ -28,15 +28,18 @@ class UpdateHave extends TimerTask{
             BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),true);
             pw.println(message);
-            System.out.println(">"+message);
+            System.out.println("<"+message);
+            PeerConfig.writeInLogs("<"+message);
             String str = br.readLine();// Ca c'est pour suivre en temps réel sur le terminal.
-            System.out.println("<"+str);
+            System.out.println(">"+str);
+            PeerConfig.writeInLogs(">"+str);
             pw.println("END");
             pw.close();
             br.close();
             socket.close();
         }catch(Exception e){
             System.out.println("Socket connecting error on have");
+            PeerConfig.writeInLogs("Socket connecting error on have");
         }
     }
 }
