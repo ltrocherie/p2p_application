@@ -8,7 +8,7 @@
 #include "queue.h"
 
 /**
-* \def HASH_TABLE_LENGTH hash_table.h
+* @def HASH_TABLE_LENGTH hash_table.h
 */
 #define HASH_TABLE_LENGTH 10000
 
@@ -21,6 +21,9 @@ struct seeder {
     SLIST_ENTRY(seeder) next_seeder; /** next_seeder for queue bsd lib*/
 };
 
+/**
+* @struct leecher hash_table.h
+*/
 struct leecher {
     char* IP; /** IP adress of the leecher of the file */
     int port; /** port of the leecher of the file */

@@ -8,12 +8,12 @@
 #include "queue.h"
 
 /**
-* \def PORT_TABLE_LENGTH port_table.h
+* @def PORT_TABLE_LENGTH port_table.h
 */
 #define PORT_TABLE_LENGTH 10000
 
 /**
-* @struct peed port_table.h
+* @struct peer port_table.h
 */
 struct peer {
     char* IP; /** IP adress of the peer of the file */
@@ -22,12 +22,12 @@ struct peer {
 };
 
 /**
-* \var port_table port_table.h
+* @def port_table port_table.h
 */
 SLIST_HEAD(,peer) port_table[PORT_TABLE_LENGTH];
 
 /**
-* \var port_mutex_table port_table.h
+* @def port_mutex_table port_table.h
 */
 pthread_mutex_t port_mutex_table[PORT_TABLE_LENGTH];
 

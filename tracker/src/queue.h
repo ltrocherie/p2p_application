@@ -1,3 +1,7 @@
+/**
+ * @file queue.h
+ * */
+
 /*	$NetBSD: queue.h,v 1.74 2019/03/23 12:01:18 maxv Exp $	*/
 
 /*
