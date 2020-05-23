@@ -42,12 +42,14 @@ public class AnnounceToTracker extends PeerConfig implements Sender{
             BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),true);
             pw.println(message);
-            System.out.println("> "+message);
+            System.out.println("< "+message);
+            PeerConfig.writeInLogs("< "+message);
             String str = br.readLine();// Ca c'est pour suivre en temps réel sur le terminal.
             if(str.equals("ok")){
                 PeerConfig.okAnnounce = true;
             }
-            System.out.println("<"+str);
+            System.out.println(">"+str);
+            PeerConfig.writeInLogs(">"+str);
             pw.println("END");
             pw.close();
             br.close();
@@ -58,6 +60,7 @@ public class AnnounceToTracker extends PeerConfig implements Sender{
             }
         }catch(Exception e){
             System.out.println("Socket connecting error");
+            PeerConfig.writeInLogs("Socket connecting error");
         }
 
     }

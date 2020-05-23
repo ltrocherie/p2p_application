@@ -41,6 +41,7 @@ public class ConfigTrackerSender extends PeerConfig implements Sender{
                     break;
                 default :
                     System.out.println("Error while changing config values");
+                    PeerConfig.writeInLogs("Error while changing config values");
             }
             texts.get(0).setText("");
         }
