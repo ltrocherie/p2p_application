@@ -155,6 +155,31 @@ public class FileManager extends PeerConfig implements Runnable{
 		return res;
 	}
 
+	boolean[] getStringToBuffermap(String buffer){
+		int index = 0;
+		int piece = 0;
+		int size = buffer.length() * 8;
+		byte[] buff = buffer.getBytes();
+		boolean[] buffermap = new boolean[size];
+		while(index < buff.length) {
+			byte bit = buff[index];
+			byte mask = 0x01;
+			for (int j = 0; j < 8; j++)
+			{
+				int value = bit & mask;
+				if(value==1){ // il veut pas convertir en un booléen
+					buffermap[piece] = true;
+				}else{
+					buffermap[piece] = false;
+				}
+				piece += 1;
+				mask <<= 1;
+			}
+			index += 1;
+		}
+		return buffermap;
+	}
+
 	void printBuffermap(boolean[] buffermap){
 		lock.lock();
 		String res = new String();

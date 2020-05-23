@@ -139,9 +139,6 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
     }
   }
 
-  private void recomposition(String[] pieces,String filename){
-
-  }
 
   public void run(){
     try{

@@ -75,7 +75,7 @@ public class GetPiecesPeer extends PeerConfig implements Sender{
         }
     }
 
-    private String transformBuffermap(String buffer){
+    String transformBuffermap(String buffer){
         int index = 0;
         int piece = 1;
         String message = "[";
@@ -96,6 +96,5 @@ public class GetPiecesPeer extends PeerConfig implements Sender{
         }
         return message;
     }
-
 
 }
