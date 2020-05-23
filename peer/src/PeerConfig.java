@@ -15,8 +15,6 @@ public class PeerConfig{
 	  static int outPort = 10000;
 	  static String trackerIp = "127.0.0.1";
 	  static int trackerPort = 10000;
-	  static int peerBasePort = 15000;
-	  static int peerListenPort = 20000;
 
 	  static final String folderName = "../seed";
 	  static final String logFile = "../log.txt";
