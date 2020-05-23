@@ -21,11 +21,11 @@ tests: $(BLD)utils.o $(BLD)thpool.o $(BLD)hash_table.o
 clean:
 	rm -rf $(SRC)*.o *~ \#*#
 	rm -rf $(BLD)*
-	rmdir $(BLD)
+	if [ -d $(BLD) ]; then rmdir $(BLD); fi
 	rm -rf $(DOC)*
-	rmdir $(DOC)
+	if [ -d $(DOC) ]; then rmdir $(DOC); fi
 	rm -rf $(LAT)*
-	rmdir $(LAT)
+	if [ -d $(LAT) ]; then rmdir $(LAT); fi
 
 tracker: $(BLD)utils.o $(BLD)thpool.o $(BLD)hash_table.o $(BLD)port_table.o
 	@if [ -z $(N_THREADS) ]; then \
