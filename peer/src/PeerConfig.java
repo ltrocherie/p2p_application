@@ -19,6 +19,7 @@ public class PeerConfig{
 	  static int peerListenPort = 20000;
 
 	  static final String folderName = "../seed";
+	  static final String logFile = "../log.txt";
 	  static int pieceSize = 1024;
 	  static int maxNbPair = 5;
 	  static int maxPieceSize = 2048;
@@ -64,6 +65,7 @@ public class PeerConfig{
 						  	break;
 						  default :
 						  	System.out.println("Can't interpret the config :"+it);
+						  	PeerConfig.writeInLogs("Can't interpret the config"+it);
 					  }
 
 				  }
@@ -104,6 +106,19 @@ public class PeerConfig{
 	    }
 	    message = message.substring(0,message.length() - 1) + "]";
 	    return message;
+	}
+
+	static public void writeInLogs(String message){
+		if(!message.equals("")){
+			try{
+				FileWriter fr = new FileWriter(logFile,true);
+				fr.write(message+"\n");
+				fr.close();
+			}catch(Exception e){
+				System.out.println("Unable to write datas in "+logFile);
+				PeerConfig.writeInLogs("Unable to write datas in "+logFile);
+			}
+		}
 	}
 
 	String parseFileKeyList(File[] fileL) throws Exception{

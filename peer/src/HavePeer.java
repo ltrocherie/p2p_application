@@ -33,12 +33,14 @@ public class HavePeer extends PeerConfig implements Sender{
             pw.println(message);
             String answer = br.readLine();
             System.out.println(answer + "\n");
+            PeerConfig.writeInLogs(answer + "\n");
 
             pw.close();
             br.close();
             socket.close();
         }catch(Exception e){
             System.out.println("Error in Have Rule"); // Faudra peut être donner des erreurs plus explicites.
+            PeerConfig.writeInLogs("Error in Have Rule");
         }
         message = "have ";
     }
@@ -48,6 +50,7 @@ public class HavePeer extends PeerConfig implements Sender{
             //this.message += Buffermap.getBuffermap(texts.get(0).getText()).toString()
             texts.get(0).setText("");
             System.out.println(this.message);
+            PeerConfig.writeInLogs(this.message);
         }
     }
 

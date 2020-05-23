@@ -34,6 +34,7 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
           break;
         }
         System.out.println(message);
+        PeerConfig.writeInLogs(message);
         String answer = "";
         boolean interestedSent = false;
 
@@ -139,6 +140,7 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
       receivePeer();
     } catch (Exception e){
       System.out.println("Listening Interrupted.");
+      PeerConfig.writeInLogs("Listening Interrupted.");
       e.printStackTrace();
     }
     return;

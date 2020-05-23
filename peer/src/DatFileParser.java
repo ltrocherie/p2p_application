@@ -34,6 +34,7 @@ public class DatFileParser {
             }
         }catch(Exception e){
             System.out.println("Error while reading "+filename);
+            PeerConfig.writeInLogs("Error while reading "+filename);
         }
         return message;
     }
@@ -62,6 +63,7 @@ public class DatFileParser {
             }
         }catch(Exception e){
             System.out.println("Error while reading "+filename);
+            PeerConfig.writeInLogs("Error while reading "+filename);
         }
         return message;
     }
@@ -74,6 +76,7 @@ public class DatFileParser {
                 fr.close();
             }catch(Exception e){
                 System.out.println("Unable to write datas in "+filename);
+                PeerConfig.writeInLogs("Unable to write datas in "+filename);
             }
         }
     }
@@ -105,6 +108,7 @@ public class DatFileParser {
             }
         }catch(Exception e){
             System.out.println("Error when looking for "+filename);
+            PeerConfig.writeInLogs("Error when looking for "+filename);
         }
         return false;
     }

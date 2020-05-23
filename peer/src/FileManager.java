@@ -142,6 +142,7 @@ public class FileManager extends PeerConfig implements Runnable{
 			if(bit == false){res += "0";}
 		}
 		System.out.println(res);
+		PeerConfig.writeInLogs(res);
 		lock.unlock();
 		return;
 	}
@@ -164,6 +165,7 @@ public class FileManager extends PeerConfig implements Runnable{
 		for(Map.Entry<String, boolean[]> entry: fileManager.entrySet()){
 			res = entry.getKey() + " has the buffermap: ";	
 			System.out.println(res);
+			PeerConfig.writeInLogs(res);
 			printBuffermap(entry.getValue());
 		}
 		lock.unlock();
@@ -218,6 +220,7 @@ public class FileManager extends PeerConfig implements Runnable{
 				res += peer + " ";
 			}
 			System.out.println(res);
+			PeerConfig.writeInLogs(res);
 		}
 		lock.unlock();
 		return;		
@@ -244,6 +247,7 @@ public class FileManager extends PeerConfig implements Runnable{
 		for(Map.Entry<String, String> entry: fileMatch.entrySet()){
 			res = entry.getKey() + " is at: " + entry.getValue();
 			System.out.println(res);
+			PeerConfig.writeInLogs(res);
 		}
 		lock.unlock();
 		return;		
