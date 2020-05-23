@@ -122,12 +122,33 @@ public class FileManager extends PeerConfig implements Runnable{
 	String getBuffermapToString(String hash){
 		lock.lock();
 		String res = "";
+		int index = 0;
+		byte b=0;
+		byte one=1;
+		boolean first = true;
 		for(Map.Entry<String, boolean[]> entry: fileManager.entrySet()){
 			if(entry.getKey().equals(hash)){
+				for(boolean bit: entry.getValue()){
+					if(index == 0 && !first) {
+						res =  res + b;
+						b = 0;
+					}
+					first = false;
+					b = (byte) (b << 1);
+					if(bit){
+						b =(byte) (b + one);
+					}
+					index = (index + 1)%8;
+				}
+			}
+			/*if(entry.getKey().equals(hash)){
 				for(boolean bit: entry.getValue()){
 					if(bit == true){res += "1";}
 					if(bit == false){res += "0";}
 				}
+			}*/
+			if(index != 0){
+				res = res + (byte) (b << (8-index));
 			}
 		}
 		lock.unlock();
