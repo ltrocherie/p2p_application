@@ -118,6 +118,11 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
 
           case "data":
             // TODO
+            String[] pieces = new String[tokens.length - 2];
+            for (int i = 2; i < tokens.length; i++) {
+              pieces[i - 2] = tokens[i];
+            }
+            fm.updatePieces(tokens[1], pieces);
             break;
 
           case "nok":
