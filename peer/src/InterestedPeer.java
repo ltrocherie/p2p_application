@@ -44,15 +44,16 @@ public class InterestedPeer extends PeerConfig implements Sender{
     }
 
     public void sendFromLook(String str){
+        str = str.replaceAll("\\[","");
         String[] strParsed = str.split(" ");
         //C'est interessant à partir de 3
-        int index = 3;
+        int index = 1;
         String key = strParsed[1];
-        while(strParsed[index] != "]"){
-             SendToPeer(strParsed[index],key);
-             index = index + 1;
+        while(index < strParsed.length-1){
+            index = index + 1;
+            SendToPeer(strParsed[index],key);
         }
-        if(index == 3){
+        if(index == 1){
             System.out.println("No peer have key "+ key + ". Interested not send");
             PeerConfig.writeInLogs("No peer have key "+ key + ". Interested not send");
         }

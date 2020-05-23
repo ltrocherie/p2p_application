@@ -8,7 +8,6 @@ public class gui extends PeerConfig{
        PeerConfig.getElementFromConfig();
        guiRunner gR= new guiRunner();
        gR.run();
-       (new Thread(new ReceiveFromPeer("127.0.0.1", peerBasePort))).start();
 
     }
 }

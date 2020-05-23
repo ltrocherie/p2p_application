@@ -47,6 +47,7 @@ public class AnnounceToTracker extends PeerConfig implements Sender{
             String str = br.readLine();// Ca c'est pour suivre en temps réel sur le terminal.
             if(str.equals("ok")){
                 PeerConfig.okAnnounce = true;
+                (new Thread(new ReceiveFromPeer("127.0.0.1", inPort))).start();
             }
             System.out.println(">"+str);
             PeerConfig.writeInLogs(">"+str);

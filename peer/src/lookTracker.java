@@ -16,6 +16,7 @@ public class lookTracker extends PeerConfig implements Sender{
 
     String message = "look [";
     public void sendMessage(ArrayList<JTextField> texts){
+        String answer = "";
         try{
             texts.get(0).setText("");
             Socket socket = new Socket(super.trackerIp,super.trackerPort);
@@ -24,11 +25,9 @@ public class lookTracker extends PeerConfig implements Sender{
             pw.println(message.substring(0,message.length() - 1) + "]");
             System.out.println("<"+message.substring(0,message.length() - 1) + "]");
             PeerConfig.writeInLogs("<"+message.substring(0,message.length() - 1) + "]");
-            String str = br.readLine();// Ca c'est pour suivre en temps réel sur le terminal.
-            System.out.println(">"+str);
-            PeerConfig.writeInLogs(">"+str);
-            InterestedPeer IntPe = new InterestedPeer();
-            IntPe.sendFromLook(str);
+            answer = br.readLine();// Ca c'est pour suivre en temps réel sur le terminal.
+            System.out.println("> "+answer);
+            PeerConfig.writeInLogs("> "+answer);
             pw.println("END");
             pw.close();
             br.close();
