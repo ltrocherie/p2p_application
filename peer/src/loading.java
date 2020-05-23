@@ -36,6 +36,7 @@ class loading {
         JLabel portText = new JLabel("Peer's listening port :\n");
         JLabel ipTrackerText = new JLabel("Tracker's IP address :\n");
         JLabel portTrackerText = new JLabel("Tracker's listening port :\n");
+        JLabel Text = new JLabel("Tracker's listening port :\n");
         JTextField portf = new JTextField(1000); // accepts upto 1000 characters
         JTextField tPortf = new JTextField(1000); // accepts upto 1000 characters
         JTextField iAddressf = new JTextField(1000); // accepts upto 1000 characters
@@ -651,8 +652,12 @@ class loading {
         JLabel mainText = new JLabel("Choose the key you want the file and the indexes of the file you want to get.\n"); // ALED j'arrive pas à rendre ça responsive
         JLabel keyText = new JLabel("Key :\n");
         JLabel indexText = new JLabel("Index :\n");
+        JLabel addressText = new JLabel("Peer address :\n");
+        JLabel portText = new JLabel("Peer port :\n");
         JTextField keyField = new JTextField(1000); // accepts upto 1000 characters
         JTextField indexField = new JTextField(1000); // accepts upto 1000 characters
+        JTextField addressField = new JTextField(1000); // accepts upto 1000 characters
+        JTextField portField = new JTextField(1000); // accepts upto 1000 characters
         JButton bAdd = new JButton("Add");
         JButton bSend = new JButton("Send");
         JButton bBack = new JButton("Back");
@@ -691,11 +696,53 @@ class loading {
         gbc.insets = new Insets(10, 30, 10, 10);
         panel.add(keyField, gbc);
 
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 1;
+        gbc.weightx = 0.;
+        gbc.weighty = 0.;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.BASELINE_LEADING;
+        gbc.insets = new Insets(10, 30, 10, 10);
+        panel.add(addressText, gbc);
 
+
+
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.gridheight = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.BASELINE;
+        gbc.insets = new Insets(10, 30, 10, 10);
+        panel.add(addressField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 1;
+        gbc.weightx = 0.;
+        gbc.weighty = 0.;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.BASELINE_LEADING;
+        gbc.insets = new Insets(10, 30, 10, 10);
+        panel.add(portText, gbc);
+
+
+
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.gridheight = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.BASELINE;
+        gbc.insets = new Insets(10, 30, 10, 10);
+        panel.add(portField, gbc);
 
 
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 4;
         gbc.gridwidth = 1;
         gbc.gridheight = 1;
         gbc.weightx = 0.;
@@ -708,7 +755,7 @@ class loading {
 
 
         gbc.gridx = 1;
-        gbc.gridy = 2;
+        gbc.gridy = 4;
         gbc.gridwidth = GridBagConstraints.RELATIVE;
         gbc.gridheight = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -726,7 +773,7 @@ class loading {
 
 
         gbc.gridx = 2;
-        gbc.gridy = 3;
+        gbc.gridy = 5;
         gbc.gridheight = GridBagConstraints.REMAINDER;
         gbc.gridwidth = GridBagConstraints.RELATIVE;
         gbc.fill = GridBagConstraints.NONE;
@@ -743,14 +790,31 @@ class loading {
         panel.add(bBack, gbc);
 
 
+
+        Sender send = new GetPiecesPeer();
+        ArrayList<JTextField> texts = new ArrayList<JTextField>();
+        texts.add(addressField);
+        texts.add(portField);
+        texts.add(keyField);
+        ArrayList<JTextField> textFlush = new ArrayList<JTextField>(texts);
+        textFlush.add(indexField);
+        ArrayList<JTextField> addIndexTf = new ArrayList<JTextField>();
+        addIndexTf.add(indexField);
+        bBack.addActionListener(new ButtonListener(runner,9,send,textFlush));
+        bSend.addActionListener(new buttonListenerSender(send,texts,false));
+        bAdd.addActionListener(new buttonListenerSender(send,addIndexTf,true));
         this.getPPanel = panel;
     }
 
     void loadIntPage(guiRunner runner) {
         JPanel panel = new JPanel(new GridBagLayout());
         JLabel mainText = new JLabel("Choose the key you want to get the file.\n"); // ALED j'arrive pas à rendre ça responsive
-        JLabel criterionText = new JLabel("Key :\n");
-        JTextField tf = new JTextField(1000); // accepts upto 1000 characters
+        JLabel criterionText = new JLabel("Key :");
+        JLabel portText = new JLabel("Peer Port :");
+        JLabel addressText = new JLabel("Peer address :");
+        JTextField keyTf = new JTextField(1000); // accepts upto 1000 characters
+        JTextField portTf = new JTextField(1000); // accepts upto 1000 characters
+        JTextField addressTf = new JTextField(1000); // accepts upto 1000 characters
         JButton bSend = new JButton("Send");
         JButton bBack = new JButton("Back");
         GridBagConstraints gbc = new GridBagConstraints();
@@ -775,7 +839,7 @@ class loading {
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.BASELINE_LEADING;
         gbc.insets = new Insets(10, 30, 10, 10);
-        panel.add(criterionText, gbc);
+        panel.add(addressText, gbc);
 
 
 
@@ -786,13 +850,56 @@ class loading {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.BASELINE;
         gbc.insets = new Insets(10, 30, 10, 10);
-        panel.add(tf, gbc);
+        panel.add(addressTf, gbc);
 
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 1;
+        gbc.weightx = 0.;
+        gbc.weighty = 0.;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.BASELINE_LEADING;
+        gbc.insets = new Insets(10, 30, 10, 10);
+        panel.add(portText, gbc);
+
+
+
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.gridheight = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.BASELINE;
+        gbc.insets = new Insets(10, 30, 10, 10);
+        panel.add(portTf, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 1;
+        gbc.weightx = 0.;
+        gbc.weighty = 0.;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.BASELINE_LEADING;
+        gbc.insets = new Insets(10, 30, 10, 10);
+        panel.add(criterionText, gbc);
+
+
+
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.gridheight = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.BASELINE;
+        gbc.insets = new Insets(10, 30, 10, 10);
+        panel.add(keyTf, gbc);
 
 
 
         gbc.gridx = 2;
-        gbc.gridy = 3;
+        gbc.gridy = 5;
         gbc.gridheight = GridBagConstraints.REMAINDER;
         gbc.gridwidth = GridBagConstraints.RELATIVE;
         gbc.fill = GridBagConstraints.NONE;
@@ -810,6 +917,14 @@ class loading {
 
 
         //bBack.addActionListener(new ButtonListener(runner,9));
+
+        Sender send = new InterestedPeer();
+        ArrayList<JTextField> texts = new ArrayList<JTextField>();
+        texts.add(addressTf);
+        texts.add(portTf);
+        texts.add(keyTf);
+        bBack.addActionListener(new ButtonListener(runner,9,send,texts));
+        bSend.addActionListener(new buttonListenerSender(send,texts,false));
         this.intPanel = panel;
     }
 
