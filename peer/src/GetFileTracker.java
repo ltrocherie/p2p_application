@@ -16,6 +16,7 @@ public class GetFileTracker extends PeerConfig implements Sender{
 
     String message = "getfile ";
     public void sendMessage(ArrayList<JTextField> texts){
+        String answer ="";
         try{
             Socket socket = new Socket(super.trackerIp,super.trackerPort);
             BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -23,9 +24,9 @@ public class GetFileTracker extends PeerConfig implements Sender{
             pw.println(message + texts.get(0).getText()+ " ");
             System.out.println("<" + message + texts.get(0).getText());
             PeerConfig.writeInLogs("<" + message + texts.get(0).getText());
-            String str = br.readLine();// Ca c'est pour suivre en temps réel sur le terminal.
+            answer = br.readLine();// Ca c'est pour suivre en temps réel sur le terminal.
             
-            // gets the data structure
+            /*// gets the data structure
             FileManager fm = FileManager.getInstance();
             
             // handles the answer and stores it 
@@ -36,18 +37,22 @@ public class GetFileTracker extends PeerConfig implements Sender{
                 peersData[i - 2] = tokens[i];
             }
 
-            fm.peerUpdate(tokens[1], peersData);
+            fm.peerUpdate(tokens[1], peersData);*/
 
-            System.out.println(">"+str);
-            PeerConfig.writeInLogs(">"+str);
+            System.out.println(">"+answer);
+            PeerConfig.writeInLogs(">"+answer);
             pw.println("END");
             texts.get(0).setText("");
             pw.close();
             br.close();
             socket.close();
         }catch(Exception e){
-            System.out.println("Error in look"); // Faudra peut être donner des erreurs plus explicites.
+            System.out.println("Error in getfile"); // Faudra peut être donner des erreurs plus explicites.
             PeerConfig.writeInLogs("Error in look");
+        }
+        if(answer != "" && answer != "nok"){
+            InterestedPeer IntPe = new InterestedPeer();
+            IntPe.sendFromLook(answer);
         }
     }
 
