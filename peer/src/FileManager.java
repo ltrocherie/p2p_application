@@ -303,6 +303,29 @@ public class FileManager extends PeerConfig implements Runnable{
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void storePieces(String message){
+		message = message.replaceAll("\\[","");
+		String[] pieces = message.split(" ");
+		if(pieces.length <= 2){
+			System.out.println("Error no given pieces");
+			PeerConfig.writeInLogs("Error no given pieces");
+			return;
+		}
+		String key = pieces[1];
+		index = 2;
+		String[] tableOfPieces = filePieces.get(key);
+		while(index<pieces.length){
+			String[] piece= pieces[index].split(":");
+			int ind = Integer.parseInt(piece[0]);
+			tableOfPieces[ind] = piece[1]
+		}
+		if(checkIfFull()){
+
+		}
+	}
+
+
+
 	public void run(){
 		try{
 			buffermapInit();
