@@ -14,42 +14,29 @@ import java.util.Timer;
 
 public class GetPiecesPeer extends PeerConfig implements Sender{
 
-    String message = "getpieces ";
+    String index = "[";
 
-    public void sendMessage(ArrayList<JTextField> texts){ 
-      /*
-          TODO : Rule Interested to send to each other peer on the network
-      */
-        texts.get(0).setText("");
-        try{
-            // TODO : iterate on peerBasePort for each peer
-            ServerSocket welcomeSocket = new ServerSocket(super.peerBasePort);
-            Socket socket = welcomeSocket.accept();
+    public void sendMessage(ArrayList<JTextField> texts){
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),true);
-
-            // Tells another peer what is given in cmd
-            pw.println(message);
-            String answer = br.readLine();
-            System.out.println(answer + "\n");
-
-            pw.close();
-            br.close();
-            socket.close();
-        }catch(Exception e){
-            System.out.println("Error in getpieces Rule"); // Faudra peut être donner des erreurs plus explicites.
+        String address = texts.get(0).getText();
+        String port = texts.get(1).getText();
+        String key = texts.get(2).getText();
+        String message = key + " " + this.index;
+        if(index == "[") {
+            System.out.println("No pieces asked");
+            PeerConfig.writeInLogs("No pieces asked");
+        }else {
+            sendToPeer(message, address, port);
         }
-        message = "getpieces ";
+        flush(texts);
     }
+
     public void addValues(ArrayList<JTextField> texts){
         if(!texts.get(0).getText().equals("")){
-            // 0 for key, 
-            this.message = this.message +texts.get(0).getText() +"[ ";
-            // TODO : gives the data pieces
-            this.message += "]";
+            this.index = this.index + texts.get(0).getText() + " ";
             texts.get(0).setText("");
-            System.out.println(this.message);
+            System.out.println(this.index);
+            PeerConfig.writeInLogs(this.index);
         }
     }
 
@@ -57,7 +44,57 @@ public class GetPiecesPeer extends PeerConfig implements Sender{
         for(JTextField text : texts) {
             text.setText("");
         }
-        this.message = "getpieces ";
+        this.index = "[";
+    }
+
+    public void sendFromInt(String mess,String add, String port){
+        // Parser mess
+        String[] messList = mess.split(" ");
+        String message = messList[1] + " " + transformBuffermap(messList[2]);
+        sendToPeer(message,add,port);
+    }
+
+    private void sendToPeer(String message,String add, String port){
+        try{
+            Socket socket = new Socket(add,Integer.parseInt(port));
+            BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),true);
+            pw.println("getpieces "+ message.substring(0,message.length() - 1) +"]");
+            System.out.println("< getpieces "+ message.substring(0,message.length() - 1) +"]");
+            PeerConfig.writeInLogs("< getpieces "+ message.substring(0,message.length() - 1) +"]");
+            String str = br.readLine();// Ca c'est pour suivre en temps réel sur le terminal.
+            System.out.println(">"+str);
+            PeerConfig.writeInLogs(">"+str);
+            pw.println("END");
+            pw.close();
+            br.close();
+            socket.close();
+        }catch(Exception e){
+            System.out.println("Error in GetPieces");
+            PeerConfig.writeInLogs("Error in GetPieces");
+        }
+    }
+
+    private String transformBuffermap(String buffer){
+        int index = 0;
+        int piece = 1;
+        String message = "[";
+        byte[] buff = buffer.getBytes();
+        while(index < buff.length) {
+            byte bit = buff[index];
+            byte mask = 0x01;
+            for (int j = 0; j < 8; j++)
+            {
+                int value = bit & mask;
+                if(value==1){ // il veut pas convertir en un booléen
+                    message = message + (piece) + " ";
+                }
+                piece += 1;
+                mask <<= 1;
+            }
+            index += 1;
+        }
+        return message;
     }
 
 

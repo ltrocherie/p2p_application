@@ -23,9 +23,11 @@ public class GetPiecesSender extends PeerConfig implements Sender{
             BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),true);
             pw.println(message + key + " ["+indexes.substring(0,message.length() - 1) + "]");
-            System.out.println(">"+message.substring(0,message.length() - 1) + "]");
+            System.out.println("<"+message.substring(0,message.length() - 1) + "]");
+            PeerConfig.writeInLogs("<"+message.substring(0,message.length() - 1) + "]");
             String str = br.readLine();// Ca c'est pour suivre en temps réel sur le terminal.
-            System.out.println("<"+str);
+            System.out.println(">"+str);
+            PeerConfig.writeInLogs(">"+str);
             pw.println("END");
             texts.get(0).setText("");
             pw.close();
@@ -33,6 +35,7 @@ public class GetPiecesSender extends PeerConfig implements Sender{
             socket.close();
         }catch(Exception e){
             System.out.println("Error in look"); // Faudra peut être donner des erreurs plus explicites.
+            PeerConfig.writeInLogs("Error in look");
         }
     }
 
