@@ -304,6 +304,19 @@ public class FileManager extends PeerConfig implements Runnable{
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void updatePieces(String hash, String[] pieces){
+		// need to update
+		String res;
+		lock.lock();
+		for(Map.Entry<String, String[]> entry: filePieces.entrySet()){
+			if(entry.getKey().equals(hash)){
+				for(String piece: pieces){
+					
+				}
+				break;
+			}			
+
+		}
+		lock.unlock();
 
 		return;
 	}

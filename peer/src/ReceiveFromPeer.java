@@ -126,7 +126,7 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
             break;
 
           case "nok":
-            // TODO
+            System.out.println("Error in transmission");
             break;
 
           default:
