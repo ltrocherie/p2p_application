@@ -36,7 +36,7 @@ auquel cas c'est le port par défaut, qui est spécifié dans le fichier de conf
 Pour compiler le pair : `make`  
 Pour lancer les tests : `make tests`
 
-On lance un pair avec : 
+On lance un pair dans le répertoir `build/` avec : `java gui`
 
 ### Documentation
 Le code da la partie tracker est commenté de façon a pouvoir générer la documentation avec **Doxygen**.  
