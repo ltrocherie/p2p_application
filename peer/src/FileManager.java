@@ -35,12 +35,28 @@ public class FileManager extends PeerConfig implements Runnable{
 		}
 	}
 
+
 	public static FileManager getInstance(){
 		return fileManagerInstance;
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 	// client methods
+
+	void updateFileMatch(String hash, String filename){
+		fileMatch.put(hash,filename);
+	}
+
+	void updateFilePieces(String key,String buffermap){
+		if(filePieces.containsKey(key)){
+			return;
+		}
+		byte[] str = buffermap.getBytes();
+		int len = str.length*8;
+		String[] arr = new String[len];
+		Arrays.fill(arr,"");
+		filePieces.put(key,arr);
+	}
 
 	public static String getFileChecksumMD5(File file) throws Exception
 	{
@@ -94,6 +110,7 @@ public class FileManager extends PeerConfig implements Runnable{
     	return;
 	}
 
+
 	void buffermapUpdate(String hash, boolean[] buffermap){
 		lock.lock();
 		for(Map.Entry<String, boolean[]> entry: fileManager.entrySet()){
@@ -124,25 +141,46 @@ public class FileManager extends PeerConfig implements Runnable{
 	String getBuffermapToString(String hash){
 		lock.lock();
 		String res = "";
+		String message = "";
 		int index = 0;
 		byte b=0;
 		byte one=1;
 		boolean first = true;
-		for(Map.Entry<String, boolean[]> entry: fileManager.entrySet()){
-			if(entry.getKey().equals(hash)){
-				for(boolean bit: entry.getValue()){
-					if(index == 0 && !first) {
-						res =  res + b;
-						b = 0;
-					}
-					first = false;
-					b = (byte) (b << 1);
-					if(bit){
-						b =(byte) (b + one);
-					}
-					index = (index + 1)%8;
-				}
+		if(!fileManager.containsKey(hash)){
+			if(!fileMatch.containsKey(hash)){
+				System.out.println("The file asked doesn't exist");
+				PeerConfig.writeInLogs("The file asked doesn't exist");
+				return "nok";
 			}
+			try{
+				File f = new File(fileMatch.get(hash));
+				long len = f.length() / PeerConfig.pieceSize;
+				String full = ""+(byte)~0;
+				message = message + full.repeat((int)len/8);
+				if(len%8!=0){
+					int rest = (int)(len % 8);
+					int lastBytes = (byte) ((byte)~0 << (rest));
+					message = message + lastBytes;
+				}
+				return message;
+			}catch(Exception e){
+				System.out.println("Error while reading file with key :"+hash);
+				PeerConfig.writeInLogs("Error while reading file with key :"+hash);
+			}
+		}
+		boolean[] value = fileManager.get(hash);
+		for(boolean bit: value){
+			if(index == 0 && !first) {
+				res =  res + b;
+				b = 0;
+			}
+			first = false;
+			b = (byte) (b << 1);
+			if(bit){
+				b =(byte) (b + one);
+			}
+			index = (index + 1)%8;
+
 			/*if(entry.getKey().equals(hash)){
 				for(boolean bit: entry.getValue()){
 					if(bit == true){res += "1";}
@@ -277,16 +315,10 @@ public class FileManager extends PeerConfig implements Runnable{
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 
 	String getPath(String hash){
-		lock.lock();
-		for(Map.Entry<String, String> entry: fileMatch.entrySet()){
-			if(entry.getKey().equals(hash)){
-				lock.unlock();
-				return entry.getValue();
-			}
+		if(fileMatch.containsKey(hash)){
+			return fileMatch.get(hash);
 		}
-		String ret = "";
-		lock.unlock();
-		return ret;
+		return "";
 	}
 
 	void printAllPaths(){
@@ -304,26 +336,83 @@ public class FileManager extends PeerConfig implements Runnable{
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void storePieces(String message){
-		message = message.replaceAll("\\[","");
-		String[] pieces = message.split(" ");
-		if(pieces.length <= 2){
+		String key = message.split(" ")[1];
+		message = message.substring("have 8905e92afeb80fc7722ec89eb0bf0966 ".length(),message.length());
+		if(message.length() <= 1){
 			System.out.println("Error no given pieces");
 			PeerConfig.writeInLogs("Error no given pieces");
 			return;
 		}
-		String key = pieces[1];
-		index = 2;
+		message = message.substring(0,message.length()-1);
 		String[] tableOfPieces = filePieces.get(key);
-		while(index<pieces.length){
-			String[] piece= pieces[index].split(":");
-			int ind = Integer.parseInt(piece[0]);
-			tableOfPieces[ind] = piece[1]
+		if(tableOfPieces == null){
+			System.out.println("You try to fill a file you were not interested in");
+			PeerConfig.writeInLogs("You try to fill a file you were not interested in");
+			return;
 		}
-		if(checkIfFull()){
-
+		boolean[] buffermap = fileManager.get(key);
+		while(message.length() >0){
+			message = message.substring(1,message.length());
+			String pieceNumber = message.split(":")[0];
+			int ind = Integer.parseInt(pieceNumber);
+			message = message.substring(pieceNumber.length(),message.length());
+			byte[] bytesTable = message.getBytes();
+			String text = new String(bytesTable, 0, PeerConfig.pieceSize);
+			if(tableOfPieces[ind]==""){
+				tableOfPieces[ind] = text;
+				buffermap[ind] = true;
+			}
+			message= message.substring(text.length(),message.length());
+		}
+		if(checkIfFull(tableOfPieces)){
+			writeFile(key);
+			leechToSeed(key);
 		}
 	}
 
+
+	boolean checkIfFull(String[] pieces){
+		for(String piece: pieces){
+			if(piece == ""){
+				return false;
+			}
+		}
+		return true;
+	}
+
+	void leechToSeed(String key){
+		filePieces.remove(key);
+		DatFileParser pars = new DatFileParser();
+		String path = fileMatch.get(key);
+		pars.addFileTo(PeerConfig.seedFile,path);
+		pars.removeFileTo(PeerConfig.leechFile,path);
+		fileMatch.remove(key);
+
+	}
+
+	void writeFile(String key){
+		String[] tableOfPieces = filePieces.get(key);
+		String path = fileMatch.get(key);
+		File f = new File(path);
+		if(f.exists() && !f.isDirectory()) {
+			System.out.println("File "+path+" already exists");
+			PeerConfig.writeInLogs("File "+path+" already exists");
+		}else {
+			String toWrite = "";
+			for(String piece : tableOfPieces){
+				toWrite = toWrite + piece;
+			}
+			try {
+				BufferedWriter out = new BufferedWriter(
+						new FileWriter(path));
+				out.write(toWrite);
+				out.close();
+			} catch (IOException e) {
+				System.out.println("Error while writing file "+path);
+				PeerConfig.writeInLogs("Error while writing file "+path);
+			}
+		}
+	}
 
 	void updatePieces(String hash, String[] pieces){
 		// need to update
