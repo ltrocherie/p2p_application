@@ -103,8 +103,8 @@ public class DatFileParser {
                 while (it.hasNext()) {
                     String stri = it.next();
                     File currentFile = new File(stri);
-                    if(f.exists() && !f.isDirectory()) {
-                        fm.updateFileMatch(FileManager.getFileChecksumMD5(currentFile),currentFile.getName());
+                    if(f.exists() && !f.isDirectory() && !fm.fileMatch.containsKey(FileManager.getFileChecksumMD5(currentFile))) {
+                        fm.updateFileMatch(FileManager.getFileChecksumMD5(currentFile),currentFile.getPath());
                     }
                 }
             }

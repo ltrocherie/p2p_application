@@ -57,6 +57,7 @@ public class AddFileSender extends PeerConfig implements Sender{
     public void addValues(ArrayList<JTextField> texts){
         if(texts.get(0).getText()!=""){
             this.parser.addFileTo(super.seedFile,texts.get(0).getText());
+            this.parser.addToFileMatch(super.seedFile);
         }
         texts.get(0).setText("");
     }

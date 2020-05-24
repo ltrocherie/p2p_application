@@ -386,13 +386,13 @@ public class FileManager extends PeerConfig implements Runnable{
 		String path = fileMatch.get(key);
 		pars.addFileTo(PeerConfig.seedFile,path);
 		pars.removeFileTo(PeerConfig.leechFile,path);
-		fileMatch.remove(key);
-
+		pars.addToFileMatch(super.seedFile);
+		fileMatch.replace(key,PeerConfig.folderName + "/"+fileMatch.get(key));
 	}
 
 	void writeFile(String key){
 		String[] tableOfPieces = filePieces.get(key);
-		String path = fileMatch.get(key);
+		String path = PeerConfig.folderName + "/"+fileMatch.get(key);
 		File f = new File(path);
 		if(f.exists() && !f.isDirectory()) {
 			System.out.println("File "+path+" already exists");

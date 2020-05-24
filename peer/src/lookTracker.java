@@ -28,6 +28,7 @@ public class lookTracker extends PeerConfig implements Sender{
             answer = br.readLine();// Ca c'est pour suivre en temps réel sur le terminal.
             System.out.println("> "+answer);
             PeerConfig.writeInLogs("> "+answer);
+            addFIlesAndKeys(answer);
             pw.println("END");
             pw.close();
             br.close();
@@ -52,5 +53,20 @@ public class lookTracker extends PeerConfig implements Sender{
             text.setText("");
         }
         this.message = "look [";
+    }
+
+    private void addFIlesAndKeys(String answer){
+        if(answer == ""){
+            return;
+        }
+        answer = answer.substring("look [".length(),answer.length());
+        answer = answer.substring(0,answer.length()-1);
+        String[] splitting = answer.split(" ");
+        int index =0;
+        FileManager fm = FileManager.getInstance();
+        while(index < splitting.length){
+            fm.updateFileMatch(splitting[index+3],splitting[index]);
+            index = index + 4;
+        }
     }
 }

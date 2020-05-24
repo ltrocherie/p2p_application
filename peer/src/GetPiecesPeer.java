@@ -53,6 +53,8 @@ public class GetPiecesPeer extends PeerConfig implements Sender{
         String[] messList = mess.split(" ");
         FileManager fm = FileManager.getInstance();
         fm.updateFilePieces(messList[1],messList[2]);
+        DatFileParser pars = new DatFileParser();
+        pars.addFileTo(PeerConfig.leechFile,fm.fileMatch.get(messList[1]));
         byte[] str = messList[2].getBytes();
         int len = str.length*8;
         boolean[] b = new boolean[len];

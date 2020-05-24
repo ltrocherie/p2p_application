@@ -24,7 +24,7 @@ public class PeerConfig{
 	  static int period = 10;
 	  static boolean okAnnounce = false;
 	  static String seedFile = "../seed.dat";
-	  static String leechFile = "leech.dat";
+	  static String leechFile = "../leech.dat";
 
 	  public static void getElementFromConfig(){
 		  try {
