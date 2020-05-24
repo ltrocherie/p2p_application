@@ -113,13 +113,6 @@ public class FileManager extends PeerConfig implements Runnable{
 
 	void buffermapUpdate(String hash, boolean[] buffermap){
 		lock.lock();
-		for(Map.Entry<String, boolean[]> entry: fileManager.entrySet()){
-			if(entry.getKey().equals(hash)){
-				entry.setValue(buffermap);
-				lock.unlock();
-				return;
-			}
-		}
 	    fileManager.put(hash, buffermap);
 	    lock.unlock();
 		return;
@@ -127,13 +120,7 @@ public class FileManager extends PeerConfig implements Runnable{
 
 	boolean[] getBuffermap(String hash){
 		lock.lock();
-		for(Map.Entry<String, boolean[]> entry: fileManager.entrySet()){
-			if(entry.getKey().equals(hash)){
-				lock.unlock();
-				return entry.getValue();
-			}
-		}
-		boolean[] ret = {};
+		boolean[] ret = fileManager.get(hash);
 		lock.unlock();
 		return ret;
 	}
@@ -272,26 +259,13 @@ public class FileManager extends PeerConfig implements Runnable{
 
 	String[] getPeers(String hash){
 		lock.lock();
-		for(Map.Entry<String, String[]> entry: peerManager.entrySet()){
-			if(entry.getKey().equals(hash)){
-				lock.unlock();
-				return entry.getValue();
-			}
-		}
-		String[] ret = {};
+		String[] ret = peerManager.get(hash);
 		lock.unlock();
 		return ret;
 	}
 
 	void peerUpdate(String fileHash, String[] peers){
 		lock.lock();
-		for(Map.Entry<String, String[]> entry: peerManager.entrySet()){
-			if(entry.getKey().equals(fileHash)){
-				entry.setValue(peers);
-				lock.unlock();
-				return;
-			}
-		}
 	    peerManager.put(fileHash, peers);
 	    lock.unlock();
 		return;
@@ -417,17 +391,9 @@ public class FileManager extends PeerConfig implements Runnable{
 	void updatePieces(String hash, String[] pieces){
 		// need to update
 		String res;
-		lock.lock();
-		for(Map.Entry<String, String[]> entry: filePieces.entrySet()){
-			if(entry.getKey().equals(hash)){
-				for(String piece: pieces){
-					
-				}
-				break;
-			}			
+		//lock.lock();
 
-		}
-		lock.unlock();
+		//lock.unlock();
 
 		return;
 	}
