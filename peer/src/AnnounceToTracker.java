@@ -24,7 +24,8 @@ public class AnnounceToTracker extends PeerConfig implements Sender{
             Socket socket = new Socket(super.trackerIp,super.trackerPort);
             /*File[] fileL = super.fileList("../seed"); // This fonctionne pas normalement en ce moment.
             String message = super.parseFileList(fileL);*/
-            DatFileParser getMessage= new DatFileParser();
+            DatFileParser getMessage = new DatFileParser();
+            getMessage.addToFileMatch(super.seedFile);
             String message = getMessage.getFilesFrom(super.seedFile);
             int inPor = super.inPort;
             if(inPor==0){

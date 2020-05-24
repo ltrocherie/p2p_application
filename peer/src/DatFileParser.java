@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class DatFileParser {
 
@@ -81,6 +86,33 @@ public class DatFileParser {
         }
     }
 
+    public void addToFileMatch(String filename){
+        FileManager fm = FileManager.getInstance();
+        try{
+            File f = new File(filename);
+            if(f.exists() && !f.isDirectory()) {
+                FileReader fr = new FileReader(f);   //reads the file
+                BufferedReader br = new BufferedReader(fr);  //creates a buffering character input stream
+                List<String> sb = new ArrayList<String>();    //constructs a string buffer with no characters
+                String line;
+                while ((line = br.readLine()) != null) {
+                    sb.add(line);      //appends line to string buffer
+                }
+                fr.close();    //closes the stream and release the resources
+                ListIterator<String> it = sb.listIterator();
+                while (it.hasNext()) {
+                    String stri = it.next();
+                    File currentFile = new File(stri);
+                    if(f.exists() && !f.isDirectory()) {
+                        fm.updateFileMatch(FileManager.getFileChecksumMD5(currentFile),currentFile.getName());
+                    }
+                }
+            }
+        }catch(Exception e){
+            System.out.println("Error while reading "+filename);
+            PeerConfig.writeInLogs("Error while reading "+filename);
+        }
+    }
     /*
     public void removeFileTo(String filename){
 
@@ -111,5 +143,18 @@ public class DatFileParser {
             PeerConfig.writeInLogs("Error when looking for "+filename);
         }
         return false;
+    }
+
+    void removeFileTo(String filename, String toRemove){
+        try{
+            String fileToAnalyse = new String(Files.readAllBytes(Paths.get(filename)));
+            fileToAnalyse = fileToAnalyse.replaceAll(toRemove+"\n","");
+            PrintWriter writer = new PrintWriter(new File(filename));
+            writer.append(fileToAnalyse);
+            writer.flush();
+        }catch(Exception e){
+            System.out.println("Error when looking for "+filename);
+            PeerConfig.writeInLogs("Error when looking for "+filename);
+        }
     }
 }
