@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Timer;
+import java.util.Arrays;
 /**
  * */
 
@@ -50,6 +51,13 @@ public class GetPiecesPeer extends PeerConfig implements Sender{
     public void sendFromInt(String mess,String add, String port){
         // Parser mess
         String[] messList = mess.split(" ");
+        FileManager fm = FileManager.getInstance();
+        fm.updateFilePieces(messList[1],messList[2]);
+        byte[] str = messList[2].getBytes();
+        int len = str.length*8;
+        boolean[] b = new boolean[len];
+        Arrays.fill(b,false);
+        fm.buffermapUpdate(messList[1],b);
         String message = messList[1] + " " + transformBuffermap(messList[2]);
         sendToPeer(message,add,port);
     }
@@ -63,6 +71,8 @@ public class GetPiecesPeer extends PeerConfig implements Sender{
             System.out.println("< getpieces "+ message.substring(0,message.length() - 1) +"]");
             PeerConfig.writeInLogs("< getpieces "+ message.substring(0,message.length() - 1) +"]");
             String str = br.readLine();// Ca c'est pour suivre en temps réel sur le terminal.
+            FileManager fm = FileManager.getInstance();
+            fm.storePieces(str);
             System.out.println(">"+str);
             PeerConfig.writeInLogs(">"+str);
             pw.println("END");
