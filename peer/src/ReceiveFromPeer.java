@@ -88,27 +88,43 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
               break;
             }
             String fileToSend = new String(Files.readAllBytes(Paths.get(fm.getPath(tokens[1])))); // problem of path
+            String path = fm.getPath(tokens[1]);
+            File f =null;
+            try {
+              f = new File(path);
+            }catch (Exception e){
+              System.out.println("Error while opening file to send.");
+              PeerConfig.writeInLogs("Error while opening file to send.");
+            }
+            long lenFile = f.length();
+            double totalStringSize = fileToSend.length();
+            int nb_pieces = (int)Math.ceil(totalStringSize/pieceSize);
+            //System.out.println("Le fichier a envoyer :"+fileToSend);
+            //System.out.println("Le path :"+fm.getPath(tokens[1]));
+            System.out.println("Le string size :"+ nb_pieces);
+            System.out.println("String 1 : " + fileToSend.charAt(0)+"String 2 : " + fileToSend.charAt(1));
+            System.out.println("Le tot :"+totalStringSize);
             // splits the file
-            String[] filePieces = new String[fileToSend.length()/pieceSize + 1];
+            String[] filePieces = new String[nb_pieces];
             int globalIndex = 0;
-            char[] tmp = new char[pieceSize];
-            for (int i = 0; i < fileToSend.length(); i++) {
-              tmp[i % pieceSize] = fileToSend.charAt(i);
-              if(i % pieceSize == 0 && i > 0){
-                String piece = new String(tmp);
-                filePieces[globalIndex] = piece;
+            String tmp = "";
+            int j = 0;
+            while (j<fileToSend.length() && j < totalStringSize) {
+              if(j % pieceSize == 0 && j > 0){
+                filePieces[globalIndex] = tmp;
                 globalIndex++;
-                tmp = new char[pieceSize];
-                //System.out.println("File cutting");              
+                tmp = "";
+                //System.out.println("File cutting");
               }
+              tmp += fileToSend.charAt(j);
+              j+=1;
             }
             String piece = new String(tmp);
             filePieces[globalIndex] = piece;
             globalIndex++;
-            tmp = new char[pieceSize];
             // creates the answer
             for (int i = 0; i < indexes.size(); i++) {
-              answer += Character.forDigit(indexes.get(i),10) + ":"+ filePieces[indexes.get(i) - 1];
+              answer += indexes.get(i) + ":"+ filePieces[indexes.get(i) - 1];
               if(i != indexes.size() - 1)
                 answer += " ";
             }

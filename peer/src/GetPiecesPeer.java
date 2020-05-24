@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Timer;
 import java.util.Arrays;
+import java.util.Base64;
 /**
  * */
 
@@ -57,7 +58,7 @@ public class GetPiecesPeer extends PeerConfig implements Sender{
         System.out.println(messList[1]);
         System.out.println("debug : "+fm.fileMatch);
         pars.addFileTo(PeerConfig.leechFile,fm.fileMatch.get(messList[1]));
-        byte[] str = messList[2].getBytes();
+        byte[] str = Base64.getDecoder().decode(messList[2]);
         int len = str.length*8;
         boolean[] b = new boolean[len];
         Arrays.fill(b,false);
@@ -95,18 +96,19 @@ public class GetPiecesPeer extends PeerConfig implements Sender{
         int index = 0;
         int piece = 1;
         String message = "[";
-        byte[] buff = buffer.getBytes();
+        byte[] buff = Base64.getDecoder().decode(buffer.getBytes());
         while(index < buff.length) {
             byte bit = buff[index];
             byte mask = 1;
+            piece = 8*(index+1);
             for (int j = 0; j < 8; j++)
             {
                 int value = bit & mask;
-                System.out.println("La value :"+value);
+                System.out.println("La value :"+value+ " bit :"+bit+" mask :"+mask);
                 if(value!=0){ // il veut pas convertir en un booléen
                     message = message + (piece) + " ";
                 }
-                piece += 1;
+                piece -= 1;
                 mask <<= 1;
             }
             index += 1;

@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Timer;
+import java.net.InetAddress;
 /**
  * */
 
@@ -53,7 +54,17 @@ public class InterestedPeer extends PeerConfig implements Sender{
         while(index < strParsed.length-1){
             index = index + 1;
             System.out.println(strParsed[index] + " et "+key);
-            SendToPeer(strParsed[index],key);
+            try{
+                InetAddress ia = InetAddress.getLocalHost();
+                System.out.println("IP Address : "+ia.getHostAddress());
+                if(!strParsed[index].equals(ia.getHostAddress()+":"+PeerConfig.inPort) && !strParsed[index].equals("127.0.0.1"+":"+PeerConfig.inPort)){
+                    System.out.println(strParsed[index]);
+                    SendToPeer(strParsed[index],key);
+                }
+            }catch(Exception e){
+                //System.out.println("Error while getting own IP address");
+                //PeerConfig.writeInLogs("Error while getting own IP address");
+            }
             System.out.println(strParsed[index] + " et2 "+key);
         }
         if(index == 1){
