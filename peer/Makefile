@@ -15,6 +15,9 @@ all: build
 build:
 	javac $(FLAGS) $(SRC)*.java
 
+doxygen:
+	doxygen dox
+
 
 tests:
 	javac $(FLAGS) $(SRC)*.java $(TST)*.java
