@@ -503,10 +503,10 @@ public class FileManager extends PeerConfig implements Runnable{
 		String[] tableOfPieces = filePieces.get(key);
 		String path = PeerConfig.folderName + "/"+fileMatch.get(key);
 		File f = new File(path);
-		if(f.exists() && !f.isDirectory()) {
+		/*if(f.exists() && !f.isDirectory()) {
 			System.out.println("File "+path+" already exists");
 			PeerConfig.writeInLogs("File "+path+" already exists");
-		}else {
+		}else */{
 			String toWrite = "";
 			for(String piece : tableOfPieces){
 				toWrite = toWrite + piece;

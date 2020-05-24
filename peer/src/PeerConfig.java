@@ -19,7 +19,7 @@ public class PeerConfig{
 
 	  static final String folderName = "../seed";
 	  static final String logFile = "../log.txt";
-	  static int pieceSize = 128;
+	  static int pieceSize = 1024;
 	  static int maxNbPair = 5;
 	  static int maxPieceSize = 8;
 	  static int period = 10;

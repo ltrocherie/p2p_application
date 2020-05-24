@@ -95,25 +95,31 @@ public class GetPiecesPeer extends PeerConfig implements Sender{
     String transformBuffermap(String buffer){
         int index = 0;
         int piece = 1;
-        String message = "[";
+        String message = "";
+        String submessage ="";
         byte[] buff = Base64.getDecoder().decode(buffer.getBytes());
         while(index < buff.length) {
             byte bit = buff[index];
             byte mask = 1;
             piece = 8*(index+1);
+            submessage ="";
             for (int j = 0; j < 8; j++)
             {
                 int value = bit & mask;
                 System.out.println("La value :"+value+ " bit :"+bit+" mask :"+mask);
                 if(value!=0){ // il veut pas convertir en un booléen
-                    message = message + (piece) + " ";
+                    submessage =  " " + piece + submessage ;
                 }
                 piece -= 1;
                 mask <<= 1;
             }
+            message = message + submessage;
             index += 1;
         }
-        return message;
+        if(message.length() >0){
+            message = "[" + message.substring(1,message.length());
+        }
+        return message+" ";
     }
 
 }

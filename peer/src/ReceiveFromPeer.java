@@ -23,6 +23,7 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
       //Socket connectionSocket = new Socket(connect, peerBasePort); // Attention ici inPort peut être set à 0 ce qui signifie attribution automatique de port
       ServerSocket welcomeSocket = new ServerSocket(port);
       Socket connectionSocket = welcomeSocket.accept();
+      welcomeSocket.setSoTimeout(10*1000);
 
       BufferedReader br = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
       PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(connectionSocket.getOutputStream())),true);
@@ -57,9 +58,9 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
           case "interested":
             //answer with have
             System.out.println(fm.getBuffermapToString(tokens[1]));
-            answer = "have " + tokens[1] + " " + fm.getBuffermapToString(tokens[1]); 
-            System.out.println("Sending > " + answer);
+            answer = "have " + tokens[1] + " " + fm.getBuffermapToString(tokens[1]);
             pw.println(answer);
+            System.out.println("Sending > " + answer);
             interestedSent = true;
             break;
 
