@@ -35,7 +35,12 @@ public class FileManager extends PeerConfig implements Runnable{
 		}
 	}
 
-
+	/**
+	 * Function to call when you want to call a method on the data base afterwards
+	 * 
+	 * @param 
+	 * @return instance of the database
+	 * */
 	public static FileManager getInstance(){
 		return fileManagerInstance;
 	}
@@ -43,21 +48,12 @@ public class FileManager extends PeerConfig implements Runnable{
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 	// client methods
 
-	void updateFileMatch(String hash, String filename){
-		fileMatch.put(hash,filename);
-	}
-
-	void updateFilePieces(String key,String buffermap){
-		if(filePieces.containsKey(key)){
-			return;
-		}
-		byte[] str = buffermap.getBytes();
-		int len = str.length*8;
-		String[] arr = new String[len];
-		Arrays.fill(arr,"");
-		filePieces.put(key,arr);
-	}
-
+	/**
+	 * Function for getting the md5sum of a file 
+	 * 
+	 * @param file file you want to convert
+	 * @return String hash of the file
+	 * */
 	public static String getFileChecksumMD5(File file) throws Exception
 	{
 		//Use MD5 algorithm
@@ -93,10 +89,42 @@ public class FileManager extends PeerConfig implements Runnable{
 	   return sb.toString();
 	}
 
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Function for updating the path of a file
+	 * 
+	 * @param hash hash of the file you want to update
+	 * @param filename new path of the file
+	 * @return void
+	 * */
+	public void updateFileMatch(String hash, String filename){
+		fileMatch.put(hash,filename);
+	}
+
+	/**
+	 * Function for initialization of the pieces in the filePieces map 
+	 * 
+	 * @param key hash of the file you want to initalize
+	 * @param buffermap buffermap of the file
+	 * @return void
+	 * */
+	void updateFilePieces(String key,String buffermap){
+		if(filePieces.containsKey(key)){
+			return;
+		}
+		byte[] str = buffermap.getBytes();
+		int len = str.length*8;
+		String[] arr = new String[len];
+		Arrays.fill(arr,"");
+		filePieces.put(key,arr);
+	}
+
+
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 	// Methods to handle the file manager
 
-	void buffermapInit() throws Exception{
+	private void buffermapInit() throws Exception{
 		// gets all the files in the seed/ folder and adds them in the file manager
 		File[] filelist = fileList(folderName); 
 	    for (File f : filelist) {
@@ -110,22 +138,40 @@ public class FileManager extends PeerConfig implements Runnable{
     	return;
 	}
 
-
-	void buffermapUpdate(String hash, boolean[] buffermap){
+	/**
+	 * Function for updating the buffermap of a file
+	 * 
+	 * @param hash hash of the file which data you want to update
+	 * @param buffermap new buffermap of the file
+	 * @return void
+	 * */
+	public void buffermapUpdate(String hash, boolean[] buffermap){
 		lock.lock();
 	    fileManager.put(hash, buffermap);
 	    lock.unlock();
 		return;
 	}
 
-	boolean[] getBuffermap(String hash){
+	/**
+	 * Function for initialization of the pieces in the filePieces map 
+	 * 
+	 * @param hash hash of the file which buffermap you want to get
+	 * @return boolean[] Corresponding buffermap (empty if not existing)
+	 * */
+	public boolean[] getBuffermap(String hash){
 		lock.lock();
 		boolean[] ret = fileManager.get(hash);
 		lock.unlock();
 		return ret;
 	}
 
-	String getBuffermapToString(String hash){
+	/**
+	 * Function for converting a buffermap into a string
+	 * 
+	 * @param hash hash of the file which buffermap you want to get in string form
+	 * @return String buffermap in string form
+	 * */
+	public String getBuffermapToString(String hash){
 		lock.lock();
 		String res = "";
 		String message = "";
@@ -184,7 +230,12 @@ public class FileManager extends PeerConfig implements Runnable{
 		return res;
 	}
 
-	boolean[] getStringToBuffermap(String buffer){
+	/**
+	 * Function for the reverse conversion (string to buffermap in boolean array form)
+	 * @param buffer buffermap in string form
+	 * @return boolean[] buffermap in array form
+	 * */
+	public boolean[] getStringToBuffermap(String buffer){
 		int index = 0;
 		int piece = 0;
 		int size = buffer.length() * 8;
@@ -209,7 +260,13 @@ public class FileManager extends PeerConfig implements Runnable{
 		return buffermap;
 	}
 
-	void printBuffermap(boolean[] buffermap){
+	/**
+	 * Function for printing a buffermap
+	 * 
+	 * @param buffermap 
+	 * @return void
+	 * */
+	public void printBuffermap(boolean[] buffermap){
 		lock.lock();
 		String res = new String();
 		for(boolean bit: buffermap){
@@ -222,7 +279,12 @@ public class FileManager extends PeerConfig implements Runnable{
 		return;
 	}
 
-	void printAll(){
+	/**
+	 * Function for printing all the buffermaps in the fileManager
+	 * @param 
+	 * @return void
+	 * */
+	public void printAll(){
 		String res;
 		/*
 		Iterator<Map.Entry<String, boolean[]>> entries = fileManager.entrySet().iterator();
@@ -257,23 +319,41 @@ public class FileManager extends PeerConfig implements Runnable{
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////
-	// Methods to handle the peer manager
+	// Mehods to handle the peer manager
 
-	String[] getPeers(String hash){
+	/**
+	 * Function for getting the coordinates of the peers who have part of a file
+	 * 
+	 * @param hash hash of the file 
+	 * @return String[] Peer coordinates given as IP@:port
+	 * */
+	public String[] getPeers(String hash){
 		lock.lock();
 		String[] ret = peerManager.get(hash);
 		lock.unlock();
 		return ret;
 	}
 
-	void peerUpdate(String fileHash, String[] peers){
+	/**
+	 * Function for updating the peers who have a file
+	 * 
+	 * @param fileHash hash of the file 
+	 * @param peers new peer coordinates
+	 * @return void
+	 * */
+	public void peerUpdate(String fileHash, String[] peers){
 		lock.lock();
 	    peerManager.put(fileHash, peers);
 	    lock.unlock();
 		return;
 	}
 
-	void printAllPeers(){
+	/**
+	 * Function for converting a buffermap into a string
+	 * 
+	 * @return void
+	 * */
+	public void printAllPeers(){
 		String res;
 		lock.lock();
 		for(Map.Entry<String, String[]> entry: peerManager.entrySet()){
@@ -290,14 +370,25 @@ public class FileManager extends PeerConfig implements Runnable{
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 
-	String getPath(String hash){
+	/**
+	 * Function for getting the path of a file
+	 * 
+	 * @param hash hash of the file which buffermap you want to get in string form
+	 * @return String path of the file
+	 * */
+	public String getPath(String hash){
 		if(fileMatch.containsKey(hash)){
 			return fileMatch.get(hash);
 		}
 		return "";
 	}
 
-	void printAllPaths(){
+	/**
+	 * Function for printing the paths of all the files
+	 * 
+	 * @return void
+	 * */
+	public void printAllPaths(){
 		String res;
 		lock.lock();
 		for(Map.Entry<String, String> entry: fileMatch.entrySet()){
@@ -311,7 +402,13 @@ public class FileManager extends PeerConfig implements Runnable{
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void storePieces(String message){
+	/**
+	 * Function for converting a buffermap into a string
+	 * 
+	 * @param message message with the pieces
+	 * @return void
+	 * */
+	public void storePieces(String message){
 		String key = message.split(" ")[1];
 		message = message.substring("have 8905e92afeb80fc7722ec89eb0bf0966 ".length(),message.length());
 		if(message.length() <= 1){
@@ -346,8 +443,13 @@ public class FileManager extends PeerConfig implements Runnable{
 		}
 	}
 
-
-	boolean checkIfFull(String[] pieces){
+	/**
+	 * Function for checking if the peer has all the pieces of a file
+	 * 
+	 * @param pieces array with all the pieces
+	 * @return boolean 
+	 * */
+	public boolean checkIfFull(String[] pieces){
 		for(String piece: pieces){
 			if(piece == ""){
 				return false;
@@ -356,7 +458,13 @@ public class FileManager extends PeerConfig implements Runnable{
 		return true;
 	}
 
-	void leechToSeed(String key){
+	/**
+	 * Function for labeling a file as a seed and no longer as a leech
+	 * 
+	 * @param key hash of the file 
+	 * @return void
+	 * */
+	public void leechToSeed(String key){
 		filePieces.remove(key);
 		DatFileParser pars = new DatFileParser();
 		String path = fileMatch.get(key);
@@ -366,7 +474,13 @@ public class FileManager extends PeerConfig implements Runnable{
 		fileMatch.replace(key,PeerConfig.folderName + "/"+fileMatch.get(key));
 	}
 
-	void writeFile(String key){
+	/**
+	 * Function for writing a file once all the pieces have been gathered
+	 * 
+	 * @param key hash of the file 
+	 * @return void
+	 * */
+	public void writeFile(String key){
 		String[] tableOfPieces = filePieces.get(key);
 		String path = PeerConfig.folderName + "/"+fileMatch.get(key);
 		File f = new File(path);
