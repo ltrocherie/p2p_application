@@ -45,13 +45,16 @@ public class InterestedPeer extends PeerConfig implements Sender{
 
     public void sendFromLook(String str){
         str = str.replaceAll("\\[","");
+        str = str.replaceAll("\\]","");
         String[] strParsed = str.split(" ");
         //C'est interessant à partir de 3
         int index = 1;
         String key = strParsed[1];
         while(index < strParsed.length-1){
             index = index + 1;
+            System.out.println(strParsed[index] + " et "+key);
             SendToPeer(strParsed[index],key);
+            System.out.println(strParsed[index] + " et2 "+key);
         }
         if(index == 1){
             System.out.println("No peer have key "+ key + ". Interested not send");
@@ -61,26 +64,29 @@ public class InterestedPeer extends PeerConfig implements Sender{
 
     public void SendToPeer(String toSend,String key){
         String[] infos = toSend.split(":");
+        String answer ="";
         try{
+            System.out.println("debug");
             Socket socket = new Socket(infos[0],Integer.parseInt(infos[1]));
             BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),true);
             pw.println("interested "+key);
             System.out.println("< interested "+key);
             PeerConfig.writeInLogs("< interested "+key);
-            String str = br.readLine();// Ca c'est pour suivre en temps réel sur le terminal.
-            System.out.println(">"+str);
-            PeerConfig.writeInLogs(">"+str);
-            GetPiecesPeer GetPPeer = new GetPiecesPeer();
-            GetPPeer.sendFromInt(str,infos[0],infos[1]);
-            pw.println("END");
+            answer = br.readLine();// Ca c'est pour suivre en temps réel sur le terminal.
+            System.out.println(">"+answer);
+            PeerConfig.writeInLogs(">"+answer);
+            //pw.println("END");
             pw.close();
             br.close();
             socket.close();
         }catch(Exception e){
             System.out.println("Error in interested");
             PeerConfig.writeInLogs("Error in interested");
+            return;
         }
+        GetPiecesPeer GetPPeer = new GetPiecesPeer();
+        GetPPeer.sendFromInt(answer,infos[0],infos[1]);
 
     }
 

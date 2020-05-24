@@ -140,10 +140,12 @@ public class FileManager extends PeerConfig implements Runnable{
 				return "nok";
 			}
 			try{
+				System.out.println("Je suis ici : " + hash);
 				File f = new File(fileMatch.get(hash));
 				long len = f.length() / PeerConfig.pieceSize;
 				String full = ""+(byte)~0;
-				message = message + full.repeat((int)len/8);
+				message = message + full.repeat((int)(len/8)+1);
+				System.out.println("Je suis ici2 : " + message);
 				if(len%8!=0){
 					int rest = (int)(len % 8);
 					int lastBytes = (byte) ((byte)~0 << (rest));

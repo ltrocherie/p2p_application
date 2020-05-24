@@ -28,7 +28,7 @@ public class GetPiecesSender extends PeerConfig implements Sender{
             String str = br.readLine();// Ca c'est pour suivre en temps réel sur le terminal.
             System.out.println(">"+str);
             PeerConfig.writeInLogs(">"+str);
-            pw.println("END");
+            //pw.println("END");
             texts.get(0).setText("");
             pw.close();
             br.close();

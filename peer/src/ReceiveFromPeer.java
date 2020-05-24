@@ -56,6 +56,7 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
 
           case "interested":
             //answer with have
+            System.out.println(fm.getBuffermapToString(tokens[1]));
             answer = "have " + tokens[1] + " " + fm.getBuffermapToString(tokens[1]); 
             System.out.println("Sending > " + answer);
             pw.println(answer);
@@ -73,9 +74,9 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
             if(fm.filePieces.containsKey(tokens[1])){
               String[] TableofPieces = fm.filePieces.get(tokens[1]);
               for(int ind : indexes){
-                if(ind>=TableofPieces.length || TableofPieces[ind] == ""){
+                if(ind>=TableofPieces.length || TableofPieces[ind].equals("")){
                   answer = "nok";
-                  System.out.println("Sending > " + answer);
+                  System.out.println("Sending2 > " + answer);
                   pw.println(answer);
                   break;
                 }

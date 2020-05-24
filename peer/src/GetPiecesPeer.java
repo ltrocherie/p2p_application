@@ -54,6 +54,8 @@ public class GetPiecesPeer extends PeerConfig implements Sender{
         FileManager fm = FileManager.getInstance();
         fm.updateFilePieces(messList[1],messList[2]);
         DatFileParser pars = new DatFileParser();
+        System.out.println(messList[1]);
+        System.out.println("debug : "+fm.fileMatch);
         pars.addFileTo(PeerConfig.leechFile,fm.fileMatch.get(messList[1]));
         byte[] str = messList[2].getBytes();
         int len = str.length*8;
@@ -65,6 +67,7 @@ public class GetPiecesPeer extends PeerConfig implements Sender{
     }
 
     private void sendToPeer(String message,String add, String port){
+        String answer ="";
         try{
             Socket socket = new Socket(add,Integer.parseInt(port));
             BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -72,19 +75,20 @@ public class GetPiecesPeer extends PeerConfig implements Sender{
             pw.println("getpieces "+ message.substring(0,message.length() - 1) +"]");
             System.out.println("< getpieces "+ message.substring(0,message.length() - 1) +"]");
             PeerConfig.writeInLogs("< getpieces "+ message.substring(0,message.length() - 1) +"]");
-            String str = br.readLine();// Ca c'est pour suivre en temps réel sur le terminal.
-            FileManager fm = FileManager.getInstance();
-            fm.storePieces(str);
-            System.out.println(">"+str);
-            PeerConfig.writeInLogs(">"+str);
-            pw.println("END");
+            answer = br.readLine();// Ca c'est pour suivre en temps réel sur le terminal.
+            System.out.println(">"+answer);
+            PeerConfig.writeInLogs(">"+answer);
+            //pw.println("END");
             pw.close();
             br.close();
             socket.close();
         }catch(Exception e){
             System.out.println("Error in GetPieces");
             PeerConfig.writeInLogs("Error in GetPieces");
+            return;
         }
+        FileManager fm = FileManager.getInstance();
+        fm.storePieces(answer);
     }
 
     String transformBuffermap(String buffer){
@@ -94,11 +98,12 @@ public class GetPiecesPeer extends PeerConfig implements Sender{
         byte[] buff = buffer.getBytes();
         while(index < buff.length) {
             byte bit = buff[index];
-            byte mask = 0x01;
+            byte mask = 1;
             for (int j = 0; j < 8; j++)
             {
                 int value = bit & mask;
-                if(value==1){ // il veut pas convertir en un booléen
+                System.out.println("La value :"+value);
+                if(value!=0){ // il veut pas convertir en un booléen
                     message = message + (piece) + " ";
                 }
                 piece += 1;
