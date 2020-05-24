@@ -68,8 +68,24 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
               indexes.add(Integer.parseInt(String.valueOf(tokens[i])));
             }
             //System.out.println(indexes);
-            String buffermap = fm.getBuffermapToString(tokens[1]); 
+            //String buffermap = fm.getBuffermapToString(tokens[1]);
             answer = "data " + tokens[1] + " [";
+            if(fm.filePieces.containsKey(tokens[1])){
+              String[] TableofPieces = fm.filePieces.get(tokens[1]);
+              for(int ind : indexes){
+                if(ind>=TableofPieces.length || TableofPieces[ind] == ""){
+                  answer = "nok";
+                  System.out.println("Sending > " + answer);
+                  pw.println(answer);
+                  break;
+                }
+                answer = answer +indexes + ":" + TableofPieces[ind] +" ";
+              }
+              answer =answer.substring(0,answer.length()-1) + "]";
+              System.out.println("Sending > " + answer);
+              pw.println(answer);
+              break;
+            }
             String fileToSend = new String(Files.readAllBytes(Paths.get(fm.getPath(tokens[1])))); // problem of path
             // splits the file
             String[] filePieces = new String[fileToSend.length()/pieceSize + 1];
