@@ -51,10 +51,15 @@ public class GetPiecesPeer extends PeerConfig implements Sender{
 
     public void sendFromInt(String mess,String add, String port){
         // Parser mess
+        System.out.println("ALED");
         String[] messList = mess.split(" ");
+        System.out.println("ALED");
         FileManager fm = FileManager.getInstance();
+        System.out.println("ALED");
         fm.updateFilePieces(messList[1],messList[2]);
+        System.out.println("ALED");
         DatFileParser pars = new DatFileParser();
+        System.out.println("ALED");
         System.out.println(messList[1]);
         System.out.println("debug : "+fm.fileMatch);
         pars.addFileTo(PeerConfig.leechFile,fm.fileMatch.get(messList[1]));
@@ -76,7 +81,13 @@ public class GetPiecesPeer extends PeerConfig implements Sender{
             pw.println("getpieces "+ message.substring(0,message.length() - 1) +"]");
             System.out.println("< getpieces "+ message.substring(0,message.length() - 1) +"]");
             PeerConfig.writeInLogs("< getpieces "+ message.substring(0,message.length() - 1) +"]");
-            answer = br.readLine();// Ca c'est pour suivre en temps réel sur le terminal.
+            String answering ="";
+            while(!(answering = br.readLine()).equals("END")){
+                // Ca c'est pour suivre en temps réel sur le terminal.
+                answer += answering+"\n";
+                System.out.println(answering);
+            }
+            answer=answer.substring(0,answer.length()-1);
             System.out.println(">"+answer);
             PeerConfig.writeInLogs(">"+answer);
             //pw.println("END");
@@ -88,8 +99,10 @@ public class GetPiecesPeer extends PeerConfig implements Sender{
             PeerConfig.writeInLogs("Error in GetPieces");
             return;
         }
+        System.out.println("Hélène");
         FileManager fm = FileManager.getInstance();
         fm.storePieces(answer);
+        System.out.println("Hélène2");
     }
 
     String transformBuffermap(String buffer){

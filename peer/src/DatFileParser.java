@@ -44,6 +44,15 @@ public class DatFileParser {
         return message;
     }
 
+    public String getLeechKeys(){
+        FileManager fm = FileManager.getInstance();
+        String message = "";
+        for(String key : fm.filePieces.keySet()){
+            message = message + key +" ";
+        }
+        return message;
+    }
+
     public String getFilesKeyFrom(String filename){
         String message = "";
         try{

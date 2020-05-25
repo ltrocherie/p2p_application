@@ -23,14 +23,17 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
       //Socket connectionSocket = new Socket(connect, peerBasePort); // Attention ici inPort peut être set à 0 ce qui signifie attribution automatique de port
       ServerSocket welcomeSocket = new ServerSocket(port);
       Socket connectionSocket = welcomeSocket.accept();
-      welcomeSocket.setSoTimeout(10*1000);
+      //welcomeSocket.setSoTimeout(1000*1000);
 
       BufferedReader br = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
       PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(connectionSocket.getOutputStream())),true);
 
 
       while(true){ // exception when not connected to a peer
-        String message = br.readLine();
+
+        String message ="";
+
+        message =br.readLine();
         if(message == null){
           break;
         }
@@ -132,6 +135,7 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
             answer += "]";
             System.out.println("Sending > " + answer);
             pw.println(answer);
+            pw.println("END");
             break;
 
           case "have":

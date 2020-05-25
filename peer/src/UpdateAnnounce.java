@@ -21,7 +21,7 @@ class UpdateAnnounce extends TimerTask{
             }else{
                 message = "update seed []";
             }
-            String messageLeech = getMessage.getFilesFrom(PeerConfig.leechFile);
+            String messageLeech = getMessage.getLeechKeys();
             if(messageLeech != ""){
                 message = message + " leech [" +messageLeech.substring(0, messageLeech.length() - 1)+"]";
             }

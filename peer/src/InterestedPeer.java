@@ -96,8 +96,10 @@ public class InterestedPeer extends PeerConfig implements Sender{
             PeerConfig.writeInLogs("Error in interested");
             return;
         }
+        System.out.println("Coucou");
         GetPiecesPeer GetPPeer = new GetPiecesPeer();
         GetPPeer.sendFromInt(answer,infos[0],infos[1]);
+        System.out.println("reCoucou");
 
     }
 

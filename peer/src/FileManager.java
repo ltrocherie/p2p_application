@@ -111,14 +111,30 @@ public class FileManager extends PeerConfig implements Runnable{
 	 * @return void
 	 * */
 	void updateFilePieces(String key,String buffermap){
+		System.out.println("ALED");
+
         if(filePieces.containsKey(key)){
             return;
         }
-        byte[] str = Base64.getDecoder().decode(buffermap);
+		System.out.println("ALED");
+        byte str[] = null;
+		try{
+        	str = Base64.getDecoder().decode(buffermap);
+		}catch(Exception e){
+			System.out.println("Invalid arg " +buffermap);
+		}
+		System.out.println("ALED");
+
         int len = str.length*8;
+		System.out.println("ALED");
         String[] arr = new String[len];
+        System.out.println("ALED");
         Arrays.fill(arr,"");
+		System.out.println("ALED");
+
         filePieces.put(key,arr);
+		System.out.println("ALED");
+
     }
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////
@@ -212,8 +228,13 @@ public class FileManager extends PeerConfig implements Runnable{
 			}
 		}
 		boolean[] value = fileManager.get(hash);
+		int len = (int) Math.ceil((double)value.length / PeerConfig.pieceSize);
+		byte[] table = new byte[(int)Math.ceil((double)len/8)];
+		int ind =0;
 		for(boolean bit: value){
-			if(index == 0 && !first) {
+			if(index%8 == 0 && !first) {
+				table[ind] = b;
+				ind = ind +1;
 				res =  res + b;
 				b = 0;
 			}
@@ -222,8 +243,7 @@ public class FileManager extends PeerConfig implements Runnable{
 			if(bit){
 				b =(byte) (b + one);
 			}
-			index = (index + 1)%8;
-
+			index = (index + 1);
 			/*if(entry.getKey().equals(hash)){
 				for(boolean bit: entry.getValue()){
 					if(bit == true){res += "1";}
@@ -231,8 +251,9 @@ public class FileManager extends PeerConfig implements Runnable{
 				}
 			}*/
 			if(index != 0){
-				res = res + (byte) (b << (8-index));
+				table[ind] = (byte) (b << (8-index));
 			}
+			res = Base64.getEncoder().encodeToString(table);
 		}
 		lock.unlock();
 		return res;
@@ -439,15 +460,20 @@ public class FileManager extends PeerConfig implements Runnable{
 			String pieceNumber = message.split(":")[0];
 			int ind = Integer.parseInt(pieceNumber);
 			message = message.substring(pieceNumber.length()+1,message.length());
-			byte[] bytesTable = message.getBytes();
+
+			byte[] bytesTable = null;
+			try{bytesTable = message.getBytes("ASCII");}catch(Exception e){System.out.println("Salut salut");}
 			System.out.println("Le message :" + message.length());
 			System.out.println("Le message :" + Math.min(PeerConfig.pieceSize,message.length()));
 			String text = new String(bytesTable, 0, Math.min(PeerConfig.pieceSize,message.length()));
+			System.out.println("Le message :" + Math.min(PeerConfig.pieceSize,message.length()));
 			if(tableOfPieces[ind-1].equals("")){
 				tableOfPieces[ind-1] = text;
 				buffermap[ind-1] = true;
 			}
+			System.out.println("Le message :" + Math.min(PeerConfig.pieceSize,message.length()));
 			message= message.substring(text.length(),message.length());
+			System.out.println("Le message :" + Math.min(PeerConfig.pieceSize,message.length()));
 		}
 		if(checkIfFull(tableOfPieces)){
 			writeFile(key);
@@ -464,7 +490,11 @@ public class FileManager extends PeerConfig implements Runnable{
 	 * */
 	public boolean checkIfFull(String[] pieces){
 	    boolean blank = false;
+	    int index = 0;
 		for(String piece: pieces){
+			if(piece.equals("") && index<pieces.length-8){
+				return false;
+			}
 			if(piece.equals("") && !blank){
 				blank = true;
 				System.out.println("2");
@@ -473,6 +503,7 @@ public class FileManager extends PeerConfig implements Runnable{
 				System.out.println("2");
 				return false;
 			}
+			index+=1;
 		}
 		return true;
 	}
