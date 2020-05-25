@@ -111,29 +111,23 @@ public class FileManager extends PeerConfig implements Runnable{
 	 * @return void
 	 * */
 	void updateFilePieces(String key,String buffermap){
-		System.out.println("ALED");
 
         if(filePieces.containsKey(key)){
             return;
         }
-		System.out.println("ALED");
         byte str[] = null;
 		try{
         	str = Base64.getDecoder().decode(buffermap);
 		}catch(Exception e){
 			System.out.println("Invalid arg " +buffermap);
 		}
-		System.out.println("ALED");
 
         int len = str.length*8;
-		System.out.println("ALED");
         String[] arr = new String[len];
-        System.out.println("ALED");
         Arrays.fill(arr,"");
-		System.out.println("ALED");
+
 
         filePieces.put(key,arr);
-		System.out.println("ALED");
 
     }
 

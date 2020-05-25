@@ -53,19 +53,15 @@ public class InterestedPeer extends PeerConfig implements Sender{
         String key = strParsed[1];
         while(index < strParsed.length-1){
             index = index + 1;
-            System.out.println(strParsed[index] + " et "+key);
             try{
                 InetAddress ia = InetAddress.getLocalHost();
-                System.out.println("IP Address : "+ia.getHostAddress());
                 if(!strParsed[index].equals(ia.getHostAddress()+":"+PeerConfig.inPort) && !strParsed[index].equals("127.0.0.1"+":"+PeerConfig.inPort)){
-                    System.out.println(strParsed[index]);
                     SendToPeer(strParsed[index],key);
                 }
             }catch(Exception e){
                 //System.out.println("Error while getting own IP address");
                 //PeerConfig.writeInLogs("Error while getting own IP address");
             }
-            System.out.println(strParsed[index] + " et2 "+key);
         }
         if(index == 1){
             System.out.println("No peer have key "+ key + ". Interested not send");
@@ -77,7 +73,6 @@ public class InterestedPeer extends PeerConfig implements Sender{
         String[] infos = toSend.split(":");
         String answer ="";
         try{
-            System.out.println("debug");
             Socket socket = new Socket(infos[0],Integer.parseInt(infos[1]));
             BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),true);
@@ -96,10 +91,8 @@ public class InterestedPeer extends PeerConfig implements Sender{
             PeerConfig.writeInLogs("Error in interested");
             return;
         }
-        System.out.println("Coucou");
         GetPiecesPeer GetPPeer = new GetPiecesPeer();
         GetPPeer.sendFromInt(answer,infos[0],infos[1]);
-        System.out.println("reCoucou");
 
     }
 

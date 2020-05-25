@@ -51,17 +51,10 @@ public class GetPiecesPeer extends PeerConfig implements Sender{
 
     public void sendFromInt(String mess,String add, String port){
         // Parser mess
-        System.out.println("ALED");
         String[] messList = mess.split(" ");
-        System.out.println("ALED");
         FileManager fm = FileManager.getInstance();
-        System.out.println("ALED");
         fm.updateFilePieces(messList[1],messList[2]);
-        System.out.println("ALED");
         DatFileParser pars = new DatFileParser();
-        System.out.println("ALED");
-        System.out.println(messList[1]);
-        System.out.println("debug : "+fm.fileMatch);
         pars.addFileTo(PeerConfig.leechFile,fm.fileMatch.get(messList[1]));
         byte[] str = Base64.getDecoder().decode(messList[2]);
         int len = str.length*8;
@@ -85,7 +78,6 @@ public class GetPiecesPeer extends PeerConfig implements Sender{
             while(!(answering = br.readLine()).equals("END")){
                 // Ca c'est pour suivre en temps réel sur le terminal.
                 answer += answering+"\n";
-                System.out.println(answering);
             }
             answer=answer.substring(0,answer.length()-1);
             System.out.println(">"+answer);
@@ -99,10 +91,8 @@ public class GetPiecesPeer extends PeerConfig implements Sender{
             PeerConfig.writeInLogs("Error in GetPieces");
             return;
         }
-        System.out.println("Hélène");
         FileManager fm = FileManager.getInstance();
         fm.storePieces(answer);
-        System.out.println("Hélène2");
     }
 
     String transformBuffermap(String buffer){
@@ -119,7 +109,6 @@ public class GetPiecesPeer extends PeerConfig implements Sender{
             for (int j = 0; j < 8; j++)
             {
                 int value = bit & mask;
-                System.out.println("La value :"+value+ " bit :"+bit+" mask :"+mask);
                 if(value!=0){ // il veut pas convertir en un booléen
                     submessage =  " " + piece + submessage ;
                 }

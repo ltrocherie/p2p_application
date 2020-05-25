@@ -42,7 +42,6 @@ public class GetPiecesSender extends PeerConfig implements Sender{
     public void addValues(ArrayList<JTextField> texts){
         this.message = this.indexes + texts.get(1).getText() +" ";
         texts.get(1).setText("");
-        System.out.println(this.message);
     }
 
     public void flush(ArrayList<JTextField> texts){

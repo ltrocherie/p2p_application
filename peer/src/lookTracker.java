@@ -65,10 +65,8 @@ public class lookTracker extends PeerConfig implements Sender{
         int index =0;
         FileManager fm = FileManager.getInstance();
         while(index < splitting.length){
-            System.out.println("debug look :"+splitting[index+3] + " " + splitting[index]);
             fm.updateFileMatch(splitting[index+3],splitting[index]);
             index = index + 4;
-            System.out.println("Debu :" +fm.fileMatch);
         }
     }
 }

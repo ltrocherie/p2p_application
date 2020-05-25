@@ -60,7 +60,6 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
 
           case "interested":
             //answer with have
-            System.out.println(fm.getBuffermapToString(tokens[1]));
             answer = "have " + tokens[1] + " " + fm.getBuffermapToString(tokens[1]);
             pw.println(answer);
             System.out.println("Sending > " + answer);
@@ -105,9 +104,6 @@ public class ReceiveFromPeer extends PeerConfig implements Runnable{
             int nb_pieces = (int)Math.ceil(totalStringSize/pieceSize);
             //System.out.println("Le fichier a envoyer :"+fileToSend);
             //System.out.println("Le path :"+fm.getPath(tokens[1]));
-            System.out.println("Le string size :"+ nb_pieces);
-            System.out.println("String 1 : " + fileToSend.charAt(0)+"String 2 : " + fileToSend.charAt(1));
-            System.out.println("Le tot :"+totalStringSize);
             // splits the file
             String[] filePieces = new String[nb_pieces];
             int globalIndex = 0;

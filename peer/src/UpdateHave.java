@@ -24,7 +24,6 @@ class UpdateHave extends TimerTask{
                 message = "have";
             }
             message = message.substring(0,message.length() - 1) + "]";
-            System.out.println(message);
             BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),true);
             pw.println(message);
