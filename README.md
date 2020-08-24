@@ -43,6 +43,15 @@ Le code des deux parties est commenté de façon a pouvoir générer la document
 Pour cela, dans le dossier `tracker/` il suffit de lancer la commande : `make doxygen`
 Ensuite, dans le dossier `html/` généré il suffit d'aller chercher le fichier `index.html` pour avoir accès à la documentation.
 
+### Auteurs
+
+Ce projet a été réalisé par :
+- Genty Laurent
+- Chataigner Johan
+- Duchemin Emeric
+- Hertay Dylan
+- Trocherie Lucas
+
 ### Autres
 
 Pour plus d'informations sur l'application, son fonctionnement et son architecture, ne pas hésiter à consulter le rapport fourni avec le dépôt.
