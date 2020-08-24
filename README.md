@@ -28,7 +28,7 @@ Pour lancer les tests : `make tests`
 
 On lance le tracker avec : `build/tracker <port>`  
 
-Il est possible de ne pas spécifier de numéro de port au lancement, 
+Il est possible de ne pas spécifier de numéro de port au lancement,
 auquel cas c'est le port par défaut, qui est spécifié dans le fichier de configuration *config.ini*, qui est utilisé.
 
 
@@ -36,9 +36,13 @@ auquel cas c'est le port par défaut, qui est spécifié dans le fichier de conf
 Pour compiler le pair : `make`  
 Pour lancer les tests : `make tests`
 
-On lance un pair dans le répertoir `build/` avec : `java gui`
+Pour lancer un pair dans le répertoir `build/` avec : `java gui`
 
 ### Documentation
-Le code da la partie tracker est commenté de façon a pouvoir générer la documentation avec **Doxygen**.  
+Le code des deux parties est commenté de façon a pouvoir générer la documentation avec **Doxygen**.  
 Pour cela, dans le dossier `tracker/` il suffit de lancer la commande : `make doxygen`
 Ensuite, dans le dossier `html/` généré il suffit d'aller chercher le fichier `index.html` pour avoir accès à la documentation.
+
+### Autres
+
+Pour plus d'informations sur l'application, son fonctionnement et son architecture, ne pas hésiter à consulter le rapport fourni avec le dépôt.
