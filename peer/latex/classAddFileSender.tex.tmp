@@ -1,0 +1,28 @@
+\hypertarget{classAddFileSender}{}\section{Référence de la classe Add\+File\+Sender}
+\label{classAddFileSender}\index{Add\+File\+Sender@{Add\+File\+Sender}}
+
+
+Graphe d\textquotesingle{}héritage de Add\+File\+Sender\+:
+% FIG 0
+
+
+Graphe de collaboration de Add\+File\+Sender\+:
+% FIG 1
+\subsection*{Fonctions membres publiques}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classAddFileSender_a51fd7d4d19ebfd73bd2209d5db25196d}\label{classAddFileSender_a51fd7d4d19ebfd73bd2209d5db25196d}} 
+void {\bfseries send\+Message} (Array\+List$<$ J\+Text\+Field $>$ texts)
+\item 
+\mbox{\Hypertarget{classAddFileSender_a7a998fc672284cc55a0b83713e9fa7cf}\label{classAddFileSender_a7a998fc672284cc55a0b83713e9fa7cf}} 
+void {\bfseries add\+Values} (Array\+List$<$ J\+Text\+Field $>$ texts)
+\item 
+\mbox{\Hypertarget{classAddFileSender_ab6e5e6aef931e607ad48ffe1e25ac5b4}\label{classAddFileSender_ab6e5e6aef931e607ad48ffe1e25ac5b4}} 
+void {\bfseries flush} (Array\+List$<$ J\+Text\+Field $>$ texts)
+\end{DoxyCompactItemize}
+\subsection*{Membres hérités additionnels}
+
+
+La documentation de cette classe a été générée à partir du fichier suivant \+:\begin{DoxyCompactItemize}
+\item 
+src/Add\+File\+Sender.\+java\end{DoxyCompactItemize}

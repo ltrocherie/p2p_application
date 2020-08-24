@@ -1,0 +1,337 @@
+\hypertarget{classFileManager}{}\section{Référence de la classe File\+Manager}
+\label{classFileManager}\index{File\+Manager@{File\+Manager}}
+
+
+Graphe d\textquotesingle{}héritage de File\+Manager\+:
+% FIG 0
+
+
+Graphe de collaboration de File\+Manager\+:
+% FIG 1
+\subsection*{Fonctions membres publiques}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classFileManager_a907bacc448d9077430f89e8304f75db8}{update\+File\+Match} (String hash, String filename)
+\item 
+void \hyperlink{classFileManager_a4be2735045c292bf7a0e0680bd01b309}{buffermap\+Update} (String hash, boolean\mbox{[}$\,$\mbox{]} buffermap)
+\item 
+boolean \mbox{[}$\,$\mbox{]} \hyperlink{classFileManager_a6f00a2b4ff073d49229b469f3971445d}{get\+Buffermap} (String hash)
+\item 
+String \hyperlink{classFileManager_a2729300742a161f49b48d6ffac61d460}{get\+Buffermap\+To\+String} (String hash)
+\item 
+boolean \mbox{[}$\,$\mbox{]} \hyperlink{classFileManager_a1c9d6d3f954b6edac5a4542dcedc3aad}{get\+String\+To\+Buffermap} (String buffer)
+\item 
+void \hyperlink{classFileManager_ae91ea295ea5951ecab2d249ea1c2f8e7}{print\+Buffermap} (boolean\mbox{[}$\,$\mbox{]} buffermap)
+\item 
+void \hyperlink{classFileManager_a902e9eeb706da69a9611d04172b945fd}{print\+All} ()
+\item 
+String \mbox{[}$\,$\mbox{]} \hyperlink{classFileManager_a58104212e362f362702ff179c484f4c8}{get\+Peers} (String hash)
+\item 
+void \hyperlink{classFileManager_a39b7d3eb829e3ecc259c4da41aa38656}{peer\+Update} (String file\+Hash, String\mbox{[}$\,$\mbox{]} peers)
+\item 
+void \hyperlink{classFileManager_a1ff7d7a1192210cc29a88609b9c1844d}{print\+All\+Peers} ()
+\item 
+String \hyperlink{classFileManager_a38d375f288f94fe973ef2352fe7f2e25}{get\+Path} (String hash)
+\item 
+void \hyperlink{classFileManager_a4f22816aaf2c5695b0e365eb88c41acf}{print\+All\+Paths} ()
+\item 
+void \hyperlink{classFileManager_a3612335ed4f691a47636d95dc7620a50}{store\+Pieces} (String message)
+\item 
+boolean \hyperlink{classFileManager_a5ae706d01456c0b37a47a5ff84a9fa15}{check\+If\+Full} (String\mbox{[}$\,$\mbox{]} pieces)
+\item 
+void \hyperlink{classFileManager_a98ee226f2fed4c3734eeb15b0518ba59}{leech\+To\+Seed} (String key)
+\item 
+void \hyperlink{classFileManager_a0715bc52c509e1f0c5011dd1d7a9b76f}{write\+File} (String key)
+\item 
+\mbox{\Hypertarget{classFileManager_a20becbe1c1305a1383cf4b58771bd801}\label{classFileManager_a20becbe1c1305a1383cf4b58771bd801}} 
+void {\bfseries run} ()
+\end{DoxyCompactItemize}
+\subsection*{Fonctions membres publiques statiques}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{classFileManager}{File\+Manager} \hyperlink{classFileManager_a4b451acca58b1ad1915a855e2f3668f2}{get\+Instance} ()
+\item 
+static String \hyperlink{classFileManager_adf5dffefb9d9ab0f3e6aab03382375c3}{get\+File\+Checksum\+M\+D5} (File file)  throws Exception 	
+\end{DoxyCompactItemize}
+
+
+\subsection{Documentation des fonctions membres}
+\mbox{\Hypertarget{classFileManager_a4be2735045c292bf7a0e0680bd01b309}\label{classFileManager_a4be2735045c292bf7a0e0680bd01b309}} 
+\index{File\+Manager@{File\+Manager}!buffermap\+Update@{buffermap\+Update}}
+\index{buffermap\+Update@{buffermap\+Update}!File\+Manager@{File\+Manager}}
+\subsubsection{\texorpdfstring{buffermap\+Update()}{buffermapUpdate()}}
+{\footnotesize\ttfamily void File\+Manager.\+buffermap\+Update (\begin{DoxyParamCaption}\item[{String}]{hash,  }\item[{boolean \mbox{[}$\,$\mbox{]}}]{buffermap }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Function for updating the buffermap of a file
+
+
+\begin{DoxyParams}{Paramètres}
+{\em hash} & hash of the file which data you want to update \\
+\hline
+{\em buffermap} & new buffermap of the file \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Renvoie}
+void 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileManager_a5ae706d01456c0b37a47a5ff84a9fa15}\label{classFileManager_a5ae706d01456c0b37a47a5ff84a9fa15}} 
+\index{File\+Manager@{File\+Manager}!check\+If\+Full@{check\+If\+Full}}
+\index{check\+If\+Full@{check\+If\+Full}!File\+Manager@{File\+Manager}}
+\subsubsection{\texorpdfstring{check\+If\+Full()}{checkIfFull()}}
+{\footnotesize\ttfamily boolean File\+Manager.\+check\+If\+Full (\begin{DoxyParamCaption}\item[{String \mbox{[}$\,$\mbox{]}}]{pieces }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Function for checking if the peer has all the pieces of a file
+
+
+\begin{DoxyParams}{Paramètres}
+{\em pieces} & array with all the pieces \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Renvoie}
+boolean 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileManager_a6f00a2b4ff073d49229b469f3971445d}\label{classFileManager_a6f00a2b4ff073d49229b469f3971445d}} 
+\index{File\+Manager@{File\+Manager}!get\+Buffermap@{get\+Buffermap}}
+\index{get\+Buffermap@{get\+Buffermap}!File\+Manager@{File\+Manager}}
+\subsubsection{\texorpdfstring{get\+Buffermap()}{getBuffermap()}}
+{\footnotesize\ttfamily boolean \mbox{[}$\,$\mbox{]} File\+Manager.\+get\+Buffermap (\begin{DoxyParamCaption}\item[{String}]{hash }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Function for initialization of the pieces in the file\+Pieces map
+
+
+\begin{DoxyParams}{Paramètres}
+{\em hash} & hash of the file which buffermap you want to get \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Renvoie}
+boolean\mbox{[}\mbox{]} Corresponding buffermap (empty if not existing) 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileManager_a2729300742a161f49b48d6ffac61d460}\label{classFileManager_a2729300742a161f49b48d6ffac61d460}} 
+\index{File\+Manager@{File\+Manager}!get\+Buffermap\+To\+String@{get\+Buffermap\+To\+String}}
+\index{get\+Buffermap\+To\+String@{get\+Buffermap\+To\+String}!File\+Manager@{File\+Manager}}
+\subsubsection{\texorpdfstring{get\+Buffermap\+To\+String()}{getBuffermapToString()}}
+{\footnotesize\ttfamily String File\+Manager.\+get\+Buffermap\+To\+String (\begin{DoxyParamCaption}\item[{String}]{hash }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Function for converting a buffermap into a string
+
+
+\begin{DoxyParams}{Paramètres}
+{\em hash} & hash of the file which buffermap you want to get in string form \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Renvoie}
+String buffermap in string form 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileManager_adf5dffefb9d9ab0f3e6aab03382375c3}\label{classFileManager_adf5dffefb9d9ab0f3e6aab03382375c3}} 
+\index{File\+Manager@{File\+Manager}!get\+File\+Checksum\+M\+D5@{get\+File\+Checksum\+M\+D5}}
+\index{get\+File\+Checksum\+M\+D5@{get\+File\+Checksum\+M\+D5}!File\+Manager@{File\+Manager}}
+\subsubsection{\texorpdfstring{get\+File\+Checksum\+M\+D5()}{getFileChecksumMD5()}}
+{\footnotesize\ttfamily static String File\+Manager.\+get\+File\+Checksum\+M\+D5 (\begin{DoxyParamCaption}\item[{File}]{file }\end{DoxyParamCaption}) throws Exception\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+Function for getting the md5sum of a file
+
+
+\begin{DoxyParams}{Paramètres}
+{\em file} & file you want to convert \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Renvoie}
+String hash of the file 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileManager_a4b451acca58b1ad1915a855e2f3668f2}\label{classFileManager_a4b451acca58b1ad1915a855e2f3668f2}} 
+\index{File\+Manager@{File\+Manager}!get\+Instance@{get\+Instance}}
+\index{get\+Instance@{get\+Instance}!File\+Manager@{File\+Manager}}
+\subsubsection{\texorpdfstring{get\+Instance()}{getInstance()}}
+{\footnotesize\ttfamily static \hyperlink{classFileManager}{File\+Manager} File\+Manager.\+get\+Instance (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+Function to call when you want to call a method on the data base afterwards
+
+
+\begin{DoxyParams}{Paramètres}
+{\em } & \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classFileManager_a38d375f288f94fe973ef2352fe7f2e25}\label{classFileManager_a38d375f288f94fe973ef2352fe7f2e25}} 
+\index{File\+Manager@{File\+Manager}!get\+Path@{get\+Path}}
+\index{get\+Path@{get\+Path}!File\+Manager@{File\+Manager}}
+\subsubsection{\texorpdfstring{get\+Path()}{getPath()}}
+{\footnotesize\ttfamily String File\+Manager.\+get\+Path (\begin{DoxyParamCaption}\item[{String}]{hash }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Function for getting the path of a file
+
+
+\begin{DoxyParams}{Paramètres}
+{\em hash} & hash of the file which buffermap you want to get in string form \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Renvoie}
+String path of the file 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileManager_a58104212e362f362702ff179c484f4c8}\label{classFileManager_a58104212e362f362702ff179c484f4c8}} 
+\index{File\+Manager@{File\+Manager}!get\+Peers@{get\+Peers}}
+\index{get\+Peers@{get\+Peers}!File\+Manager@{File\+Manager}}
+\subsubsection{\texorpdfstring{get\+Peers()}{getPeers()}}
+{\footnotesize\ttfamily String \mbox{[}$\,$\mbox{]} File\+Manager.\+get\+Peers (\begin{DoxyParamCaption}\item[{String}]{hash }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Function for getting the coordinates of the peers who have part of a file
+
+
+\begin{DoxyParams}{Paramètres}
+{\em hash} & hash of the file \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Renvoie}
+String\mbox{[}\mbox{]} Peer coordinates given as IP@\+:port 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileManager_a1c9d6d3f954b6edac5a4542dcedc3aad}\label{classFileManager_a1c9d6d3f954b6edac5a4542dcedc3aad}} 
+\index{File\+Manager@{File\+Manager}!get\+String\+To\+Buffermap@{get\+String\+To\+Buffermap}}
+\index{get\+String\+To\+Buffermap@{get\+String\+To\+Buffermap}!File\+Manager@{File\+Manager}}
+\subsubsection{\texorpdfstring{get\+String\+To\+Buffermap()}{getStringToBuffermap()}}
+{\footnotesize\ttfamily boolean \mbox{[}$\,$\mbox{]} File\+Manager.\+get\+String\+To\+Buffermap (\begin{DoxyParamCaption}\item[{String}]{buffer }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Function for the reverse conversion (string to buffermap in boolean array form) 
+\begin{DoxyParams}{Paramètres}
+{\em buffer} & buffermap in string form \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Renvoie}
+boolean\mbox{[}\mbox{]} buffermap in array form 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileManager_a98ee226f2fed4c3734eeb15b0518ba59}\label{classFileManager_a98ee226f2fed4c3734eeb15b0518ba59}} 
+\index{File\+Manager@{File\+Manager}!leech\+To\+Seed@{leech\+To\+Seed}}
+\index{leech\+To\+Seed@{leech\+To\+Seed}!File\+Manager@{File\+Manager}}
+\subsubsection{\texorpdfstring{leech\+To\+Seed()}{leechToSeed()}}
+{\footnotesize\ttfamily void File\+Manager.\+leech\+To\+Seed (\begin{DoxyParamCaption}\item[{String}]{key }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Function for labeling a file as a seed and no longer as a leech
+
+
+\begin{DoxyParams}{Paramètres}
+{\em key} & hash of the file \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Renvoie}
+void 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileManager_a39b7d3eb829e3ecc259c4da41aa38656}\label{classFileManager_a39b7d3eb829e3ecc259c4da41aa38656}} 
+\index{File\+Manager@{File\+Manager}!peer\+Update@{peer\+Update}}
+\index{peer\+Update@{peer\+Update}!File\+Manager@{File\+Manager}}
+\subsubsection{\texorpdfstring{peer\+Update()}{peerUpdate()}}
+{\footnotesize\ttfamily void File\+Manager.\+peer\+Update (\begin{DoxyParamCaption}\item[{String}]{file\+Hash,  }\item[{String \mbox{[}$\,$\mbox{]}}]{peers }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Function for updating the peers who have a file
+
+
+\begin{DoxyParams}{Paramètres}
+{\em file\+Hash} & hash of the file \\
+\hline
+{\em peers} & new peer coordinates \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Renvoie}
+void 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileManager_a902e9eeb706da69a9611d04172b945fd}\label{classFileManager_a902e9eeb706da69a9611d04172b945fd}} 
+\index{File\+Manager@{File\+Manager}!print\+All@{print\+All}}
+\index{print\+All@{print\+All}!File\+Manager@{File\+Manager}}
+\subsubsection{\texorpdfstring{print\+All()}{printAll()}}
+{\footnotesize\ttfamily void File\+Manager.\+print\+All (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Function for printing all the buffermaps in the file\+Manager 
+\begin{DoxyParams}{Paramètres}
+{\em } & \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classFileManager_a4f22816aaf2c5695b0e365eb88c41acf}\label{classFileManager_a4f22816aaf2c5695b0e365eb88c41acf}} 
+\index{File\+Manager@{File\+Manager}!print\+All\+Paths@{print\+All\+Paths}}
+\index{print\+All\+Paths@{print\+All\+Paths}!File\+Manager@{File\+Manager}}
+\subsubsection{\texorpdfstring{print\+All\+Paths()}{printAllPaths()}}
+{\footnotesize\ttfamily void File\+Manager.\+print\+All\+Paths (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Function for printing the paths of all the files
+
+\begin{DoxyReturn}{Renvoie}
+void 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileManager_a1ff7d7a1192210cc29a88609b9c1844d}\label{classFileManager_a1ff7d7a1192210cc29a88609b9c1844d}} 
+\index{File\+Manager@{File\+Manager}!print\+All\+Peers@{print\+All\+Peers}}
+\index{print\+All\+Peers@{print\+All\+Peers}!File\+Manager@{File\+Manager}}
+\subsubsection{\texorpdfstring{print\+All\+Peers()}{printAllPeers()}}
+{\footnotesize\ttfamily void File\+Manager.\+print\+All\+Peers (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Function for converting a buffermap into a string
+
+\begin{DoxyReturn}{Renvoie}
+void 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileManager_ae91ea295ea5951ecab2d249ea1c2f8e7}\label{classFileManager_ae91ea295ea5951ecab2d249ea1c2f8e7}} 
+\index{File\+Manager@{File\+Manager}!print\+Buffermap@{print\+Buffermap}}
+\index{print\+Buffermap@{print\+Buffermap}!File\+Manager@{File\+Manager}}
+\subsubsection{\texorpdfstring{print\+Buffermap()}{printBuffermap()}}
+{\footnotesize\ttfamily void File\+Manager.\+print\+Buffermap (\begin{DoxyParamCaption}\item[{boolean \mbox{[}$\,$\mbox{]}}]{buffermap }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Function for printing a buffermap
+
+
+\begin{DoxyParams}{Paramètres}
+{\em buffermap} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Renvoie}
+void 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileManager_a3612335ed4f691a47636d95dc7620a50}\label{classFileManager_a3612335ed4f691a47636d95dc7620a50}} 
+\index{File\+Manager@{File\+Manager}!store\+Pieces@{store\+Pieces}}
+\index{store\+Pieces@{store\+Pieces}!File\+Manager@{File\+Manager}}
+\subsubsection{\texorpdfstring{store\+Pieces()}{storePieces()}}
+{\footnotesize\ttfamily void File\+Manager.\+store\+Pieces (\begin{DoxyParamCaption}\item[{String}]{message }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Function for converting a buffermap into a string
+
+
+\begin{DoxyParams}{Paramètres}
+{\em message} & message with the pieces \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Renvoie}
+void 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileManager_a907bacc448d9077430f89e8304f75db8}\label{classFileManager_a907bacc448d9077430f89e8304f75db8}} 
+\index{File\+Manager@{File\+Manager}!update\+File\+Match@{update\+File\+Match}}
+\index{update\+File\+Match@{update\+File\+Match}!File\+Manager@{File\+Manager}}
+\subsubsection{\texorpdfstring{update\+File\+Match()}{updateFileMatch()}}
+{\footnotesize\ttfamily void File\+Manager.\+update\+File\+Match (\begin{DoxyParamCaption}\item[{String}]{hash,  }\item[{String}]{filename }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Function for updating the path of a file
+
+
+\begin{DoxyParams}{Paramètres}
+{\em hash} & hash of the file you want to update \\
+\hline
+{\em filename} & new path of the file \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Renvoie}
+void 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileManager_a0715bc52c509e1f0c5011dd1d7a9b76f}\label{classFileManager_a0715bc52c509e1f0c5011dd1d7a9b76f}} 
+\index{File\+Manager@{File\+Manager}!write\+File@{write\+File}}
+\index{write\+File@{write\+File}!File\+Manager@{File\+Manager}}
+\subsubsection{\texorpdfstring{write\+File()}{writeFile()}}
+{\footnotesize\ttfamily void File\+Manager.\+write\+File (\begin{DoxyParamCaption}\item[{String}]{key }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Function for writing a file once all the pieces have been gathered
+
+
+\begin{DoxyParams}{Paramètres}
+{\em key} & hash of the file \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Renvoie}
+void 
+\end{DoxyReturn}
+
+
+La documentation de cette classe a été générée à partir du fichier suivant \+:\begin{DoxyCompactItemize}
+\item 
+src/File\+Manager.\+java\end{DoxyCompactItemize}
